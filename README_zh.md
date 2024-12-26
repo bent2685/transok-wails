@@ -1,7 +1,6 @@
 <h1 align="center">Transok</h1>
 
-<h4 align="center"><strong>English</strong> | <a href="https://github.com/bent2685/transok-wails/blob/main/README_zh.md">
-简体中文</a></h4>
+<h4 align="center"><a href="https://github.com/bent2685/transok-wails/blob/main/README.md">English</a> | <strong>简体中文</strong></h4>
 
 <div align="center">
 
@@ -11,13 +10,13 @@
 
 </div>
 
-> An efficient LAN file sharing tool
+> 一个高效的局域网文件共享工具
 
 ---
 
-# About
+# 关于
 
-**Transok** is a local area network file sharing tool that allows you to share files with a unique share password. There is no limit on the number and size of files.
+**Transok** 是一个局域网文件共享工具，可以通过唯一的共享密码来分享文件。对文件数量和大小没有限制。
 
 ---
 
