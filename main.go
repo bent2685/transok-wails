@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"runtime"
+	"transok/backend/app"
 	"transok/backend/services"
 
 	"github.com/wailsapp/wails/v2"
@@ -24,6 +25,8 @@ var icon []byte
 func main() {
 	sysSvc := services.System()
 	fileSvc := services.File()
+	storageSvc := services.Storage()
+	ginSvc := app.Gin()
 	appInfo := sysSvc.GetAppInfo()
 	windowStartState := options.Normal
 	// menu
@@ -51,7 +54,7 @@ func main() {
 			DisableWebViewDrop: true,
 		},
 		Debug: options.Debug{
-			OpenInspectorOnStartup: true,
+			OpenInspectorOnStartup: false,
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -61,10 +64,13 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx, appInfo["version"])
 			fileSvc.Start(ctx)
+			storageSvc.Init(ctx)
 		},
 		Bind: []interface{}{
 			sysSvc,
 			fileSvc,
+			storageSvc,
+			ginSvc,
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{

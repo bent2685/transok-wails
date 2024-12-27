@@ -1,13 +1,13 @@
-import React from "react";
-import TitleBar from "./components/TitleBar/TItleBar";
-import { ThemeProvider } from "./provider/theme.provider";
-import { ConfirmProvider } from "./provider/confirm.provider";
-import { SpinProvider } from "./provider/spin.provider";
-import useTheme from "./hooks/theme.use";
-import MainLayout from "./@layout/MainLayout";
+import React from 'react'
+import TitleBar from './components/TitleBar/TItleBar'
+import { ThemeProvider } from './provider/theme.provider'
+import { ConfirmProvider } from './provider/confirm.provider'
+import { SpinProvider } from './provider/spin.provider'
+import useTheme from './hooks/theme.use'
+import MainLayout from './@layout/MainLayout'
 
 function App() {
-  useTheme();
+  useTheme()
 
   return (
     <React.Fragment>
@@ -21,7 +21,7 @@ function App() {
         </ConfirmProvider>
       </ThemeProvider>
     </React.Fragment>
-  );
+  )
 }
 
-export default App;
+export default App

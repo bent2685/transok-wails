@@ -11,6 +11,7 @@ import (
 
 type systemService struct {
 	ctx     context.Context
+	env     string
 	version string
 	appInfo map[string]string
 }
@@ -23,6 +24,7 @@ func System() *systemService {
 		systemOnce.Do(func() {
 			system = &systemService{}
 			system.appInfo = consts.APP_INFO
+			system.env = consts.APP_INFO["env"]
 			go system.loopWindowEvent()
 		})
 	}
@@ -48,6 +50,11 @@ func (c *systemService) Start(ctx context.Context, version string) {
 // GetVersion 获取版本号
 func (c *systemService) GetVersion() string {
 	return c.version
+}
+
+// GetEnv 获取环境
+func (c *systemService) GetEnv() string {
+	return c.env
 }
 
 func (c *systemService) GetAppInfo() map[string]string {

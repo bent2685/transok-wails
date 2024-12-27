@@ -1,9 +1,9 @@
-import TitleBar from "@/components/TitleBar/TItleBar";
-import React, { useEffect, useState } from "react";
-import RouterView from "@/routes";
+import TitleBar from '@/components/TitleBar/TItleBar'
+import React, { useEffect, useState } from 'react'
+import RouterView from '@/routes'
 interface IMainLayoutProps {}
 
-const MainLayout: React.FC<IMainLayoutProps> = (props) => {
+const MainLayout: React.FC<IMainLayoutProps> = props => {
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
       <TitleBar />
@@ -11,7 +11,7 @@ const MainLayout: React.FC<IMainLayoutProps> = (props) => {
         <RouterView />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default MainLayout;
+export default MainLayout

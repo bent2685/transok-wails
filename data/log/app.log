@@ -1,0 +1,24 @@
+[API-LOG]2024/12/27 16:35:49  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "成功"] lasted:6.159µs
+[API-LOG]2024/12/27 16:41:19  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "success"] lasted:4.924µs
+[API-LOG]2024/12/27 16:49:18  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "success"] lasted:6.294µs
+[API-LOG]2024/12/27 16:49:23  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "success"] lasted:4.992µs
+[API-LOG]2024/12/27 16:52:05  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "success"] lasted:5.603µs
+[API-LOG]2024/12/27 16:54:35  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "success"] lasted:5.953µs
+[API-LOG]2024/12/27 16:54:43  <IP: ==> 127.0.0.1> [GET] URL: /api/ping => [code:200 | BusinessCode:20000 => "success"] lasted:4.865µs
+[API-LOG]2024/12/27 17:09:27  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:179.456µs
+[API-LOG]2024/12/27 17:24:00  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:99999 => "unknown error"] lasted:238.939µs
+[API-LOG]2024/12/27 17:24:09  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:99999 => "unknown error"] lasted:83.459µs
+[API-LOG]2024/12/27 17:24:36  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:99999 => "unknown error"] lasted:268.697µs
+[API-LOG]2024/12/27 17:25:13  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:99999 => "unknown error"] lasted:338.094µs
+[API-LOG]2024/12/27 17:27:08  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:99999 => "unknown error"] lasted:156.898µs
+[API-LOG]2024/12/27 17:29:34  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:99999 => "unknown error"] lasted:252.808µs
+[API-LOG]2024/12/27 17:31:20  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:198.308µs
+[API-LOG]2024/12/27 17:32:15  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:254.399µs
+[API-LOG]2024/12/27 17:33:20  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:328.904µs
+[API-LOG]2024/12/27 17:37:15  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:304.765µs
+[API-LOG]2024/12/27 17:37:34  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:109.248µs
+[API-LOG]2024/12/27 17:37:39  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:59.581µs
+[API-LOG]2024/12/27 17:40:20  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:306.263µs
+[API-LOG]2024/12/27 17:40:28  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:123.715µs
+[API-LOG]2024/12/27 17:40:36  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:124.943µs
+[API-LOG]2024/12/27 17:40:46  <IP: ==> ::1> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:62.379µs

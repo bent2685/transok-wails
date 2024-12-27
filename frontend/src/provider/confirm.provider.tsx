@@ -1,64 +1,62 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+  DialogTitle
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 interface ConfirmContextType {
-  confirm: (options: ConfirmOptions) => Promise<boolean>;
+  confirm: (options: ConfirmOptions) => Promise<boolean>
 }
 
 interface ConfirmOptions {
-  title: string;
-  description: string;
-  confirmText?: string;
-  cancelText?: string;
+  title: string
+  description: string
+  confirmText?: string
+  cancelText?: string
 }
 
-const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined);
+const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined)
 
 export const useConfirm = () => {
-  const context = useContext(ConfirmContext);
+  const context = useContext(ConfirmContext)
   if (!context) {
-    throw new Error("useConfirm must be used within a ConfirmProvider");
+    throw new Error('useConfirm must be used within a ConfirmProvider')
   }
-  return context;
-};
+  return context
+}
 
-export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [confirmState, setConfirmState] = useState<ConfirmOptions | null>(null);
+export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [confirmState, setConfirmState] = useState<ConfirmOptions | null>(null)
   const [resolveReject, setResolveReject] = useState<{
-    resolve: (value: boolean) => void;
-    reject: () => void;
-  } | null>(null);
+    resolve: (value: boolean) => void
+    reject: () => void
+  } | null>(null)
 
   const confirm = (options: ConfirmOptions) => {
     return new Promise<boolean>((resolve, reject) => {
-      setConfirmState(options);
-      setResolveReject({ resolve, reject });
-    });
-  };
+      setConfirmState(options)
+      setResolveReject({ resolve, reject })
+    })
+  }
 
   const handleConfirm = () => {
     if (resolveReject) {
-      resolveReject.resolve(true);
-      setConfirmState(null);
+      resolveReject.resolve(true)
+      setConfirmState(null)
     }
-  };
+  }
 
   const handleCancel = () => {
     if (resolveReject) {
-      resolveReject.resolve(false);
-      setConfirmState(null);
+      resolveReject.resolve(false)
+      setConfirmState(null)
     }
-  };
+  }
 
   return (
     <ConfirmContext.Provider value={{ confirm }}>
@@ -72,15 +70,13 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={handleCancel}>
-                {confirmState.cancelText || "取消"}
+                {confirmState.cancelText || '取消'}
               </Button>
-              <Button onClick={handleConfirm}>
-                {confirmState.confirmText || "确认"}
-              </Button>
+              <Button onClick={handleConfirm}>{confirmState.confirmText || '确认'}</Button>
             </DialogFooter>
           </DialogContent>
         )}
       </Dialog>
     </ConfirmContext.Provider>
-  );
-};
+  )
+}
