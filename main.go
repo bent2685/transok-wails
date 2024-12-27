@@ -23,6 +23,7 @@ var icon []byte
 
 func main() {
 	sysSvc := services.System()
+	fileSvc := services.File()
 	appInfo := sysSvc.GetAppInfo()
 	windowStartState := options.Normal
 	// menu
@@ -45,7 +46,10 @@ func main() {
 		WindowStartState:         windowStartState,
 		Menu:                     appMenu,
 		EnableDefaultContextMenu: true,
-
+		DragAndDrop: &options.DragAndDrop{
+			EnableFileDrop:     true,
+			DisableWebViewDrop: true,
+		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,
 		},
@@ -56,10 +60,11 @@ func main() {
 		StartHidden:      true,
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx, appInfo["version"])
-
+			fileSvc.Start(ctx)
 		},
 		Bind: []interface{}{
 			sysSvc,
+			fileSvc,
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{

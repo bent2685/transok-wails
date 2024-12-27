@@ -7,7 +7,7 @@ const MainLayout: React.FC<IMainLayoutProps> = (props) => {
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
       <TitleBar />
-      <div className="flex-1 overflow-hidden px-3 py-2">
+      <div className="flex flex-col flex-1 overflow-hidden px-3 py-2">
         <RouterView />
       </div>
     </div>

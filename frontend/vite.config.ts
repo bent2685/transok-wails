@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       "@": rootPath + "src",
       "@wa": rootPath + "wailsjs/go",
+      "@runtime": rootPath + "wailsjs/runtime",
     },
   },
 });

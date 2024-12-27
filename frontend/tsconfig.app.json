@@ -29,6 +29,9 @@
             "@/*": [
                 "./src/*"
             ],
+            "@runtime/*": [
+                "./wailsjs/runtime/*"
+            ],
             "@wa/*": [
                 "./wailsjs/go/*"
             ]
