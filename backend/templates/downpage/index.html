@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Transok Download</title>
+    <style>
+        :root {
+            --pri: #c34141;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .main {
+            transition: opacity 0.3s;
+        }
+
+        .main.unready {
+            opacity: 0 !important;
+        }
+    </style>
+
+</head>
+
+<body class="py-2 px-6">
+    <div class="main unready max-w-764px min-w-420px mx-auto h-full flex flex-col overflow-hiddenss">
+        <div class="h-20"></div>
+        <header>
+            <div class="flex items-baseline">
+                <h1 class="line-height-1em">Transok</h1>
+                <div class="w-1.5 h-1.5 ml-1" style="background-color: var(--pri);"></div>
+            </div>
+        </header>
+        <div id="loading" class="flex-center py-8">
+            <span class="ml-2 text-gray-400">加载中...</span>
+        </div>
+        <main class="flex-1 overflow-y-auto">
+            <div class="list-container flex flex-col pt-4 pb-2">
+
+            </div>
+            <p class="file-counter text-gray-400 mt-1 text-3.5">Counting the number of files...</p>
+        </main>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/attributify.global.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/preset-icons.global.js"></script>
+<script>
+    window.__unocss = {
+        presets: [
+            () => window.__unocss_runtime.presets.presetIcons({
+                scale: 1.2,
+                cdn: 'https://esm.sh/'
+            }),
+        ],
+
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/core.global.js"></script>
+<script src="file-type.js"></script>
+
+<script>
+
+    const baseUrl = ''
+    const pri = '#c34141'
+    let isLoading = true
+    const listContainer = document.querySelector('.list-container')
+    const loadingEl = document.querySelector('#loading')
+    const fileCounter = document.querySelector('.file-counter')
+    const mainEl = document.querySelector('.main')
+
+
+    const downloadFile = async (url) => {
+        try {
+            const response = await fetch(`${baseUrl}/download/index?filePath=${encodeURIComponent(url)}`)
+            const blob = await response.blob()
+            const downloadUrl = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = downloadUrl
+            a.download = url.split('/').pop()
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            window.URL.revokeObjectURL(downloadUrl)
+        } catch (error) {
+            console.error('下载失败:', error)
+        }
+
+    }
+
+
+    const renderList = (data) => {
+        const { shareList } = data
+        // 清空现有列表
+        listContainer.innerHTML = ''
+
+        shareList.forEach(item => {
+            const { Ext, Name, Path, Size } = item
+            const fileTypeItem = FILE_TYPE_LIST.find(type => type.type === Ext)
+            const fileTypeIcon = fileTypeItem?.icon
+            const listItem = document.createElement('div')
+            listItem.innerHTML = `
+                <div class="flex items-center p2 mb-2 rd-2 border-1px border-solid border-#e7e7e7 duration-300 cursor-pointer
+                    ${['bg-gray-100'].map(cls => `hover:${cls}`).join(' ')}
+                ">
+                    <div class="flex items-center flex-1">
+                        <div class="${fileTypeIcon} text-xl"></div>
+                        <span class="ml-2">${Name}</span>
+                    </div>
+                    <div>
+                        <div
+                            onclick="downloadFile('${Path}')"
+                            class="min-w-8 min-h-8 bg-${pri}/20 rd-full flex justify-center items-center duration-300
+                            ${['bg-pri/30'].map(cls => `hover:${cls}`).join(' ')}
+                            ${['scale-95'].map(cls => `active:${cls}`).join(' ')}
+                        ">
+                          <div class="i-tabler:download text-3"></div>                            
+                        </div>
+                    </div>
+                </div>
+            `
+            fileCounter.textContent = `There are ${shareList.length} files in total.`
+            listContainer.appendChild(listItem)
+        })
+    }
+
+    const getDownloadList = async () => {
+        try {
+            isLoading = true
+            loadingEl.style.display = 'flex'
+            listContainer.style.display = 'none'
+            const res = await fetch(`${baseUrl}/share/list`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    captcha: ''
+                })
+            })
+            const data = await res.json()
+            if (!data?.success) {
+                throw new Error('Failed to obtain download list')
+            }
+            renderList(data.data)
+        } catch (error) {
+            alert(error.message)
+        } finally {
+            isLoading = false
+            loadingEl.style.display = 'none'
+            listContainer.style.display = 'block'
+        }
+    }
+
+    window.onload = () => {
+        getDownloadList()
+        requestAnimationFrame(() => {
+            mainEl.classList.remove('unready')
+        })
+    }
+
+
+
+</script>
+
+</html>

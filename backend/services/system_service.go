@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"net"
 	"sync"
 	"time"
 	"transok/backend/consts"
@@ -55,6 +56,24 @@ func (c *systemService) GetVersion() string {
 // GetEnv 获取环境
 func (c *systemService) GetEnv() string {
 	return c.env
+}
+
+// 获取本机局域网ip
+func (c *systemService) GetLocalIp() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+
+	for _, addr := range addrs {
+		// 检查ip地址判断是否回环地址
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
 
 func (c *systemService) GetAppInfo() map[string]string {

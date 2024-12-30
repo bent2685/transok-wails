@@ -1,11 +1,4 @@
 {
   "is-share": false,
-  "share-list": [
-    {
-      "Ext": "json",
-      "Name": "tsconfig.node.json",
-      "Path": "/Users/mac/Downloads/vite-react-uno-shadcn-main/tsconfig.node.json",
-      "Size": 326
-    }
-  ]
+  "share-list": []
 }

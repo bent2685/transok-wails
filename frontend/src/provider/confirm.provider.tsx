@@ -63,16 +63,20 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
       {children}
       <Dialog open={!!confirmState} onOpenChange={() => setConfirmState(null)}>
         {confirmState && (
-          <DialogContent className="bg-bg shadow-2xl">
+          <DialogContent className="bg-bg shadow-2xl w-80 rd-3">
             <DialogHeader>
               <DialogTitle>{confirmState.title}</DialogTitle>
               <DialogDescription>{confirmState.description}</DialogDescription>
             </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={handleCancel}>
-                {confirmState.cancelText || '取消'}
-              </Button>
-              <Button onClick={handleConfirm}>{confirmState.confirmText || '确认'}</Button>
+            <DialogFooter className="">
+              <div className="flex justify-center">
+                <Button variant="outline" size="sm" onClick={handleCancel} className='mr-2'>
+                  {confirmState.cancelText || '取消'}
+                </Button>
+                <Button size="sm" onClick={handleConfirm}>
+                  {confirmState.confirmText || '确认'}
+                </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         )}

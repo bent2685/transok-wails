@@ -47,6 +47,7 @@ func (s *StorageService) Init(ctx context.Context) error {
 
 	// 获取适合当前操作系统的基础存储路径
 	basePath := s.GetBasePath()
+	fmt.Println("basePath => ", basePath)
 
 	s.storagePath = filepath.Join(basePath, "storage.json")
 

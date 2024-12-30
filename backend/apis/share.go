@@ -19,7 +19,6 @@ func (s *ShareApi) ShareList(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("执行到这里===========")
 	keys := storage.GetKeys()
 	hasShare := false
 	for _, key := range keys {

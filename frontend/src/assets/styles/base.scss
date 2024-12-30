@@ -60,9 +60,7 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  user-select: none;
 }
-
 
 .tap {
   @apply active:(scale-95)
@@ -107,4 +105,8 @@ body {
     display: none;
   }
 
+}
+
+button {
+  @apply text-text;
 }

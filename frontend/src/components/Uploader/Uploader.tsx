@@ -4,12 +4,19 @@ import { Button } from '../ui/button'
 import { GetFile, SelectFiles } from '@wa/services/fileService'
 import { OnFileDrop, OnFileDropOff } from '@runtime/runtime'
 import { FileTypeList } from './file-type'
+import { useConfirm } from '@/provider/confirm.provider'
+import { EventEmitter } from 'ahooks/lib/useEventEmitter'
 // 定义文件信息接口
 export interface FileInfo {
   Name: string
   Size: number
   Path: string // 文件在设备中的绝对路径
   Ext: string // 文件扩展名
+}
+
+export interface UploaderEvent {
+  type: 'copy-link'
+  data: any
 }
 
 // 更新 ref 接口定义
@@ -27,10 +34,11 @@ interface UploaderProps {
   maxSize?: number // 单位: MB，不传则不限制大小
   className?: string
   multiple?: boolean
+  event$: EventEmitter<UploaderEvent>
 }
 
 export const Uploader = forwardRef<UploaderRef, UploaderProps>(
-  ({ onFileSelect, onFileChange, accept = '*', maxSize, className, multiple = false }, ref) => {
+  ({ onFileSelect, onFileChange, accept = '*', maxSize, className, multiple = false, event$ }, ref) => {
     const [isDragging, setIsDragging] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([])
 
@@ -43,6 +51,24 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
         console.error('选择文件失败:', error)
       }
     }
+
+    const actionList = [
+      {
+        icon: 'i-tabler:copy',
+        text: '复制链接',
+        onClick: () => {
+          event$.emit({
+            type: 'copy-link',
+            data: null
+          })
+        }
+      },
+      {
+        icon: 'i-tabler:trash',
+        text: '',
+        onClick: () => clearFiles()
+      }
+    ]
 
     /* 删除文件 */
     const removeFile = (fileName: string) => {
@@ -100,6 +126,8 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
         <div
+          onDragOver={() => setIsDragging(true)}
+          onMouseLeave={() => setIsDragging(false)}
           className={cn(
             'relative flex flex-col items-center justify-center w-full min-h-42',
             'border-2 border-solid rounded-lg cursor-pointer bg-bg2',
@@ -125,10 +153,16 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           <h2 className="text-lg font-bold">文件列表{!!selectedFiles?.length && `(${selectedFiles?.length})`}</h2>
           <div className="flex-1"></div>
           {!!selectedFiles?.length && (
-            <div
-              className="flex items-center cursor-pointer bg-pri/20 w-8 h-8 rd-full flex-center duration-300 hover:(bg-pri/30) active:(scale-95)"
-              onClick={clearFiles}>
-              <div className="i-tabler:trash text-3.5"></div>
+            <div className="flex items-center">
+              {actionList?.map((item, index) => (
+                <div
+                  key={index}
+                  className="not-last:mr-2 cursor-pointer rd-full duration-300 bg-border/60 h-6 px-1.5 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)"
+                  onClick={item.onClick}>
+                  {item?.text && <span className="text-3 mr-1">{item.text}</span>}
+                  <div className={`${item.icon} text-3`}></div>
+                </div>
+              ))}
             </div>
           )}
         </div>

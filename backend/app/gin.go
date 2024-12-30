@@ -111,6 +111,16 @@ func (c *ginService) SetupRoutes() {
 		share.POST("/list", middleware.Valid(dto.ShareListDto{}), con.ShareList)
 	}
 
+	download := c.server.Group("/download")
+	{
+		con := apis.DownloadApi{}
+
+		download.Static("/page", "backend/templates/downpage")
+
+		download.GET("/index", con.DownloadFile)
+
+	}
+
 	for _, route := range c.server.Routes() {
 		fmt.Printf("Method: %s, Path: %s\n", route.Method, route.Path)
 	}
