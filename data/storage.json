@@ -1,4 +1,29 @@
 {
-  "is-share": false,
-  "share-list": []
+  "is-share": true,
+  "share-list": [
+    {
+      "Ext": "zip",
+      "Name": "dist.zip",
+      "Path": "/Users/mac/Documents/temp/dist.zip",
+      "Size": 1958420
+    },
+    {
+      "Ext": "txt",
+      "Name": "AOI.txt",
+      "Path": "/Users/mac/Documents/temp/AOI.txt",
+      "Size": 41833
+    },
+    {
+      "Ext": "png",
+      "Name": "ico-zygw.png",
+      "Path": "/Users/mac/Documents/temp/ico-zygw.png",
+      "Size": 13027
+    },
+    {
+      "Ext": "md",
+      "Name": "feat.md",
+      "Path": "/Users/mac/Documents/temp/feat.md",
+      "Size": 1283
+    }
+  ]
 }

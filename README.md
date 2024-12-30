@@ -21,6 +21,26 @@
 
 ---
 
+# Features
+
+- [x] File upload functionality
+- [x] Enable sharing feature
+- [x] File deletion and clearing
+- [x] File download page
+- [x] Dark mode
+- [ ] Right-click to add in Finder/File Explorer
+- [ ] Encrypted file sharing
+
+---
+
+# Preview
+
+![preview](./readme_assets/preview1.png)
+![preview](./readme_assets/preview3.png)
+![preview](./readme_assets/preview2.png)
+
+---
+
 # License
 
 [MIT](/LICENSE)

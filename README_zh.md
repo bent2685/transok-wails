@@ -20,6 +20,26 @@
 
 ---
 
+# Features
+
+- [x] 文件上传功能
+- [x] 开启分享功能
+- [x] 文件删除和清空
+- [x] 文件下载页
+- [x] 深色模式
+- [ ] 在 Finder/资源管理器中右键添加
+- [ ] 文件加密分享
+
+---
+
+# Preview
+
+![preview](./readme_assets/preview1.png)
+![preview](./readme_assets/preview3.png)
+![preview](./readme_assets/preview2.png)
+
+---
+
 # License
 
 [MIT](/LICENSE)
