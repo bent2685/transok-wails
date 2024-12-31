@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -66,4 +67,32 @@ func (c *fileService) GetFile(path string) *FileInfo {
 		Size: fileInfo.Size(),
 		Ext:  strings.TrimPrefix(strings.ToLower(filepath.Ext(path)), "."),
 	}
+}
+
+func (c *fileService) GetShareList() []FileInfo {
+	storage := Storage()
+	shareList, isExist := storage.Get("share-list")
+
+	// 初始化一个空数组
+	result := make([]FileInfo, 0)
+
+	if !isExist {
+		storage.Set("share-list", result)
+		return result
+	}
+
+	// 使用 json.Marshal 和 json.Unmarshal 进行类型转换
+	if jsonData, err := json.Marshal(shareList); err == nil {
+		json.Unmarshal(jsonData, &result)
+	}
+
+	validFiles := make([]FileInfo, 0)
+	for _, file := range result {
+		if _, err := os.Stat(file.Path); err == nil {
+			validFiles = append(validFiles, file)
+		}
+	}
+
+	storage.Set("share-list", validFiles)
+	return validFiles
 }

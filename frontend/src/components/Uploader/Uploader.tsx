@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
+import { useState, useRef, forwardRef, useImperativeHandle, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 import { GetFile, SelectFiles } from '@wa/services/fileService'
@@ -6,6 +6,7 @@ import { OnFileDrop, OnFileDropOff } from '@runtime/runtime'
 import { FileTypeList } from './file-type'
 import { useConfirm } from '@/provider/confirm.provider'
 import { EventEmitter } from 'ahooks/lib/useEventEmitter'
+import { calcFileSize } from '@/utils/file.util'
 // 定义文件信息接口
 export interface FileInfo {
   Name: string
@@ -15,7 +16,7 @@ export interface FileInfo {
 }
 
 export interface UploaderEvent {
-  type: 'copy-link'
+  type: 'copy-link' | 'is-running' | 'share-list'
   data: any
 }
 
@@ -40,6 +41,7 @@ interface UploaderProps {
 export const Uploader = forwardRef<UploaderRef, UploaderProps>(
   ({ onFileSelect, onFileChange, accept = '*', maxSize, className, multiple = false, event$ }, ref) => {
     const [isDragging, setIsDragging] = useState(false)
+    const [isRunning, setIsRunning] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([])
 
     const handleClick = async () => {
@@ -52,23 +54,27 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       }
     }
 
-    const actionList = [
-      {
-        icon: 'i-tabler:copy',
-        text: '复制链接',
-        onClick: () => {
-          event$.emit({
-            type: 'copy-link',
-            data: null
-          })
+    const actionList = useMemo(() => {
+      return [
+        {
+          icon: 'i-tabler:copy',
+          display: isRunning,
+          text: '复制链接',
+          onClick: () => {
+            event$.emit({
+              type: 'copy-link',
+              data: null
+            })
+          }
+        },
+        {
+          icon: 'i-tabler:trash',
+          display: true,
+          text: '',
+          onClick: () => clearFiles()
         }
-      },
-      {
-        icon: 'i-tabler:trash',
-        text: '',
-        onClick: () => clearFiles()
-      }
-    ]
+      ]
+    }, [selectedFiles, isRunning])
 
     /* 删除文件 */
     const removeFile = (fileName: string) => {
@@ -84,8 +90,8 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
     }
 
     const setShareList = (files: FileInfo[]) => {
-      setSelectedFiles(files)
-      onFileSelect?.(files)
+      setSelectedFiles(files || [])
+      onFileSelect?.(files || [])
     }
 
     // 添加useImperativeHandle
@@ -114,6 +120,19 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
         return newFiles
       })
     }
+
+    event$.useSubscription(payload => {
+      const { type, data } = payload
+      if (type === 'is-running') {
+        setIsRunning(data)
+        return
+      }
+
+      if (type === 'share-list') {
+        setShareList(data)
+        return
+      }
+    })
 
     useEffect(() => {
       OnFileDrop((x, y, paths) => {
@@ -154,10 +173,14 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           <div className="flex-1"></div>
           {!!selectedFiles?.length && (
             <div className="flex items-center">
+              <div></div>
               {actionList?.map((item, index) => (
                 <div
                   key={index}
-                  className="not-last:mr-2 cursor-pointer rd-full duration-300 bg-border/60 h-6 px-1.5 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)"
+                  className={cn(
+                    'not-last:mr-2 cursor-pointer rd-full duration-300 bg-border/60 h-6 px-1.5 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)',
+                    !item.display && 'hidden'
+                  )}
                   onClick={item.onClick}>
                   {item?.text && <span className="text-3 mr-1">{item.text}</span>}
                   <div className={`${item.icon} text-3`}></div>
@@ -186,7 +209,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
                     )}></div>
                   <div className="flex flex-col line-height-1em">
                     <span className="truncate font-bold text-(3.5 text)">{file.Name}</span>
-                    <span className="text-(3 text2)">{(file.Size / 1024).toFixed(2)}KB</span>
+                    <span className="text-(3 text2)">{calcFileSize(file.Size)}</span>
                   </div>
                 </div>
                 <div className="flex items-center pl-2">

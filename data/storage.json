@@ -1,29 +1,4 @@
 {
-  "is-share": true,
-  "share-list": [
-    {
-      "Ext": "ts",
-      "Name": "uno.config.ts",
-      "Path": "/Users/mac/Documents/temp/uno.config.ts",
-      "Size": 1398
-    },
-    {
-      "Ext": "json",
-      "Name": "tsconfig.node.json",
-      "Path": "/Users/mac/Documents/temp/tsconfig.node.json",
-      "Size": 326
-    },
-    {
-      "Ext": "json",
-      "Name": "tsconfig.json",
-      "Path": "/Users/mac/Documents/temp/tsconfig.json",
-      "Size": 119
-    },
-    {
-      "Ext": "json",
-      "Name": "tsconfig.app.json",
-      "Path": "/Users/mac/Documents/temp/tsconfig.app.json",
-      "Size": 864
-    }
-  ]
+  "is-share": false,
+  "share-list": []
 }

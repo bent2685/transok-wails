@@ -6,7 +6,7 @@ import { Start, Stop } from '@wa/app/ginService'
 import { cn } from '@/lib/utils'
 import { useEventEmitter } from 'ahooks'
 import { useConfirm } from '@/provider/confirm.provider'
-
+import { GetShareList } from '@wa/services/fileService'
 const Home: React.FC = () => {
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
   const [fileList, setFileList] = useState<FileInfo[]>([])
@@ -49,15 +49,13 @@ const Home: React.FC = () => {
     }
     const isShareState = await Get('is-share')
     setIsShare(!!isShareState)
-    const shareList = await Get('share-list')
-    console.log('shareList', shareList)
+    const shareList = await GetShareList()
     uploaderRef.current?.setShareList(shareList)
   }
 
   event$.useSubscription(async payload => {
     const { type, data } = payload
     if (type === 'copy-link') {
-      console.log('复制链接', data)
       const ip = await GetLocalIp()
       const url = `http://${ip}:${port}/download/page`
       const ok = await confirm({
@@ -73,11 +71,28 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (isShare === null) return
+
+    const interval = setInterval(async () => {
+      const shareList = await GetShareList()
+      console.log('shareList', shareList)
+      event$.emit({
+        type: 'share-list',
+        data: shareList || []
+      })
+    }, 1000)
+
+    event$.emit({
+      type: 'is-running',
+      data: isShare
+    })
+
     if (isShare) {
       Start(`:${port}`)
       return
     }
+
     Stop()
+    return () => clearInterval(interval)
   }, [isShare])
 
   useEffect(() => {

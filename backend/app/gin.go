@@ -14,6 +14,8 @@ import (
 	"transok/backend/middleware"
 	"transok/backend/services"
 
+	"io/fs"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -119,8 +121,12 @@ func (c *ginService) SetupRoutes() {
 	{
 		con := apis.DownloadApi{}
 
-		// 使用嵌入式文件系统提供静态文件服务
-		download.StaticFS("/page", http.FS(downpageFS))
+		// 修改静态文件服务配置，指向 downpage 子目录
+		templatesFS, err := fs.Sub(downpageFS, "templates/downpage")
+		if err != nil {
+			log.Printf("Failed to sub downpage directory: %v\n", err)
+		}
+		download.StaticFS("/page", http.FS(templatesFS))
 
 		download.GET("/index", con.DownloadFile)
 	}

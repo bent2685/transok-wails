@@ -75,7 +75,7 @@
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/core.global.js"></script>
-<script src="file-type.js"></script>
+<script src="file-util.js"></script>
 
 <script>
 
@@ -122,8 +122,11 @@
                     ${['bg-gray-100'].map(cls => `hover:${cls}`).join(' ')}
                 ">
                     <div class="flex items-center flex-1">
-                        <div class="${fileTypeIcon} text-xl"></div>
-                        <span class="ml-2">${Name}</span>
+                        <div class="${fileTypeIcon} text-5"></div>
+                        <div class="flex flex-col line-height-1em ml-2">
+                            <span class="text-3.5 font-bold">${Name}</span>    
+                            <span class="text-gray-400 text-3">${calcFileSize(Size)}</span>
+                        </div>
                     </div>
                     <div>
                         <div
