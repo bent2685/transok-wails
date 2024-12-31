@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+//go:embed templates/downpage/*
+var downpageFS embed.FS
 
 type ginService struct {
 	ctx         context.Context
@@ -115,10 +119,10 @@ func (c *ginService) SetupRoutes() {
 	{
 		con := apis.DownloadApi{}
 
-		download.Static("/page", "backend/templates/downpage")
+		// 使用嵌入式文件系统提供静态文件服务
+		download.StaticFS("/page", http.FS(downpageFS))
 
 		download.GET("/index", con.DownloadFile)
-
 	}
 
 	for _, route := range c.server.Routes() {

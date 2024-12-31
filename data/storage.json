@@ -2,28 +2,28 @@
   "is-share": true,
   "share-list": [
     {
-      "Ext": "zip",
-      "Name": "dist.zip",
-      "Path": "/Users/mac/Documents/temp/dist.zip",
-      "Size": 1958420
+      "Ext": "ts",
+      "Name": "uno.config.ts",
+      "Path": "/Users/mac/Documents/temp/uno.config.ts",
+      "Size": 1398
     },
     {
-      "Ext": "txt",
-      "Name": "AOI.txt",
-      "Path": "/Users/mac/Documents/temp/AOI.txt",
-      "Size": 41833
+      "Ext": "json",
+      "Name": "tsconfig.node.json",
+      "Path": "/Users/mac/Documents/temp/tsconfig.node.json",
+      "Size": 326
     },
     {
-      "Ext": "png",
-      "Name": "ico-zygw.png",
-      "Path": "/Users/mac/Documents/temp/ico-zygw.png",
-      "Size": 13027
+      "Ext": "json",
+      "Name": "tsconfig.json",
+      "Path": "/Users/mac/Documents/temp/tsconfig.json",
+      "Size": 119
     },
     {
-      "Ext": "md",
-      "Name": "feat.md",
-      "Path": "/Users/mac/Documents/temp/feat.md",
-      "Size": 1283
+      "Ext": "json",
+      "Name": "tsconfig.app.json",
+      "Path": "/Users/mac/Documents/temp/tsconfig.app.json",
+      "Size": 864
     }
   ]
 }
