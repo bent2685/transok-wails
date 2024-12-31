@@ -34,9 +34,9 @@
 
 # Preview
 
-![preview](./readme_assets/preview1.png)
-![preview](./readme_assets/preview3.png)
-![preview](./readme_assets/preview2.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview3.png)
 
 ---
 
