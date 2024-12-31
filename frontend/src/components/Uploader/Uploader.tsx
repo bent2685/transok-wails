@@ -7,12 +7,15 @@ import { FileTypeList } from './file-type'
 import { useConfirm } from '@/provider/confirm.provider'
 import { EventEmitter } from 'ahooks/lib/useEventEmitter'
 import { calcFileSize } from '@/utils/file.util'
+import React from 'react'
+import _ from 'lodash'
 // 定义文件信息接口
 export interface FileInfo {
   Name: string
   Size: number
   Path: string // 文件在设备中的绝对路径
-  Ext: string // 文件扩展名
+  Type: string // 文件类型/扩展名
+  Text?: string // 纯文本
 }
 
 export interface UploaderEvent {
@@ -43,7 +46,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
     const [isDragging, setIsDragging] = useState(false)
     const [isRunning, setIsRunning] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([])
-
+    const { confirm } = useConfirm()
     const handleClick = async () => {
       try {
         const filePaths = await SelectFiles()
@@ -54,31 +57,9 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       }
     }
 
-    const actionList = useMemo(() => {
-      return [
-        {
-          icon: 'i-tabler:copy',
-          display: isRunning,
-          text: '复制链接',
-          onClick: () => {
-            event$.emit({
-              type: 'copy-link',
-              data: null
-            })
-          }
-        },
-        {
-          icon: 'i-tabler:trash',
-          display: true,
-          text: '',
-          onClick: () => clearFiles()
-        }
-      ]
-    }, [selectedFiles, isRunning])
-
     /* 删除文件 */
-    const removeFile = (fileName: string) => {
-      const newFiles = selectedFiles.filter(file => file.Name !== fileName)
+    const removeFile = (filePath: string) => {
+      const newFiles = selectedFiles.filter(file => file.Path !== filePath)
       setSelectedFiles(newFiles)
       onFileSelect?.(newFiles)
     }
@@ -93,6 +74,43 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       setSelectedFiles(files || [])
       onFileSelect?.(files || [])
     }
+
+    const actionList /* 文件列表操作 */ = useMemo(() => {
+      return [
+        {
+          icon: 'i-tabler:keyboard',
+          display: true,
+          text: '纯文本',
+          onClick: () => {
+            const newTextShare = {
+              Type: 'pure-text',
+              Name: 'Untitled',
+              Path: _.uniqueId('text-'),
+              Size: 0,
+              Text: ''
+            }
+            setSelectedFiles(prev => {
+              const newList = [...prev, newTextShare]
+              onFileSelect?.(newList)
+              onFileChange?.([newTextShare])
+              return newList
+            })
+          }
+        },
+        {
+          icon: 'i-tabler:copy',
+          display: isRunning,
+          text: '复制链接',
+          onClick: () => {}
+        },
+        {
+          icon: 'i-tabler:trash',
+          display: !!selectedFiles?.length,
+          text: '',
+          onClick: () => clearFiles()
+        }
+      ]
+    }, [selectedFiles, isRunning])
 
     // 添加useImperativeHandle
     useImperativeHandle(ref, () => ({
@@ -142,6 +160,80 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       return () => OnFileDropOff()
     }, [])
 
+    const renderListItem = (file: FileInfo) => {
+      const renderCommon = () => (
+        <div className="flex flex-col line-height-1em">
+          <span className="truncate font-bold text-(3.5 text) break-all">{file.Name}</span>
+          <span className="text-(3 text2) break-all">{calcFileSize(file.Size)}</span>
+        </div>
+      )
+
+      const renderPureText = () => (
+        <div className="flex flex-col line-height-1em flex-1">
+          <input
+            type="text"
+            value={file.Name}
+            onChange={e => {
+              const newFiles = selectedFiles.map(f => {
+                if (f.Path === file.Path) {
+                  return { ...f, Name: e.target.value }
+                }
+                return f
+              })
+              setSelectedFiles(newFiles)
+              onFileSelect?.(newFiles)
+            }}
+            className="w-full bg-transparent border-none outline-none font-bold text-(3.5 text)"
+            placeholder="输入标题"
+          />
+          <div
+            className="text-(3 text2) cursor-pointer"
+            onClick={async () => {
+              const text = await confirm({
+                title: '编辑纯文本',
+                description: '请输入内容',
+                isPrompt: true,
+                defaultValue: file.Text
+              })
+              if (!text) return
+              const newFiles = selectedFiles.map(f => {
+                if (f.Path === file.Path) {
+                  return { ...f, Text: text }
+                }
+                return f
+              }) as FileInfo[]
+              setSelectedFiles(newFiles)
+              onFileSelect?.(newFiles)
+            }}>
+            <div className="i-tabler:edit mr-0.5 text-2.5 inline-block -mb-0.5 text-pri"></div>
+            <span className="truncate">{file.Text || '无内容'}</span>
+          </div>
+        </div>
+      )
+
+      return (
+        <>
+          <div className="flex items-center border-2 border-solid border-border rounded-lg p-2">
+            <div className="flex items-center gap-2 truncate flex-1">
+              <div
+                className={cn(
+                  'text-text min-w-4 min-h-4',
+                  FileTypeList.find(item => item.type === file.Type)?.icon || 'i-tabler:file'
+                )}></div>
+              {file.Type === 'pure-text' ? renderPureText() : renderCommon()}
+            </div>
+            <div className="flex items-center pl-2">
+              <div
+                className="cursor-pointer rd-full duration-300 bg-border/60 w-6 h-6 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)"
+                onClick={() => removeFile(file.Path)}>
+                <div className="i-tabler:trash text-text text-3"></div>
+              </div>
+            </div>
+          </div>
+        </>
+      )
+    }
+
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
         <div
@@ -171,23 +263,21 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
         <div className="flex">
           <h2 className="text-lg font-bold">文件列表{!!selectedFiles?.length && `(${selectedFiles?.length})`}</h2>
           <div className="flex-1"></div>
-          {!!selectedFiles?.length && (
-            <div className="flex items-center">
-              <div></div>
-              {actionList?.map((item, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'not-last:mr-2 cursor-pointer rd-full duration-300 bg-border/60 h-6 px-1.5 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)',
-                    !item.display && 'hidden'
-                  )}
-                  onClick={item.onClick}>
-                  {item?.text && <span className="text-3 mr-1">{item.text}</span>}
-                  <div className={`${item.icon} text-3`}></div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center">
+            <div></div>
+            {actionList?.map((item, index) => (
+              <div
+                key={index}
+                className={cn(
+                  'not-last:mr-2 cursor-pointer rd-full duration-300 bg-border/60 h-6 px-1.5 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)',
+                  !item.display && 'hidden'
+                )}
+                onClick={item.onClick}>
+                {item?.text && <span className="text-3 mr-1">{item.text}</span>}
+                <div className={`${item.icon} text-3`}></div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col flex-1 overflow-auto mt-2 hide-scrollbar">
@@ -199,27 +289,8 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           )}
 
           <div className="flex flex-col gap-2">
-            {selectedFiles.map(file => (
-              <div key={file.Name} className="flex items-center border-2 border-solid border-border rounded-lg p-2">
-                <div className="flex items-center gap-2 truncate flex-1">
-                  <div
-                    className={cn(
-                      'text-text',
-                      FileTypeList.find(item => item.type === file.Ext)?.icon || 'i-tabler:file'
-                    )}></div>
-                  <div className="flex flex-col line-height-1em">
-                    <span className="truncate font-bold text-(3.5 text)">{file.Name}</span>
-                    <span className="text-(3 text2)">{calcFileSize(file.Size)}</span>
-                  </div>
-                </div>
-                <div className="flex items-center pl-2">
-                  <div
-                    className="cursor-pointer rd-full duration-300 bg-border/60 w-6 h-6 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)"
-                    onClick={() => removeFile(file.Name)}>
-                    <div className="i-tabler:trash text-text text-3"></div>
-                  </div>
-                </div>
-              </div>
+            {selectedFiles.map((file, index) => (
+              <React.Fragment key={index}>{renderListItem(file)}</React.Fragment>
             ))}
             <div className="h-20"></div>
           </div>

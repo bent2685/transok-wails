@@ -1,11 +1,18 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "transok-wails",
-  "outputfilename": "transok-wails",
+  "name": "transok",
+  "outputfilename": "transok",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
+  "info": {
+    "companyName": "transok",
+    "productName": "transok",
+    "productVersion": "0.0.3-beta",
+    "copyright": "Copyright © 2024 transok. All rights reserved.",
+    "comments": "Built using Wails (https://wails.app)"
+  },
   "author": {
     "name": "bent2685",
     "email": "bent2685@outlook.com"

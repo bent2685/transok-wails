@@ -19,7 +19,8 @@ type FileInfo struct {
 	Path string
 	Name string
 	Size int64
-	Ext  string
+	Type string
+	Text string
 }
 
 var file *fileService
@@ -65,7 +66,7 @@ func (c *fileService) GetFile(path string) *FileInfo {
 		Path: path,
 		Name: fileInfo.Name(),
 		Size: fileInfo.Size(),
-		Ext:  strings.TrimPrefix(strings.ToLower(filepath.Ext(path)), "."),
+		Type: strings.TrimPrefix(strings.ToLower(filepath.Ext(path)), "."),
 	}
 }
 
@@ -88,6 +89,10 @@ func (c *fileService) GetShareList() []FileInfo {
 
 	validFiles := make([]FileInfo, 0)
 	for _, file := range result {
+		if file.Type == "pure-text" {
+			validFiles = append(validFiles, file)
+		}
+
 		if _, err := os.Stat(file.Path); err == nil {
 			validFiles = append(validFiles, file)
 		}

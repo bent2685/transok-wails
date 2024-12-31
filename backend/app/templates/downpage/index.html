@@ -7,16 +7,20 @@
 
     <title>Transok Download</title>
     <style>
+        /* 定义全局CSS变量 */
         :root {
             --pri: #c34141;
+            /* 主题色 - 红色 */
         }
 
+        /* 基础样式重置 */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* 页面基础布局样式 */
         html,
         body {
             padding: 0;
@@ -27,10 +31,12 @@
             transition: opacity 0.3s;
         }
 
+        /* 主容器过渡动画 */
         .main {
             transition: opacity 0.3s;
         }
 
+        /* 未就绪状态的透明度设置 */
         .main.unready {
             opacity: 0 !important;
         }
@@ -39,33 +45,45 @@
 </head>
 
 <body class="py-2 px-6">
+    <!-- 主容器：使用 UnoCSS 的工具类设置最大/最小宽度和弹性布局 -->
     <div class="main unready max-w-764px min-w-320px px-4 mx-auto h-full flex flex-col overflow-hiddenss">
         <div class="h-20"></div>
+        <!-- 页面头部 -->
         <header>
             <div class="flex items-baseline">
                 <h1 class="line-height-1em">Transok</h1>
+                <!-- 标题旁边的装饰点 -->
                 <div class="w-1.5 h-1.5 ml-1" style="background-color: var(--pri);"></div>
             </div>
         </header>
+        <!-- 加载状态显示 -->
         <div id="loading" class="flex-center py-8">
             <span class="ml-2 text-gray-400">加载中...</span>
         </div>
+        <!-- 主要内容区域 -->
         <main class="flex-1 overflow-y-auto">
+            <!-- 文件列表容器 -->
             <div class="list-container flex flex-col pt-4 pb-2">
 
             </div>
+            <!-- 文件计数器 -->
             <p class="file-counter text-gray-400 mt-1 text-3.5">Counting the number of files...</p>
         </main>
     </div>
 </body>
+
+<!-- 引入 UnoCSS 运行时 -->
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/attributify.global.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/preset-icons.global.js"></script>
+
+<!-- UnoCSS 配置 -->
 <script>
     window.__unocss = {
         presets: [
+            // 配置图标预设
             () => window.__unocss_runtime.presets.presetIcons({
                 scale: 1.2,
                 cdn: 'https://esm.sh/'
@@ -74,25 +92,35 @@
 
     }
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/core.global.js"></script>
 <script src="file-util.js"></script>
 
 <script>
 
+    // 基础配置
     const baseUrl = ''
     const pri = '#c34141'
     let isLoading = true
+
+    // DOM 元素引用
     const listContainer = document.querySelector('.list-container')
     const loadingEl = document.querySelector('#loading')
     const fileCounter = document.querySelector('.file-counter')
     const mainEl = document.querySelector('.main')
 
-
+    /**
+     * 处理文件下载
+     * @param {string} url - 文件路径
+     */
     const downloadFile = async (url) => {
         try {
+            // 发起下载请求并创建 blob URL
             const response = await fetch(`${baseUrl}/download/index?filePath=${encodeURIComponent(url)}`)
             const blob = await response.blob()
             const downloadUrl = window.URL.createObjectURL(blob)
+
+            // 创建临时下载链接并触发下载
             const a = document.createElement('a')
             a.href = downloadUrl
             a.download = url.split('/').pop()
@@ -103,39 +131,84 @@
         } catch (error) {
             console.error('下载失败:', error)
         }
-
     }
 
+    /**
+     * 处理文本复制
+     * @param {string} text - 要复制的文本
+     */
+    const handleCopy = async (text) => {
+        try {
+            // 优先使用现代 Clipboard API
+            await navigator.clipboard.writeText(text);
+            alert('Copied to clipboard');
+        } catch (err) {
+            // 降级方案：使用传统的 textarea 方法
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('Copied to clipboard');
+            } catch (e) {
+                alert('Copy failed, please copy manually');
+            }
+            document.body.removeChild(textarea);
+        }
+    }
 
+    /**
+     * 处理文件操作点击事件
+     * @param {string} fileStr - 序列化的文件信息
+     */
+    const handleActionClick = (fileStr) => {
+        const file = JSON.parse(fileStr)
+        const { Type, Text, Path } = file
+        if (Type === 'pure-text') {
+            handleCopy(Text)
+            return
+        }
+        downloadFile(Path)
+    }
+
+    /**
+     * 渲染文件列表
+     * @param {Object} data - 包含文件列表的数据对象
+     */
     const renderList = (data) => {
         const { shareList } = data
         // 清空现有列表
         listContainer.innerHTML = ''
 
+        // 遍历文件列表并创建DOM元素
         shareList.forEach(item => {
-            const { Ext, Name, Path, Size } = item
-            const fileTypeItem = FILE_TYPE_LIST.find(type => type.type === Ext)
+            const { Type, Name, Path, Size, Text } = item
+            const fileTypeItem = FILE_TYPE_LIST.find(type => type.type === Type)
             const fileTypeIcon = fileTypeItem?.icon
             const listItem = document.createElement('div')
+            // 构建列表项HTML
             listItem.innerHTML = `
                 <div class="flex items-center p2 mb-2 rd-2 border-1px border-solid border-#e7e7e7 duration-300 cursor-pointer
                     ${['bg-gray-100'].map(cls => `hover:${cls}`).join(' ')}
                 ">
                     <div class="flex items-center flex-1">
                         <div class="${fileTypeIcon} text-5"></div>
-                        <div class="flex flex-col line-height-1em ml-2">
-                            <span class="text-3.5 font-bold">${Name}</span>    
-                            <span class="text-gray-400 text-3">${calcFileSize(Size)}</span>
+                        <div class="flex flex-1 flex-col line-height-1em ml-2">
+                            <span class="text-3.5 font-bold break-all">${Name || 'Untitled'}</span>    
+                            <span class="text-gray-400 text-3 break-all">${Type == 'pure-text' ? (Text || 'No content') : calcFileSize(Size)}</span>
                         </div>
                     </div>
                     <div>
                         <div
-                            onclick="downloadFile('${Path}')"
+                            onclick='handleActionClick(${JSON.stringify(JSON.stringify(item))})'
                             class="min-w-8 min-h-8 bg-${pri}/20 rd-full flex justify-center items-center duration-300
                             ${['bg-pri/30'].map(cls => `hover:${cls}`).join(' ')}
                             ${['scale-95'].map(cls => `active:${cls}`).join(' ')}
                         ">
-                          <div class="i-tabler:download text-3"></div>                            
+                          <div class="${Type === 'pure-text' ? 'i-tabler:copy' : 'i-tabler:download'} text-3"></div>
                         </div>
                     </div>
                 </div>
@@ -145,11 +218,16 @@
         })
     }
 
+    /**
+     * 获取下载列表数据
+     */
     const getDownloadList = async () => {
         try {
             isLoading = true
             loadingEl.style.display = 'flex'
             listContainer.style.display = 'none'
+
+            // 发起请求获取文件列表
             const res = await fetch(`${baseUrl}/share/list`, {
                 method: 'POST',
                 headers: {
@@ -173,8 +251,10 @@
         }
     }
 
+    // 页面加载完成后初始化
     window.onload = () => {
         getDownloadList()
+        // 使用 requestAnimationFrame 确保平滑过渡
         requestAnimationFrame(() => {
             mainEl.classList.remove('unready')
         })

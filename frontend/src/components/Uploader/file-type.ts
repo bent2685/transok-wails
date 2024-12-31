@@ -165,7 +165,11 @@ export const FileTypeList: IFileType[] = [
     type: 'toml'
   },
   {
+    icon: 'i-tabler:keyboard',
+    type: 'pure-text'
+  },
+  {
     icon: 'i-tabler:file',
     type: 'other'
-  }
+  },
 ]

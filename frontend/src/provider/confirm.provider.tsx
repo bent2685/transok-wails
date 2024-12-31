@@ -8,9 +8,11 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 interface ConfirmContextType {
-  confirm: (options: ConfirmOptions) => Promise<boolean>
+  confirm: (options: ConfirmOptions) => Promise<boolean | string>
 }
 
 interface ConfirmOptions {
@@ -18,6 +20,8 @@ interface ConfirmOptions {
   description: string
   confirmText?: string
   cancelText?: string
+  isPrompt?: boolean
+  defaultValue?: string
 }
 
 const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined)
@@ -32,21 +36,23 @@ export const useConfirm = () => {
 
 export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [confirmState, setConfirmState] = useState<ConfirmOptions | null>(null)
+  const [inputValue, setInputValue] = useState<string>('')
   const [resolveReject, setResolveReject] = useState<{
-    resolve: (value: boolean) => void
+    resolve: (value: boolean | string) => void
     reject: () => void
   } | null>(null)
 
   const confirm = (options: ConfirmOptions) => {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean | string>((resolve, reject) => {
       setConfirmState(options)
+      setInputValue(options.defaultValue || '')
       setResolveReject({ resolve, reject })
     })
   }
 
   const handleConfirm = () => {
     if (resolveReject) {
-      resolveReject.resolve(true)
+      resolveReject.resolve(confirmState?.isPrompt ? inputValue : true)
       setConfirmState(null)
     }
   }
@@ -68,9 +74,19 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
               <DialogTitle>{confirmState.title}</DialogTitle>
               <DialogDescription>{confirmState.description}</DialogDescription>
             </DialogHeader>
+            {confirmState.isPrompt && (
+              <div className="py-2">
+                <Textarea
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  placeholder="请输入..."
+                  className="resize-none hide-scrollbar"
+                />
+              </div>
+            )}
             <DialogFooter className="">
               <div className="flex justify-center">
-                <Button variant="outline" size="sm" onClick={handleCancel} className='mr-2'>
+                <Button variant="outline" size="sm" onClick={handleCancel} className="mr-2">
                   {confirmState.cancelText || '取消'}
                 </Button>
                 <Button size="sm" onClick={handleConfirm}>

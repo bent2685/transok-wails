@@ -20,6 +20,7 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+//go:embed build/appicon.png
 var icon []byte
 
 func main() {
@@ -54,7 +55,7 @@ func main() {
 			DisableWebViewDrop: true,
 		},
 		Debug: options.Debug{
-			OpenInspectorOnStartup: true,
+			OpenInspectorOnStartup: false,
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,

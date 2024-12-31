@@ -1,3 +1,8 @@
+
+<div align="center">
+  <img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/logo.png" alt="logo" width="100" height="100" />
+</div>
+
 <h1 align="center">Transok</h1>
 
 <h4 align="center"><a href="https://github.com/bent2685/transok-wails/blob/main/README.md">English</a> | <strong>简体中文</strong></h4>
@@ -27,6 +32,8 @@
 - [x] 文件删除和清空
 - [x] 文件下载页
 - [x] 深色模式
+- [x] 纯文字分享
+- [ ] i18n
 - [ ] 在 Finder/资源管理器中右键添加
 - [ ] 文件加密分享
 
