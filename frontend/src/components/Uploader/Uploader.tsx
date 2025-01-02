@@ -101,7 +101,9 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           icon: 'i-tabler:copy',
           display: isRunning,
           text: '复制链接',
-          onClick: () => {}
+          onClick: () => {
+            event$.emit({ type: 'copy-link', data: null })
+          }
         },
         {
           icon: 'i-tabler:trash',

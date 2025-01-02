@@ -71,6 +71,7 @@
         </main>
     </div>
 </body>
+<script src="file-util.js"></script>
 
 <!-- 引入 UnoCSS 运行时 -->
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
@@ -94,7 +95,6 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/core.global.js"></script>
-<script src="file-util.js"></script>
 
 <script>
 
@@ -195,7 +195,7 @@
                     ${['bg-gray-100'].map(cls => `hover:${cls}`).join(' ')}
                 ">
                     <div class="flex items-center flex-1">
-                        <div class="${fileTypeIcon} text-5"></div>
+                        <div class="${fileTypeIcon || 'i-tabler:file'} text-5"></div>
                         <div class="flex flex-1 flex-col line-height-1em ml-2">
                             <span class="text-3.5 font-bold break-all">${Name || 'Untitled'}</span>    
                             <span class="text-gray-400 text-3 break-all">${Type == 'pure-text' ? (Text || 'No content') : calcFileSize(Size)}</span>
@@ -253,11 +253,14 @@
 
     // 页面加载完成后初始化
     window.onload = () => {
-        getDownloadList()
-        // 使用 requestAnimationFrame 确保平滑过渡
-        requestAnimationFrame(() => {
-            mainEl.classList.remove('unready')
-        })
+        setTimeout(async () => {
+            await getDownloadList()
+            // 使用 requestAnimationFrame 确保平滑过渡
+            requestAnimationFrame(() => {
+                mainEl.classList.remove('unready')
+            })
+        }, 1000)
+
     }
 
 
