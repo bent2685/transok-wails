@@ -11,20 +11,20 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-type systemService struct {
+type SystemService struct {
 	ctx     context.Context
 	env     string
 	version string
 	appInfo map[string]string
 }
 
-var system *systemService
+var system *SystemService
 var systemOnce sync.Once
 
-func System() *systemService {
+func System() *SystemService {
 	if system == nil {
 		systemOnce.Do(func() {
-			system = &systemService{}
+			system = &SystemService{}
 			system.appInfo = consts.APP_INFO
 			system.env = consts.APP_INFO["env"]
 			go system.loopWindowEvent()
@@ -33,7 +33,7 @@ func System() *systemService {
 	return system
 }
 
-func (c *systemService) Start(ctx context.Context, version string) {
+func (c *SystemService) Start(ctx context.Context, version string) {
 	c.ctx = ctx
 	c.version = version
 
@@ -50,17 +50,17 @@ func (c *systemService) Start(ctx context.Context, version string) {
 }
 
 // GetVersion 获取版本号
-func (c *systemService) GetVersion() string {
+func (c *SystemService) GetVersion() string {
 	return c.version
 }
 
 // GetEnv 获取环境
-func (c *systemService) GetEnv() string {
+func (c *SystemService) GetEnv() string {
 	return c.env
 }
 
 // 获取本机局域网ip
-func (c *systemService) GetLocalIp() string {
+func (c *SystemService) GetLocalIp() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return ""
@@ -77,15 +77,15 @@ func (c *systemService) GetLocalIp() string {
 	return ""
 }
 
-func (c *systemService) GetAppInfo() map[string]string {
+func (c *SystemService) GetAppInfo() map[string]string {
 	return c.appInfo
 }
 
-func (c *systemService) GetPlatform() string {
+func (c *SystemService) GetPlatform() string {
 	return runtime.GOOS
 }
 
-func (s *systemService) loopWindowEvent() {
+func (s *SystemService) loopWindowEvent() {
 	for {
 		time.Sleep(time.Second + time.Millisecond*500)
 		if s.ctx != nil {

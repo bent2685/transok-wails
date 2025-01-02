@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { GetAppInfo, GetLocalIp } from '@wa/services/systemService'
+import { GetAppInfo, GetLocalIp } from '@wa/services/SystemService'
 import { FileInfo, Uploader, UploaderEvent, UploaderRef } from '@/components/Uploader/Uploader'
 import { Set, Delete, Get, GetKeys } from '@wa/services/StorageService'
 import { Start, Stop } from '@wa/app/ginService'
@@ -7,15 +7,22 @@ import { cn } from '@/lib/utils'
 import { useEventEmitter } from 'ahooks'
 import { useConfirm } from '@/provider/confirm.provider'
 import { GetShareList } from '@wa/services/fileService'
+import { useNavigate } from 'react-router-dom'
 const Home: React.FC = () => {
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
   const [fileList, setFileList] = useState<FileInfo[]>([])
   const [isShare, setIsShare] = useState<boolean | null>(null)
-  const port = 9482
+  const port /* 端口 */ = 9482
+  const navigate = useNavigate()
   const { confirm } = useConfirm()
 
-  const uploaderRef = useRef<UploaderRef>(null)
-  const event$ = useEventEmitter<UploaderEvent>()
+  const uploaderRef /* 上传器 */ = useRef<UploaderRef>(null)
+  const event$ /* 事件总栈 */ = useEventEmitter<UploaderEvent>()
+
+  /**
+   * 文件选择/添加后回调
+   * @param files
+   */
   const handleFileSelect = (files: FileInfo[]) => {
     setFileList(files)
     Set('share-list', files)
@@ -40,6 +47,10 @@ const Home: React.FC = () => {
     await Set('is-share', true)
   }
 
+  /**
+   * 同步分享状态
+   * @returns
+   */
   const syncIsShare = async () => {
     const keys = await GetKeys()
     if (!keys.includes('is-share')) {
@@ -53,6 +64,9 @@ const Home: React.FC = () => {
     uploaderRef.current?.setShareList(shareList)
   }
 
+  /**
+   * 事件订阅
+   */
   event$.useSubscription(async payload => {
     const { type, data } = payload
     if (type === 'copy-link') {
@@ -102,12 +116,21 @@ const Home: React.FC = () => {
   return (
     <>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header>
-          <div className="flex items-end mb-1">
-            <h1 className="font-900 text-(6 text) line-height-1em">{appInfo.name}</h1>
-            <div className="w-1.5 h-1.5 bg-pri ml-1"></div>
+        <header className="flex items-center">
+          <div className="flex-1">
+            <div className="flex items-end mb-1">
+              <h1 className="font-900 text-(6 text) line-height-1em">{appInfo.name}</h1>
+              <div className="w-1.5 h-1.5 bg-pri ml-1"></div>
+            </div>
+            <p className="text-(3 text2)">高效·快速·无限制 局域网文件分享</p>
           </div>
-          <p className="text-(3 text2)">高效·快速·无限制 局域网文件分享</p>
+          <div>
+            <div
+              className="w-8 h-8 duration-300 bg-bg2 rd-5 flex-center cursor-pointer hover:(bg-pri/20) active:(bg-pri/40 scale-95)"
+              onClick={() => navigate('/settings')}>
+              <div className="i-tabler:settings text-(text 3.5)"></div>
+            </div>
+          </div>
         </header>
         <main className="mt-4 flex-1 flex flex-col overflow-hidden">
           <Uploader ref={uploaderRef} multiple onFileSelect={handleFileSelect} event$={event$} />
