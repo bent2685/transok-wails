@@ -103,7 +103,7 @@ const Home: React.FC = () => {
     <>
       <div className="flex-1 flex flex-col overflow-hidden">
         <header>
-          <div className="flex items-end my-1">
+          <div className="flex items-end mb-1">
             <h1 className="font-900 text-(6 text) line-height-1em">{appInfo.name}</h1>
             <div className="w-1.5 h-1.5 bg-pri ml-1"></div>
           </div>

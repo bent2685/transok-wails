@@ -3,11 +3,12 @@ package services
 import (
 	"context"
 	"net"
+	"runtime"
 	"sync"
 	"time"
 	"transok/backend/consts"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type systemService struct {
@@ -36,11 +37,11 @@ func (c *systemService) Start(ctx context.Context, version string) {
 	c.ctx = ctx
 	c.version = version
 
-	if screen, err := runtime.ScreenGetAll(ctx); err == nil && len(screen) > 0 {
+	if screen, err := wailsRuntime.ScreenGetAll(ctx); err == nil && len(screen) > 0 {
 		for _, sc := range screen {
 			if sc.IsCurrent {
 				if sc.Size.Width < consts.MIN_WINDOW_WIDTH || sc.Size.Height < consts.MIN_WINDOW_HEIGHT {
-					runtime.WindowMaximise(ctx)
+					wailsRuntime.WindowMaximise(ctx)
 					break
 				}
 			}
@@ -80,11 +81,15 @@ func (c *systemService) GetAppInfo() map[string]string {
 	return c.appInfo
 }
 
+func (c *systemService) GetPlatform() string {
+	return runtime.GOOS
+}
+
 func (s *systemService) loopWindowEvent() {
 	for {
 		time.Sleep(time.Second + time.Millisecond*500)
 		if s.ctx != nil {
-			runtime.WindowShow(s.ctx)
+			wailsRuntime.WindowShow(s.ctx)
 			break
 		}
 	}
