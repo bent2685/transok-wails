@@ -53,7 +53,7 @@
 
 ☕ 如果这个项目对你有帮助，为什么不请我喝杯咖啡呢？这将激励我继续开发。
 
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/sponsor.jpeg)
+<img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/sponsor.jpeg" alt="wechat" width="200" />
 
 ---
 

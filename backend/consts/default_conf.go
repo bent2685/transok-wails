@@ -10,7 +10,7 @@ const MIN_WINDOW_HEIGHT = 640
 var APP_INFO = map[string]string{
 	"name":    "Transok",
 	"env":     "prod",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"desc":    "Transok is an efficient LAN file sharing tool",
 	"author":  "bent2685",
 	"email":   "bent2685@outlook.com",

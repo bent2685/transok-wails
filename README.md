@@ -54,7 +54,7 @@
 
 ☕ If this project has been helpful to you, why not buy me a cup of coffee? This will keep me going.
 
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/sponsor.jpeg)
+<img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/sponsor.jpeg" alt="wechat" width="200" />
 
 ---
 
