@@ -3,7 +3,11 @@ import { Input } from '@/components/ui/input'
 import { GetVersion, GetAppInfo } from '@wa/services/SystemService'
 import { BrowserOpenURL } from '@runtime/runtime'
 import React, { useEffect, useState } from 'react'
-
+import { useTranslation } from 'react-i18next'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Set, Get, GetKeys } from '@wa/services/StorageService'
+import { useRef } from 'react'
+import { Stop } from '@wa/app/ginService'
 export interface ISettingItem {
   icon?: string
   label: string
@@ -14,19 +18,54 @@ export interface ISettingItem {
 const Settings: React.FC = () => {
   const [version, setVersion] = useState('')
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
+  const [language, setLanguage] = useState<string | null>(null)
+  const [port, setPort] = useState<string>('9482')
+  const { t, i18n } = useTranslation()
+
+  const defaultLanguage = useRef()
   const commonSettings: ISettingItem[] = [
     {
       icon: 'i-tabler:language',
-      label: '语言',
-      node: <div>中文</div>
+      label: t('settings.language'),
+      node: (
+        <div>
+          <Select value={language} onValueChange={setLanguage}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="zh_CN">简体中文</SelectItem>
+              <SelectItem value="zh_TW">繁体中文</SelectItem>
+              <SelectItem value="ja">日本語</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )
     },
     {
       icon: 'i-tabler:server-cog',
-      label: '端口',
+      label: t('settings.port'),
       node: (
         <>
           <div>
-            <input className="w-16 text-right text-(text 3.5)" placeholder="8080" />
+            <input
+              className="w-16 text-right text-(text 3.5)"
+              value={port}
+              onChange={async e => {
+                const value = e.target.value
+                if (!/^\d*$/.test(value)) return
+
+                const numValue = parseInt(value || '0')
+                if (numValue > 65535) return
+
+                setPort(value)
+                Stop()
+                // 保存端口值到存储
+                await Set('port', value)
+              }}
+              placeholder="9482"
+            />
           </div>
         </>
       )
@@ -36,22 +75,22 @@ const Settings: React.FC = () => {
   const otherSettings: ISettingItem[] = [
     {
       icon: 'i-tabler:brand-appstore',
-      label: '应用名称',
+      label: t('settings.name'),
       node: <div className="text-text2">{appInfo.name}</div>
     },
     {
       icon: 'i-tabler:info-circle',
-      label: '版本',
+      label: t('settings.version'),
       node: <div className="text-text2">{version}</div>
     },
     {
       icon: 'i-tabler:user-hexagon',
-      label: '作者',
+      label: t('settings.author'),
       node: <div className="text-text2">{appInfo.author}</div>
     },
     {
       icon: 'i-tabler:mail',
-      label: '邮箱',
+      label: t('settings.email'),
       node: <div className="text-text2">{appInfo.email}</div>
     },
     {
@@ -67,9 +106,42 @@ const Settings: React.FC = () => {
     }
   ]
 
+  /**
+   * 改变语言
+   * @param lang 语言
+   */
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang)
+    Set('language', lang)
+  }
+
+  useEffect(() => {
+    if (!language) return
+    changeLanguage(language)
+  }, [language])
+
+  const getLanguageFromDb = async () => {
+    const keys = await GetKeys()
+    if (!keys.includes('language')) {
+      await Set('language', 'en')
+    }
+    const lang = await Get('language')
+
+    setLanguage(lang)
+    defaultLanguage.current = lang
+  }
   useEffect(() => {
     GetVersion().then(setVersion)
     GetAppInfo().then(setAppInfo)
+    getLanguageFromDb()
+    Get('port').then(async savedPort => {
+      if (!savedPort) {
+        await Set('port', '9482')
+        setPort('9482')
+        return
+      }
+      setPort(savedPort)
+    })
   }, [])
 
   const renderItem = (item: ISettingItem) => {
@@ -90,41 +162,40 @@ const Settings: React.FC = () => {
         <header className="flex items-center">
           <div className="flex-1 flex items-center">
             <BackBtn />
-            <h1 className="font-900 text-(6 text) line-height-1em ml-2">设置</h1>
+            <h1 className="font-900 text-(6 text) line-height-1em ml-2">{t('settings.title.settings')}</h1>
           </div>
         </header>
         <main>
-          <h5 className="font-900 mt-6 text-text2">通用设置</h5>
+          <h5 className="font-900 mt-6 text-text2">{t('settings.title.common')}</h5>
           <div className="rd-2 border-(2 solid border/40) mt-2">
             {commonSettings.map((item, index) => (
-              <>
-                <div key={index}>{renderItem(item)}</div>
+              <React.Fragment key={`common-${index}`}>
+                <div>{renderItem(item)}</div>
                 {index !== commonSettings.length - 1 && (
                   <div className="w-full px-2">
                     <div className="h-1px bg-border/70 w-full"></div>
                   </div>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </div>
 
-          <h5 className="font-900 mt-6 text-text2">关于</h5>
+          <h5 className="font-900 mt-6 text-text2">{t('settings.title.about')}</h5>
           <div className="rd-2 border-(2 solid border/40) mt-2">
             {otherSettings.map((item, index) => (
-              <>
-                <div key={index}>{renderItem(item)}</div>
+              <React.Fragment key={`other-${index}`}>
+                <div>{renderItem(item)}</div>
                 {index !== otherSettings.length - 1 && (
                   <div className="w-full px-2">
                     <div className="h-1px bg-border/70 w-full"></div>
                   </div>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </div>
 
-
-          <div className='flex-center px2 py-3'>
-            <p className='text-(3 text2)'>喜欢的话可以给我的仓库点个star</p>
+          <div className="flex-center px2 py-3">
+            <p className="text-(3 text2) text-center">{t('settings.footer')}</p>
           </div>
         </main>
       </div>

@@ -1,0 +1,49 @@
+{
+    "language": "English",
+    "settings": {
+        "title": {
+            "settings": "Settings",
+            "common": "Common",
+            "about": "About"
+        },
+        "language": "Language",
+        "port": "Port",
+        "version": "Version",
+        "name": "App Name",
+        "author": "Author",
+        "email": "Email",
+        "footer": "If you like this app, please give my repository a star"
+    },
+    "home": {
+        "title": "Fast · Efficient · Unlimited LAN File Sharing",
+        "upload": {
+            "title": "Click or drag file to upload",
+            "button": "Upload File",
+            "multiple": "one or more files",
+            "single": "file",
+            "noLimit": "No format limit No size limit",
+            "fileList": "File List",
+            "noFiles": "Please upload files first",
+            "actions": {
+                "pureText": "Pure Text",
+                "copyLink": "Copy Link",
+                "clear": "Clear"
+            },
+            "text": {
+                "inputTitle": "Enter title",
+                "noContent": "No content",
+                "editText": "Edit pure text",
+                "enterContent": "Please enter content"
+            }
+        }
+    },
+    "dialog": {
+        "copyLink": {
+            "title": "Copy Link",
+            "confirm": "Copy"
+        },
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "placeholder": "Please input..."
+    }
+}

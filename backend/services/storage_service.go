@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sync"
 )
 
@@ -56,8 +57,34 @@ func (s *StorageService) Init(ctx context.Context) error {
 		return fmt.Errorf("创建存储目录失败: %w", err)
 	}
 
-	// 加载现有数据
-	return s.loadData()
+	// 先加载现有数据
+	if err := s.loadData(); err != nil {
+		return err
+	}
+
+	// 然后再检查并设置默认值
+	keys := s.GetKeys()
+	if !slices.Contains(keys, "language") {
+		fmt.Println("设置语言为en")
+		s.Set("language", "en")
+	}
+
+	if !slices.Contains(keys, "port") {
+		fmt.Println("设置端口为9482")
+		s.Set("port", "9482")
+	}
+
+	if !slices.Contains(keys, "share-list") {
+		fmt.Println("设置share-list为空")
+		s.Set("share-list", []interface{}{})
+	}
+
+	if !slices.Contains(keys, "is-share") {
+		fmt.Println("设置is-share为false")
+		s.Set("is-share", false)
+	}
+
+	return nil
 }
 
 func (s *StorageService) GetBasePath() string {

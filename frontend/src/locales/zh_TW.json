@@ -1,0 +1,49 @@
+{
+    "language": "繁體中文",
+    "settings": {
+        "title": {
+            "settings": "設定",
+            "common": "通用設定",
+            "about": "關聯信息"
+        },
+        "language": "語言",
+        "port": "端口",
+        "version": "版本",
+        "name": "應用名稱",
+        "author": "作者",
+        "email": "郵箱",
+        "footer": "如果喜歡本應用請給我的倉庫點個star"
+    },
+    "home": {
+        "title": "高效·快速·無限制 局域網文件分享",
+        "upload": {
+            "title": "點擊或拖拽文件上傳",
+            "button": "上傳文件",
+            "multiple": "一個或多個文件",
+            "single": "文件",
+            "noLimit": "無文件格式限制 無大小限制",
+            "fileList": "文件列表",
+            "noFiles": "請先上傳文件",
+            "actions": {
+                "pureText": "純文本",
+                "copyLink": "複製鏈接",
+                "clear": "清空"
+            },
+            "text": {
+                "inputTitle": "輸入標題",
+                "noContent": "無內容",
+                "editText": "編輯純文本",
+                "enterContent": "請輸入內容"
+            }
+        }
+    },
+    "dialog": {
+        "copyLink": {
+            "title": "複製鏈接",
+            "confirm": "複製"
+        },
+        "confirm": "確認",
+        "cancel": "取消",
+        "placeholder": "請輸入..."
+    }
+}

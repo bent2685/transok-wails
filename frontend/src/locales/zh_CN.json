@@ -1,0 +1,49 @@
+{
+    "language": "简体中文",
+    "settings": {
+        "title": {
+            "settings": "设置",
+            "common": "通用设置",
+            "about": "关于"
+        },
+        "language": "语言",
+        "port": "端口",
+        "version": "版本",
+        "name": "应用名称",
+        "author": "作者",
+        "email": "邮箱",
+        "footer": "如果喜欢本应用请给我的仓库点个star"
+    },
+    "home": {
+        "title": "高效·快速·无限制 局域网文件分享",
+        "upload": {
+            "title": "点击或拖拽文件上传",
+            "button": "上传文件",
+            "multiple": "一个或多个文件",
+            "single": "文件",
+            "noLimit": "无文件格式限制 无大小限制",
+            "fileList": "文件列表",
+            "noFiles": "请先上传文件",
+            "actions": {
+                "pureText": "纯文本",
+                "copyLink": "复制链接",
+                "clear": "清空"
+            },
+            "text": {
+                "inputTitle": "输入标题",
+                "noContent": "无内容",
+                "editText": "编辑纯文本",
+                "enterContent": "请输入内容"
+            }
+        }
+    },
+    "dialog": {
+        "copyLink": {
+            "title": "复制链接",
+            "confirm": "复制"
+        },
+        "confirm": "确认",
+        "cancel": "取消",
+        "placeholder": "请输入..."
+    }
+}

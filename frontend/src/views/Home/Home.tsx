@@ -8,11 +8,14 @@ import { useEventEmitter } from 'ahooks'
 import { useConfirm } from '@/provider/confirm.provider'
 import { GetShareList } from '@wa/services/fileService'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+
 const Home: React.FC = () => {
+  const { t } = useTranslation()
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
   const [fileList, setFileList] = useState<FileInfo[]>([])
   const [isShare, setIsShare] = useState<boolean | null>(null)
-  const port /* 端口 */ = 9482
+  const [port, setPort] = useState<string>('9482')
   const navigate = useNavigate()
   const { confirm } = useConfirm()
 
@@ -73,10 +76,9 @@ const Home: React.FC = () => {
       const ip = await GetLocalIp()
       const url = `http://${ip}:${port}/download/page`
       const ok = await confirm({
-        title: '复制链接',
+        title: t('dialog.copyLink.title'),
         description: url,
-        confirmText: '复制',
-        cancelText: '取消'
+        confirmText: t('dialog.copyLink.confirm')
       })
       if (!ok) return
       window.navigator.clipboard.writeText(url)
@@ -111,6 +113,14 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     GetAppInfo().then(setAppInfo)
+    Get('port').then(port => {
+      if (!port) {
+        Set('port', '9482')
+        setPort('9482')
+        return
+      }
+      setPort(port)
+    })
     syncIsShare()
   }, [])
   return (
@@ -122,7 +132,7 @@ const Home: React.FC = () => {
               <h1 className="font-900 text-(6 text) line-height-1em">{appInfo.name}</h1>
               <div className="w-1.5 h-1.5 bg-pri ml-1"></div>
             </div>
-            <p className="text-(3 text2)">高效·快速·无限制 局域网文件分享</p>
+            <p className="text-(3 text2)">{t('home.title')}</p>
           </div>
           <div>
             <div

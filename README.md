@@ -34,7 +34,8 @@
 - [x] File download page
 - [x] Dark mode
 - [x] Pure text sharing
-- [ ] i18n
+- [x] i18n
+- [x] Custom port
 - [ ] Right-click to add in Finder/File Explorer
 - [ ] Encrypted file sharing
 
@@ -45,6 +46,7 @@
 ![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.png)
 ![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.png)
 ![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview3.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview4.png)
 
 ---
 

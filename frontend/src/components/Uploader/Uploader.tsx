@@ -9,6 +9,7 @@ import { EventEmitter } from 'ahooks/lib/useEventEmitter'
 import { calcFileSize } from '@/utils/file.util'
 import React from 'react'
 import _ from 'lodash'
+import { useTranslation } from 'react-i18next'
 // 定义文件信息接口
 export interface FileInfo {
   Name: string
@@ -43,6 +44,7 @@ interface UploaderProps {
 
 export const Uploader = forwardRef<UploaderRef, UploaderProps>(
   ({ onFileSelect, onFileChange, accept = '*', maxSize, className, multiple = false, event$ }, ref) => {
+    const { t } = useTranslation()
     const [isDragging, setIsDragging] = useState(false)
     const [isRunning, setIsRunning] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([])
@@ -80,7 +82,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
         {
           icon: 'i-tabler:keyboard',
           display: true,
-          text: '纯文本',
+          text: t('home.upload.actions.pureText'),
           onClick: () => {
             const newTextShare = {
               Type: 'pure-text',
@@ -100,7 +102,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
         {
           icon: 'i-tabler:copy',
           display: isRunning,
-          text: '复制链接',
+          text: t('home.upload.actions.copyLink'),
           onClick: () => {
             event$.emit({ type: 'copy-link', data: null })
           }
@@ -186,14 +188,14 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
               onFileSelect?.(newFiles)
             }}
             className="w-full bg-transparent border-none outline-none font-bold text-(3.5 text)"
-            placeholder="输入标题"
+            placeholder={t('home.upload.text.inputTitle')}
           />
           <div
             className="text-(3 text2) cursor-pointer"
             onClick={async () => {
               const text = await confirm({
-                title: '编辑纯文本',
-                description: '请输入内容',
+                title: t('home.upload.text.editText'),
+                description: t('home.upload.text.enterContent'),
                 isPrompt: true,
                 defaultValue: file.Text
               })
@@ -208,7 +210,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
               onFileSelect?.(newFiles)
             }}>
             <div className="i-tabler:edit mr-0.5 text-2.5 inline-block -mb-0.5 text-pri"></div>
-            <span className="truncate">{file.Text || '无内容'}</span>
+            <span className="truncate">{file.Text || t('home.upload.text.noContent')}</span>
           </div>
         </div>
       )
@@ -251,19 +253,25 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           style={{ '--wails-drop-target': 'drop' } as React.CSSProperties}>
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
             <div className="i-tabler:file-upload text-(pri 10)"></div>
-            <p className="m-2 text-(3.5 text2)">点击或拖拽{multiple ? '一个或多个文件' : '文件'}上传</p>
+            <p className="m-2 text-(3.5 text2) text-center">
+              {t('home.upload.title')}
+              {multiple ? t('home.upload.multiple') : t('home.upload.single')}
+            </p>
             <div className="flex flex-col gap-2">
               <Button size="sm" variant="destructive" onClick={handleClick}>
-                上传文件
+                {t('home.upload.button')}
               </Button>
             </div>
           </div>
         </div>
-        <p className="text-(3 text2) mt-2">无文件格式限制 无大小限制</p>
+        <p className="text-(3 text2) mt-2">{t('home.upload.noLimit')}</p>
 
         <div className="h-4"></div>
         <div className="flex">
-          <h2 className="text-lg font-bold">文件列表{!!selectedFiles?.length && `(${selectedFiles?.length})`}</h2>
+          <h2 className="text-lg font-bold">
+            {t('home.upload.fileList')}
+            {!!selectedFiles?.length && `(${selectedFiles?.length})`}
+          </h2>
           <div className="flex-1"></div>
           <div className="flex items-center">
             <div></div>
@@ -286,7 +294,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           {!selectedFiles?.length && (
             <div className="flex-center px-2 py-6 flex-col">
               <div className="i-tabler:playlist-x text-12 text-text2"></div>
-              <p className="text-4 text-text2">请先上传文件</p>
+              <p className="text-4 text-text2">{t('home.upload.noFiles')}</p>
             </div>
           )}
 

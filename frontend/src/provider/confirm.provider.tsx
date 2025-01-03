@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react'
+import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmContextType {
   confirm: (options: ConfirmOptions) => Promise<boolean | string>
@@ -41,14 +42,15 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
     resolve: (value: boolean | string) => void
     reject: () => void
   } | null>(null)
+  const { t } = useTranslation()
 
-  const confirm = (options: ConfirmOptions) => {
+  const confirm = useCallback((options: ConfirmOptions) => {
     return new Promise<boolean | string>((resolve, reject) => {
       setConfirmState(options)
       setInputValue(options.defaultValue || '')
       setResolveReject({ resolve, reject })
     })
-  }
+  }, [])
 
   const handleConfirm = () => {
     if (resolveReject) {
@@ -79,7 +81,7 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
                 <Textarea
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
-                  placeholder="请输入..."
+                  placeholder={t('dialog.placeholder')}
                   className="resize-none hide-scrollbar"
                 />
               </div>
@@ -87,10 +89,10 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
             <DialogFooter className="">
               <div className="flex justify-center">
                 <Button variant="outline" size="sm" onClick={handleCancel} className="mr-2">
-                  {confirmState.cancelText || '取消'}
+                  {confirmState.cancelText || t('dialog.cancel')}
                 </Button>
                 <Button size="sm" onClick={handleConfirm}>
-                  {confirmState.confirmText || '确认'}
+                  {confirmState.confirmText || t('dialog.confirm')}
                 </Button>
               </div>
             </DialogFooter>

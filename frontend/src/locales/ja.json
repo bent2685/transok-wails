@@ -1,0 +1,49 @@
+{
+    "language": "日本語",
+    "settings": {
+        "title": {
+            "settings": "設定",
+            "common": "共通設定",
+            "about": "関連情報"
+        },
+        "language": "言語",
+        "port": "ポート",
+        "version": "バージョン",
+        "name": "アプリ名",
+        "author": "作者",
+        "email": "メール",
+        "footer": "このアプリが気に入ったら、私のリポジトリにスターをつけてください"
+    },
+    "home": {
+        "title": "効率的·迅速·無制限 LAN ファイル共有",
+        "upload": {
+            "title": "ファイルをアップロード",
+            "button": "ファイルをアップロード",
+            "multiple": "一つまたは複数のファイル",
+            "single": "ファイル",
+            "noLimit": "形式制限なし サイズ制限なし",
+            "fileList": "ファイル",
+            "noFiles": "まずファイルをアップロードしてください",
+            "actions": {
+                "pureText": "テキスト",
+                "copyLink": "コピー",
+                "clear": "クリア"
+            },
+            "text": {
+                "inputTitle": "タイトルを入力",
+                "noContent": "内容なし",
+                "editText": "プレーンテキストを編集",
+                "enterContent": "内容を入力してください"
+            }
+        }
+    },
+    "dialog": {
+        "copyLink": {
+            "title": "リンクをコピー",
+            "confirm": "コピー"
+        },
+        "confirm": "確認",
+        "cancel": "キャンセル",
+        "placeholder": "入力してください..."
+    }
+}

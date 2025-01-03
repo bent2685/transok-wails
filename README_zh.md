@@ -33,7 +33,8 @@
 - [x] 文件下载页
 - [x] 深色模式
 - [x] 纯文字分享
-- [ ] i18n
+- [x] i18n
+- [x] 自定义端口
 - [ ] 在 Finder/资源管理器中右键添加
 - [ ] 文件加密分享
 
@@ -44,6 +45,7 @@
 ![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.png)
 ![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.png)
 ![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview3.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview4.png)
 
 ---
 
