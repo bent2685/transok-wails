@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 	"transok/backend/apis"
+	"transok/backend/consts"
 	"transok/backend/domain/dto"
 	"transok/backend/domain/resp"
 	"transok/backend/middleware"
@@ -21,6 +22,10 @@ import (
 
 //go:embed templates/downpage/*
 var downpageFS embed.FS
+
+type contextKey string
+
+const mdnsKey contextKey = "mdns"
 
 type ginService struct {
 	ctx         context.Context
@@ -38,6 +43,7 @@ func Gin() *ginService {
 	if ginEngine == nil {
 		ginEngineOnce.Do(func() {
 			ctx, cancel := context.WithCancel(context.Background())
+			ctx = context.WithValue(ctx, mdnsKey, nil)
 			ginEngine = &ginService{
 				ctx:    ctx,
 				server: gin.Default(),
@@ -58,7 +64,29 @@ func (c *ginService) Start(port string) {
 		port = ":4343"
 	}
 
+	portNum := 4343
+	if port != ":4343" {
+		_, err := fmt.Sscanf(port, ":%d", &portNum)
+		if err != nil {
+			log.Printf("解析端口号失败: %v，将使用默认端口 4343\n", err)
+			portNum = 4343
+		}
+	}
+
 	c.SetupRoutes()
+	/* 开始发送轮询mdns消息 */
+	services.GetDiscoverService().StopPeriodicBroadcast()
+
+	// 添加：重新订阅处理器
+	// mdns.GetDispatcher().Subscribe(mdns_handlers.NewDiscoverHandler())
+
+	services.GetDiscoverService().StartPeriodicBroadcast(portNum, consts.DiscoverPayload{
+		Type: "DISCOVER",
+		Payload: map[string]string{
+			"ip":   services.System().GetLocalIp(),
+			"port": fmt.Sprintf("%d", portNum),
+		},
+	}, 3*time.Second)
 
 	c.httpServer = &http.Server{
 		Addr:    port,
@@ -67,6 +95,7 @@ func (c *ginService) Start(port string) {
 
 	go func() {
 		if err := c.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			services.GetDiscoverService().Stop()
 			log.Printf("Gin server error: %v\n", err)
 		}
 	}()
@@ -81,7 +110,7 @@ func (c *ginService) Stop() {
 	if c.cancel != nil {
 		c.cancel()
 	}
-
+	services.GetDiscoverService().StopPeriodicBroadcast()
 	if c.httpServer != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -93,6 +122,7 @@ func (c *ginService) Stop() {
 		c.server = nil
 		c.routesSetup = false
 	}
+
 }
 
 func (c *ginService) SetupRoutes() {
@@ -103,6 +133,7 @@ func (c *ginService) SetupRoutes() {
 	c.server.Use(middleware.Cors())
 	c.server.Use(middleware.Recover)
 	c.server.Use(middleware.LogHandler(c.storage.GetBasePath()))
+
 	api := c.server.Group("/api")
 	{
 		api.GET("/ping", func(ctx *gin.Context) {

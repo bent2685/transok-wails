@@ -1,0 +1,34 @@
+[API-LOG]2025/01/06 17:31:14  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:99999 => "unknown error"] lasted:15.792µs
+[API-LOG]2025/01/08 10:02:40  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:99999 => "unknown error"] lasted:14.061µs
+[API-LOG]2025/01/08 10:04:44  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:99999 => "unknown error"] lasted:15.616µs
+[API-LOG]2025/01/08 10:07:08  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:99999 => "unknown error"] lasted:11.244µs
+[API-LOG]2025/01/08 10:09:52  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:50000 => "MDNS service not found in context"] lasted:11.438µs
+[API-LOG]2025/01/08 10:28:59  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:50000 => "MDNS service not initialized"] lasted:3.274µs
+[API-LOG]2025/01/08 10:35:06  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:5.00116671s
+[API-LOG]2025/01/08 10:37:37  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:5.001224564s
+[API-LOG]2025/01/08 10:38:59  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:5.0009113s
+[API-LOG]2025/01/08 10:39:43  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000494168s
+[API-LOG]2025/01/08 10:43:10  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000739242s
+[API-LOG]2025/01/08 10:43:13  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000349073s
+[API-LOG]2025/01/08 10:48:51  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001011559s
+[API-LOG]2025/01/08 10:48:53  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001938607s
+[API-LOG]2025/01/08 10:50:47  <IP: ==> ::1> [GET] URL: /discover/find => [code:200 | BusinessCode:99999 => "unknown error"] lasted:1.001011189s
+[API-LOG]2025/01/08 10:57:43  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.00046855s
+[API-LOG]2025/01/08 11:06:37  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001496495s
+[API-LOG]2025/01/08 11:08:54  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001568631s
+[API-LOG]2025/01/08 11:09:09  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001451204s
+[API-LOG]2025/01/08 11:10:54  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000629125s
+[API-LOG]2025/01/08 11:11:13  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.00090736s
+[API-LOG]2025/01/08 11:11:43  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000485198s
+[API-LOG]2025/01/08 11:12:32  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000771533s
+[API-LOG]2025/01/08 11:14:29  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000589184s
+[API-LOG]2025/01/08 11:18:17  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001125228s
+[API-LOG]2025/01/08 11:24:52  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000947768s
+[API-LOG]2025/01/08 11:25:42  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000779302s
+[API-LOG]2025/01/08 11:26:18  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001074211s
+[API-LOG]2025/01/08 11:28:03  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.001503369s
+[API-LOG]2025/01/08 13:37:50  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:1.000961974s
+[API-LOG]2025/01/08 13:44:22  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:99999 => "unknown error"] lasted:1.000957269s
+[API-LOG]2025/01/08 13:46:17  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:3.000696324s
+[API-LOG]2025/01/08 13:48:25  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:3.000622975s
+[API-LOG]2025/01/08 13:50:35  <IP: ==> 192.168.50.74> [GET] URL: /discover/find => [code:200 | BusinessCode:20000 => "success"] lasted:3.000837521s

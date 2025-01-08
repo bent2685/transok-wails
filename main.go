@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"transok/backend/app"
 	"transok/backend/services"
+	"transok/backend/utils/mdns"
+	mdns_handlers "transok/backend/utils/mdns/handlers"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/menu"
@@ -26,8 +28,10 @@ var icon []byte
 func main() {
 	sysSvc := services.System()
 	fileSvc := services.File()
+	discoverSvc := services.GetDiscoverService()
 	storageSvc := services.Storage()
 	ginSvc := app.Gin()
+
 	appInfo := sysSvc.GetAppInfo()
 	windowStartState := options.Normal
 	// menu
@@ -66,12 +70,17 @@ func main() {
 			sysSvc.Start(ctx, appInfo["version"])
 			fileSvc.Start(ctx)
 			storageSvc.Init(ctx)
+			discoverSvc.Start()
+			/* 订阅mdns消息 */
+			mdns.GetDispatcher().Subscribe(mdns_handlers.NewDiscoverHandler())
+			mdns.GetDispatcher().Subscribe(mdns_handlers.NewPingHandler())
 		},
 		Bind: []interface{}{
 			sysSvc,
 			fileSvc,
 			storageSvc,
 			ginSvc,
+			discoverSvc,
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{

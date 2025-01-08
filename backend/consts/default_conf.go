@@ -9,9 +9,15 @@ const MIN_WINDOW_HEIGHT = 640
 
 var APP_INFO = map[string]string{
 	"name":    "Transok",
-	"env":     "prod",
-	"version": "0.2.0",
+	"env":     "dev",
+	"version": "0.3.0",
 	"desc":    "Transok is an efficient LAN file sharing tool",
 	"author":  "bent2685",
 	"email":   "bent2685@outlook.com",
+}
+
+type DiscoverPayload struct {
+	Type    string
+	Sender  string
+	Payload map[string]string
 }

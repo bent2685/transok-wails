@@ -1,0 +1,14 @@
+{
+  "is-share": true,
+  "language": "en",
+  "port": "9482",
+  "share-list": [
+    {
+      "Name": "transok-v0.2.0-windows-x64.zip",
+      "Path": "/Users/mac/Downloads/transok-v0.2.0-windows-x64.zip",
+      "Size": 8188275,
+      "Text": "",
+      "Type": "zip"
+    }
+  ]
+}
