@@ -1,5 +1,8 @@
 {
-  "is-share": true,
+  "discover-list": [
+    "192.168.50.239:9482"
+  ],
+  "is-share": false,
   "language": "en",
   "port": "9482",
   "share-list": [
