@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	"transok/backend/consts"
@@ -66,10 +67,43 @@ func (c *SystemService) GetLocalIp() string {
 		return ""
 	}
 
+	var wlanIP string
+	var ethernetIP string
+
 	// 遍历所有网络接口
 	for _, iface := range interfaces {
 		// 检查接口是否启用且不是回环接口
 		if iface.Flags&net.FlagUp != 0 && iface.Flags&net.FlagLoopback == 0 {
+			name := iface.Name
+			// 跳过虚拟接口
+			if strings.Contains(strings.ToLower(name), "virtual") ||
+				strings.Contains(strings.ToLower(name), "vethernet") ||
+				strings.Contains(strings.ToLower(name), "vmware") ||
+				strings.Contains(strings.ToLower(name), "vbox") {
+				continue
+			}
+
+			isWlan := false
+			isEthernet := false
+
+			switch runtime.GOOS {
+			case "windows":
+				// Windows 下通过描述来判断接口类型
+				description := name
+				isWlan = strings.Contains(strings.ToLower(description), "wireless") ||
+					strings.Contains(strings.ToLower(description), "wi-fi") ||
+					strings.Contains(strings.ToLower(description), "wlan")
+				isEthernet = strings.Contains(strings.ToLower(description), "ethernet") ||
+					strings.Contains(strings.ToLower(description), "gigabit")
+			case "darwin":
+				// macOS 下 en0 通常是内置网卡（Wi-Fi），en1/en2 等可能是以太网
+				isWlan = name == "en0"
+				isEthernet = strings.HasPrefix(name, "en") && name != "en0"
+			case "linux":
+				isWlan = strings.HasPrefix(name, "wlan") || strings.HasPrefix(name, "wifi")
+				isEthernet = strings.HasPrefix(name, "eth") || strings.HasPrefix(name, "enp") || strings.HasPrefix(name, "eno")
+			}
+
 			addrs, err := iface.Addrs()
 			if err != nil {
 				continue
@@ -77,23 +111,28 @@ func (c *SystemService) GetLocalIp() string {
 
 			for _, addr := range addrs {
 				if ipnet, ok := addr.(*net.IPNet); ok {
-					if ip4 := ipnet.IP.To4(); ip4 != nil {
-						// 检查是否是私有IP地址
-						// RFC 1918 私有网络
-						if ip4[0] == 192 && ip4[1] == 168 || // 192.168.0.0/16
-							ip4[0] == 10 || // 10.0.0.0/8
-							(ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31) || // 172.16.0.0/12
-							// 其他特殊用途地址
-							(ip4[0] == 169 && ip4[1] == 254) || // 169.254.0.0/16 (APIPA)
-							(ip4[0] == 100 && ip4[1] >= 64 && ip4[1] <= 127) { // 100.64.0.0/10 (CGN)
-							return ip4.String()
+					if ip4 := ipnet.IP.To4(); ip4 != nil && isPrivateIP(ip4) {
+						if isWlan {
+							wlanIP = ip4.String()
+						} else if isEthernet {
+							ethernetIP = ip4.String()
 						}
 					}
 				}
 			}
 		}
 	}
-	return ""
+
+	if wlanIP != "" {
+		return wlanIP
+	}
+	return ethernetIP
+}
+
+func isPrivateIP(ip net.IP) bool {
+	return ip[0] == 192 && ip[1] == 168 || // 192.168.0.0/16
+		ip[0] == 10 || // 10.0.0.0/8
+		(ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31) // 172.16.0.0/12
 }
 
 func (c *SystemService) GetAppInfo() map[string]string {

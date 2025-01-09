@@ -84,12 +84,12 @@ func (s *DiscoverService) Start() error {
 				fmt.Printf("解析JSON数据失败: %v\n", err)
 				continue
 			}
+			fmt.Println("发现服务:", data)
 
 			/* 如果发送者是自己，则跳过 */
 			if data.Sender == s.id {
 				continue
 			}
-			fmt.Println("发现服务:", data)
 
 			// 使用调度器处理消息
 			mdns.GetDispatcher().Dispatch(data)
