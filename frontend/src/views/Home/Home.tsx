@@ -22,6 +22,17 @@ const Home: React.FC = () => {
   const uploaderRef /* 上传器 */ = useRef<UploaderRef>(null)
   const event$ /* 事件总栈 */ = useEventEmitter<UploaderEvent>()
 
+  const actionList /* 操作列表 */ = [
+    {
+      icon: 'i-tabler:device-desktop-search',
+      onClick: () => navigate('/discover')
+    },
+    {
+      icon: 'i-tabler:settings',
+      onClick: () => navigate('/settings')
+    }
+  ]
+
   /**
    * 文件选择/添加后回调
    * @param files
@@ -88,7 +99,10 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (isShare === null) return
 
-    const interval = setInterval(async () => {
+    let interval: NodeJS.Timeout | null = null
+
+    // 无论是否分享，都需要同步share-list
+    interval = setInterval(async () => {
       const shareList = await GetShareList()
       console.log('shareList', shareList)
       event$.emit({
@@ -97,18 +111,24 @@ const Home: React.FC = () => {
       })
     }, 1000)
 
+    if (isShare) {
+      console.log('启动')
+      Start(`:${port}`)
+    } else {
+      console.log('关闭')
+      Stop()
+    }
+
     event$.emit({
       type: 'is-running',
       data: isShare
     })
 
-    if (isShare) {
-      Start(`:${port}`)
-      return
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
     }
-
-    Stop()
-    return () => clearInterval(interval)
   }, [isShare])
 
   useEffect(() => {
@@ -134,12 +154,15 @@ const Home: React.FC = () => {
             </div>
             <p className="text-(3 text2)">{t('home.title')}</p>
           </div>
-          <div>
-            <div
-              className="w-8 h-8 duration-300 bg-bg2 rd-5 flex-center cursor-pointer hover:(bg-pri/20) active:(bg-pri/40 scale-95)"
-              onClick={() => navigate('/settings')}>
-              <div className="i-tabler:settings text-(text 3.5)"></div>
-            </div>
+          <div className="flex items-center">
+            {actionList.map((action, index) => (
+              <div
+                key={index}
+                className="w-8 h-8 duration-300 bg-bg2 rd-5 flex-center cursor-pointer hover:(bg-pri/20) active:(bg-pri/40 scale-95) not-last:mr-3"
+                onClick={action.onClick}>
+                <div className={cn('text-(text 3.5)', action.icon)}></div>
+              </div>
+            ))}
           </div>
         </header>
         <main className="mt-4 flex-1 flex flex-col overflow-hidden">

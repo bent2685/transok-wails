@@ -1,17 +1,24 @@
 {
   "discover-list": [
-    "192.168.50.239:9482"
+    {
+      "ip": "192.168.50.240",
+      "port": "9482",
+      "uname": "transok",
+      "platform": "darwin",
+      "address": "192.168.50.240:9482"
+    }
   ],
   "is-share": false,
-  "language": "en",
+  "language": "ja",
   "port": "9482",
   "share-list": [
     {
-      "Name": "transok-v0.2.0-windows-x64.zip",
-      "Path": "/Users/mac/Downloads/transok-v0.2.0-windows-x64.zip",
-      "Size": 8188275,
+      "Name": "ParallelsDesktop-20.1.3-55743.dmg",
+      "Path": "/Users/mac/Downloads/ParallelsDesktop-20.1.3-55743.dmg",
+      "Size": 193197090,
       "Text": "",
-      "Type": "zip"
+      "Type": "dmg"
     }
-  ]
+  ],
+  "uname": "transok"
 }

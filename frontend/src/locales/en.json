@@ -1,5 +1,10 @@
 {
     "language": "English",
+    "discover": {
+        "title": "Discover",
+        "noDevices": "No devices found",
+        "fetchError": "Failed to fetch device list"
+    },
     "settings": {
         "title": {
             "settings": "Settings",

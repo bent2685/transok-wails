@@ -29,7 +29,7 @@ const Settings: React.FC = () => {
       label: t('settings.language'),
       node: (
         <div>
-          <Select value={language} onValueChange={setLanguage}>
+          <Select value={language || 'en'} onValueChange={setLanguage}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

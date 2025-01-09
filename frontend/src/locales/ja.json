@@ -1,5 +1,10 @@
 {
     "language": "日本語",
+    "discover": {
+        "title": "発見",
+        "noDevices": "デバイスが見つかりません",
+        "fetchError": "デバイスリストの取得に失敗しました"
+    },
     "settings": {
         "title": {
             "settings": "設定",

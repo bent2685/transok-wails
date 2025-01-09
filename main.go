@@ -59,7 +59,7 @@ func main() {
 			DisableWebViewDrop: true,
 		},
 		Debug: options.Debug{
-			OpenInspectorOnStartup: false,
+			OpenInspectorOnStartup: true,
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -72,7 +72,7 @@ func main() {
 			storageSvc.Init(ctx)
 			discoverSvc.Start()
 			/* 订阅mdns消息 */
-			mdns.GetDispatcher().Subscribe(mdns_handlers.NewDiscoverHandler())
+			mdns.GetDispatcher().Subscribe(mdns_handlers.GetDiscoverHandler())
 			mdns.GetDispatcher().Subscribe(mdns_handlers.NewPingHandler())
 		},
 		Bind: []interface{}{
@@ -81,6 +81,7 @@ func main() {
 			storageSvc,
 			ginSvc,
 			discoverSvc,
+			mdns_handlers.GetDiscoverHandler(),
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{

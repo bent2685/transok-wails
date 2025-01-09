@@ -79,6 +79,11 @@ func (s *StorageService) Init(ctx context.Context) error {
 		s.Set("share-list", []interface{}{})
 	}
 
+	if !slices.Contains(keys, "uname") {
+		fmt.Println("设置uname为transok")
+		s.Set("uname", "transok")
+	}
+
 	if !slices.Contains(keys, "is-share") {
 		fmt.Println("设置is-share为false")
 		s.Set("is-share", false)

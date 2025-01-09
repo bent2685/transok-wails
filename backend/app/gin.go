@@ -55,6 +55,12 @@ func Gin() *ginService {
 }
 
 func (c *ginService) Start(port string) {
+	// 检查服务是否已经在运行
+	if c.httpServer != nil {
+		log.Println("服务器已经在运行中")
+		return
+	}
+
 	if c.server == nil {
 		c.server = gin.Default()
 	}
@@ -80,11 +86,17 @@ func (c *ginService) Start(port string) {
 	// 添加：重新订阅处理器
 	// mdns.GetDispatcher().Subscribe(mdns_handlers.NewDiscoverHandler())
 
+	uname, ok := services.Storage().Get("uname")
+	if !ok {
+		uname = "transok"
+	}
 	services.GetDiscoverService().StartPeriodicBroadcast(portNum, consts.DiscoverPayload{
 		Type: "DISCOVER",
 		Payload: map[string]string{
-			"ip":   services.System().GetLocalIp(),
-			"port": fmt.Sprintf("%d", portNum),
+			"IP":       services.System().GetLocalIp(),
+			"Port":     fmt.Sprintf("%d", portNum),
+			"Uname":    uname.(string),
+			"Platform": services.System().GetPlatform(),
 		},
 	}, 3*time.Second)
 
@@ -107,22 +119,35 @@ func Storage() {
 }
 
 func (c *ginService) Stop() {
+	// 先停止 MDNS 广播
+	services.GetDiscoverService().StopPeriodicBroadcast()
+
 	if c.cancel != nil {
 		c.cancel()
 	}
-	services.GetDiscoverService().StopPeriodicBroadcast()
+
 	if c.httpServer != nil {
+		// 创建一个新的上下文用于关闭操作
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
+		// 先关闭所有新的连接
+		c.httpServer.SetKeepAlivesEnabled(false)
+
+		// 关闭服务器
 		if err := c.httpServer.Shutdown(ctx); err != nil {
 			log.Printf("Server forced to shutdown: %v\n", err)
+			// 如果优雅关闭失败，强制关闭
+			if err := c.httpServer.Close(); err != nil {
+				log.Printf("Server force close error: %v\n", err)
+			}
 		}
 
+		// 重置服务器状态
+		c.httpServer = nil
 		c.server = nil
 		c.routesSetup = false
 	}
-
 }
 
 func (c *ginService) SetupRoutes() {
@@ -160,6 +185,12 @@ func (c *ginService) SetupRoutes() {
 		download.StaticFS("/page", http.FS(templatesFS))
 
 		download.GET("/index", con.DownloadFile)
+	}
+
+	discover := c.server.Group("/discover")
+	{
+		con := apis.DiscoverApi{}
+		discover.GET("/ping", con.Ping)
 	}
 
 	for _, route := range c.server.Routes() {

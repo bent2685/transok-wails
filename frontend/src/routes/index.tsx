@@ -9,7 +9,7 @@ export type RouteType = RouteObject & {
 
 const HomeView = lazy(() => import('../views/Home/Home'))
 const SettingsView = lazy(() => import('../views/Settings/Settings'))
-
+const DiscoverView = lazy(() => import('../views/Discover/Discover'))
 export const routes: RouteType[] = [
   {
     path: '/',
@@ -22,6 +22,10 @@ export const routes: RouteType[] = [
   {
     path: '/settings',
     element: <SettingsView />
+  },
+  {
+    path: '/discover',
+    element: <DiscoverView />
   }
 ]
 const RoterConfig = () => {

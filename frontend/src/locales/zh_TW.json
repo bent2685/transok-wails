@@ -1,5 +1,10 @@
 {
     "language": "繁體中文",
+    "discover": {
+        "title": "發現",
+        "noDevices": "未發現設備",
+        "fetchError": "獲取設備列表失敗"
+    },
     "settings": {
         "title": {
             "settings": "設定",
