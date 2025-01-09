@@ -1,4 +1,3 @@
-
 <div align="center">
   <img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/logo.png" alt="logo" width="100" height="100" />
 </div>
@@ -21,7 +20,7 @@
 
 # 关于
 
-**Transok** 是一个局域网文件共享工具，可以通过唯一的共享密码来分享文件。对文件数量和大小没有限制。
+**Transok** 是一个局域网文件共享工具, 支持查找局域网内正在共享的设备。对文件数量和大小没有限制。
 
 ---
 
@@ -35,6 +34,7 @@
 - [x] 纯文字分享
 - [x] i18n
 - [x] 自定义端口
+- [x] 查找局域网内正在共享的设备
 - [ ] 在 Finder/资源管理器中右键添加
 - [ ] 文件加密分享
 

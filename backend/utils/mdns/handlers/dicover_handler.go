@@ -82,8 +82,10 @@ func (h *DiscoverHandler) Handle(payload consts.DiscoverPayload) {
 
 	// 添加新设备并去重
 	deviceExists := false
-	for _, dev := range deviceList {
+	for i, dev := range deviceList {
 		if dev.Address == device.Address {
+			// 更新设备信息
+			deviceList[i] = device
 			deviceExists = true
 			break
 		}

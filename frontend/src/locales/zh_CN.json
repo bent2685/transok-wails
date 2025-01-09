@@ -13,6 +13,7 @@
         },
         "language": "语言",
         "port": "端口",
+        "deviceName": "设备名称",
         "version": "版本",
         "name": "应用名称",
         "author": "作者",

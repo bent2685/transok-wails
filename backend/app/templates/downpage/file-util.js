@@ -161,6 +161,10 @@ const FILE_TYPE_LIST = [
         type: 'toml'
     },
     {
+        icon: 'i-tabler:markdown',
+        type: 'md'
+    },
+    {
         icon: 'i-tabler:keyboard',
         type: 'pure-text'
     },

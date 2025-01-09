@@ -13,6 +13,7 @@
         },
         "language": "Language",
         "port": "Port",
+        "deviceName": "Device Name",
         "version": "Version",
         "name": "App Name",
         "author": "Author",

@@ -22,7 +22,7 @@
 
 # About
 
-**Transok** is a local area network file sharing tool that allows you to share files with a unique share password. There is no limit on the number and size of files.
+**Transok** is a LAN file sharing tool that supports discovering sharing devices in the local network. There are no limits on file quantity and size.
 
 ---
 
@@ -36,6 +36,7 @@
 - [x] Pure text sharing
 - [x] i18n
 - [x] Custom port
+- [x] Discover sharing devices in the local network
 - [ ] Right-click to add in Finder/File Explorer
 - [ ] Encrypted file sharing
 

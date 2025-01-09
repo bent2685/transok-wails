@@ -14,10 +14,26 @@ const Discover: React.FC = () => {
   const [error, setError] = useState<string>('')
   const timerRef = useRef<number>()
 
+  const deviceIcons /* 设备类型图标 */ = [
+    {
+      icon: 'i-tabler:brand-apple',
+      type: 'darwin'
+    },
+    {
+      icon: 'i-tabler:brand-windows',
+      type: 'windows'
+    },
+    {
+      icon: 'i-tabler:device-desktop',
+      type: 'other'
+    }
+  ]
+
   /* 获取设备列表 */
   const getDiscoverList = async () => {
     try {
       const list = await GetDiscoverList()
+      console.log(list)
       setDiscoverList(list || [])
       setError('')
     } catch (err) {
@@ -61,10 +77,14 @@ const Discover: React.FC = () => {
             </div>
           )}
 
-          {discoverList.map(device => (
-            <div className="flex items-center border-2 border-solid border-border rounded-lg p-2 mb-2">
+          {discoverList.map((device, index) => (
+            <div className="flex items-center border-2 border-solid border-border rounded-lg p-2 mb-2" key={index}>
               <div className="flex items-center gap-2 truncate flex-1">
-                <div className={cn('text-text min-w-4 min-h-4', 'i-tabler:device-desktop')}></div>
+                <div
+                  className={cn(
+                    'text-text min-w-4 min-h-4',
+                    deviceIcons.find(icon => icon.type === device.platform)?.icon || 'i-tabler:device-desktop'
+                  )}></div>
                 <div className="flex flex-col line-height-1em">
                   <span className="truncate font-bold text-(3.5 text) break-all">{device.uname}</span>
                   <span className="text-(3 text2) break-all">{device.address}</span>

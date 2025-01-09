@@ -15,11 +15,16 @@ export interface ISettingItem {
   [key: string]: any
 }
 
+/**
+ * 设置页面
+ * @returns
+ */
 const Settings: React.FC = () => {
   const [version, setVersion] = useState('')
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
   const [language, setLanguage] = useState<string | null>(null)
   const [port, setPort] = useState<string>('9482')
+  const [deviceName, setDeviceName] = useState<string>('')
   const { t, i18n } = useTranslation()
 
   const defaultLanguage = useRef()
@@ -65,6 +70,27 @@ const Settings: React.FC = () => {
                 await Set('port', value)
               }}
               placeholder="9482"
+            />
+          </div>
+        </>
+      )
+    },
+    {
+      icon: 'i-tabler:device-desktop-star',
+      label: t('settings.deviceName'),
+      node: (
+        <>
+          <div>
+            <input
+              className="w-16 text-right text-(text 3.5)"
+              value={deviceName}
+              onChange={async e => {
+                const value = e.target.value
+                setDeviceName(value.replace(/[^a-zA-Z0-9]/g, ''))
+                Stop()
+                await Set('uname', value)
+              }}
+              placeholder={t('settings.deviceName')}
             />
           </div>
         </>
@@ -142,6 +168,8 @@ const Settings: React.FC = () => {
       }
       setPort(savedPort)
     })
+
+    Get('uname').then(setDeviceName)
   }, [])
 
   const renderItem = (item: ISettingItem) => {

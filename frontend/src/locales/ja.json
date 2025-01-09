@@ -13,6 +13,7 @@
         },
         "language": "言語",
         "port": "ポート",
+        "deviceName": "デバイス名",
         "version": "バージョン",
         "name": "アプリ名",
         "author": "作者",
