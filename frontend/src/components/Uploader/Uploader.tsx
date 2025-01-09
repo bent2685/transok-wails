@@ -302,7 +302,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
             {selectedFiles.map((file, index) => (
               <React.Fragment key={index}>{renderListItem(file)}</React.Fragment>
             ))}
-            <div className="h-20"></div>
+            <div className="h-25"></div>
           </div>
         </div>
       </div>

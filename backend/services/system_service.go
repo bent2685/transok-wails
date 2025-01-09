@@ -61,16 +61,35 @@ func (c *SystemService) GetEnv() string {
 
 // 获取本机局域网ip
 func (c *SystemService) GetLocalIp() string {
-	addrs, err := net.InterfaceAddrs()
+	interfaces, err := net.Interfaces()
 	if err != nil {
 		return ""
 	}
 
-	for _, addr := range addrs {
-		// 检查ip地址判断是否回环地址
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
+	// 遍历所有网络接口
+	for _, iface := range interfaces {
+		// 检查接口是否启用且不是回环接口
+		if iface.Flags&net.FlagUp != 0 && iface.Flags&net.FlagLoopback == 0 {
+			addrs, err := iface.Addrs()
+			if err != nil {
+				continue
+			}
+
+			for _, addr := range addrs {
+				if ipnet, ok := addr.(*net.IPNet); ok {
+					if ip4 := ipnet.IP.To4(); ip4 != nil {
+						// 检查是否是私有IP地址
+						// RFC 1918 私有网络
+						if ip4[0] == 192 && ip4[1] == 168 || // 192.168.0.0/16
+							ip4[0] == 10 || // 10.0.0.0/8
+							(ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31) || // 172.16.0.0/12
+							// 其他特殊用途地址
+							(ip4[0] == 169 && ip4[1] == 254) || // 169.254.0.0/16 (APIPA)
+							(ip4[0] == 100 && ip4[1] >= 64 && ip4[1] <= 127) { // 100.64.0.0/10 (CGN)
+							return ip4.String()
+						}
+					}
+				}
 			}
 		}
 	}
