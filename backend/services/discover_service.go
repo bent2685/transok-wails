@@ -8,10 +8,12 @@ import (
 	"sync"
 	"time"
 	"transok/backend/consts"
+	"transok/backend/utils/logger"
 	"transok/backend/utils/mdns"
 
 	"github.com/google/uuid"
 	"github.com/grandcat/zeroconf"
+	"go.uber.org/zap"
 )
 
 type DiscoverService struct {
@@ -39,10 +41,10 @@ func GetDiscoverService() *DiscoverService {
 
 /* Start 开始监听mdns广播 */
 func (s *DiscoverService) Start() error {
-	fmt.Println("开始监听mdns广播...")
+	logger.Info("开始监听mdns广播...")
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
-		fmt.Println("创建resolver失败:", err)
+		logger.Error("创建resolver失败", zap.Error(err))
 		return err
 	}
 
@@ -50,17 +52,20 @@ func (s *DiscoverService) Start() error {
 
 	entries := make(chan *zeroconf.ServiceEntry)
 	go func() {
-		fmt.Println("开始浏览服务...")
+		logger.Info("开始浏览服务...")
 		err = resolver.Browse(s.ctx, "_transok._tcp", "local.", entries)
 		if err != nil {
-			fmt.Println("浏览服务失败:", err)
+			logger.Error("浏览服务失败", zap.Error(err))
 			return
 		}
 	}()
 
 	go func() {
-		fmt.Println("等待服务发现...")
+		logger.Info("等待服务发现...")
+
 		for entry := range entries {
+			logger.Debug("收到原始服务条目", zap.Any("entry", entry))
+
 			// 查找包含数据的 TXT 记录
 			var jsonData string
 			for _, txt := range entry.Text {
@@ -81,15 +86,16 @@ func (s *DiscoverService) Start() error {
 
 			// 解析 JSON 字符串到 DiscoverPayload 结构体
 			if err := json.Unmarshal([]byte(jsonData), &data); err != nil {
-				fmt.Printf("解析JSON数据失败: %v\n", err)
+				logger.Error("解析JSON数据失败", zap.Error(err))
 				continue
 			}
-			fmt.Println("发现服务:", data)
 
 			/* 如果发送者是自己，则跳过 */
-			if data.Sender == s.id {
-				continue
-			}
+			// if data.Sender == s.id {
+			// 	continue
+			// }
+
+			logger.Info("发现服务", zap.Any("data", data))
 
 			// 使用调度器处理消息
 			mdns.GetDispatcher().Dispatch(data)
@@ -119,7 +125,8 @@ func (s *DiscoverService) Broadcast(port int, payload consts.DiscoverPayload) er
 		fmt.Sprintf("data=%s", string(jsonBytes)),
 	}
 
-	s.server, err = zeroconf.Register(
+	// 修改服务注册配置
+	server, err := zeroconf.Register(
 		fmt.Sprintf("TransokService_%s", s.id),
 		"_transok._tcp",
 		"local.",
@@ -128,10 +135,21 @@ func (s *DiscoverService) Broadcast(port int, payload consts.DiscoverPayload) er
 		nil,
 	)
 	if err != nil {
-		fmt.Println("注册广播服务失败:", err)
+		logger.Error("注册广播服务失败", zap.Error(err))
 		return err
 	}
-	fmt.Printf("服务(ID: %s)已开始广播在端口 %d，payload: %v\n", s.id, port, discoverPayload)
+
+	// 保存server实例前，确保关闭旧的实例
+	if s.server != nil {
+		s.server.Shutdown()
+	}
+	s.server = server
+
+	logger.Info("服务已开始广播",
+		zap.String("id", s.id),
+		zap.Int("port", port),
+		zap.Any("payload", discoverPayload),
+	)
 	return nil
 }
 

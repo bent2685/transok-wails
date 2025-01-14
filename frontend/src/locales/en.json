@@ -1,5 +1,8 @@
 {
     "language": "English",
+    "common": {
+        "you": "You"
+    },
     "discover": {
         "title": "Discover",
         "noDevices": "No devices found",

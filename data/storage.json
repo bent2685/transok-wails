@@ -1,0 +1,24 @@
+{
+  "discover-list": [
+    {
+      "ip": "192.168.50.74",
+      "port": "9482",
+      "uname": "transok",
+      "platform": "darwin",
+      "address": "192.168.50.74:9482"
+    }
+  ],
+  "is-share": false,
+  "language": "en",
+  "port": "9482",
+  "share-list": [
+    {
+      "Name": "transok.exe",
+      "Path": "/Users/mac/Desktop/transok.exe",
+      "Size": 18281984,
+      "Text": "",
+      "Type": "exe"
+    }
+  ],
+  "uname": "transok"
+}

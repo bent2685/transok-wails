@@ -19,7 +19,7 @@ func LogHandler(basePath string) gin.HandlerFunc {
 		log.Printf("创建日志目录失败: %v", err)
 	}
 
-	logFile, err := os.OpenFile(filepath.Join(basePath, "log", "app.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err := os.OpenFile(filepath.Join(basePath, "logs", "gin.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatalf("无法打开日志文件: %v", err)
 	}

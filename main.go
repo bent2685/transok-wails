@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"transok/backend/app"
 	"transok/backend/services"
+	"transok/backend/utils/logger"
 	"transok/backend/utils/mdns"
 	mdns_handlers "transok/backend/utils/mdns/handlers"
 
@@ -31,7 +32,7 @@ func main() {
 	discoverSvc := services.GetDiscoverService()
 	storageSvc := services.Storage()
 	ginSvc := app.Gin()
-
+	logger.InitLogger()
 	appInfo := sysSvc.GetAppInfo()
 	windowStartState := options.Normal
 	// menu

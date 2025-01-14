@@ -1,5 +1,8 @@
 {
     "language": "繁體中文",
+    "common": {
+        "you": "你"
+    },
     "discover": {
         "title": "發現",
         "noDevices": "未發現設備",

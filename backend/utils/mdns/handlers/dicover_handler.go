@@ -38,9 +38,6 @@ func (h *DiscoverHandler) GetType() string {
 }
 
 func (h *DiscoverHandler) Handle(payload consts.DiscoverPayload) {
-	fmt.Println("DiscoverHandler: ", payload)
-
-	// 将 payload.Payload 转换为 DiscoverPayload
 	device := DiscoverDevice{
 		IP:       payload.Payload["IP"],
 		Port:     payload.Payload["Port"],
@@ -49,48 +46,22 @@ func (h *DiscoverHandler) Handle(payload consts.DiscoverPayload) {
 		Address:  fmt.Sprintf("%s:%s", payload.Payload["IP"], payload.Payload["Port"]),
 	}
 
-	// 初始化设备列表
-	keys := services.Storage().GetKeys()
-	hasList := false
-	for _, key := range keys {
-		if key == "discover-list" {
-			hasList = true
-			break
-		}
-	}
-	if !hasList {
-		services.Storage().Set("discover-list", []DiscoverDevice{})
-	}
-
-	// 获取现有设备列表
 	var deviceList []DiscoverDevice
-	discoverList, ok := services.Storage().Get("discover-list")
-	if !ok {
-		fmt.Println("获取 discover-list 失败")
-		return
+	if discoverList, ok := services.Storage().Get("discover-list"); ok {
+		jsonData, _ := json.Marshal(discoverList)
+		json.Unmarshal(jsonData, &deviceList)
 	}
 
-	// 将 interface{} 转换为 []DiscoverDevice
-	if list, ok := discoverList.([]interface{}); ok {
-		for _, item := range list {
-			if deviceMap, ok := item.(map[string]interface{}); ok {
-				dev := mapperDiscoverDevice(deviceMap)
-				deviceList = append(deviceList, dev)
-			}
-		}
-	}
-
-	// 添加新设备并去重
-	deviceExists := false
+	// 通过 Address 去重，如果存在则更新信息
+	found := false
 	for i, dev := range deviceList {
 		if dev.Address == device.Address {
-			// 更新设备信息
-			deviceList[i] = device
-			deviceExists = true
+			deviceList[i] = device // 更新设备信息
+			found = true
 			break
 		}
 	}
-	if !deviceExists {
+	if !found {
 		deviceList = append(deviceList, device)
 	}
 
@@ -137,40 +108,28 @@ func mapperDiscoverDevice(device map[string]interface{}) DiscoverDevice {
 
 /* 获取发现列表 */
 func (h *DiscoverHandler) GetDiscoverList() []DiscoverDevice {
-	discoverList, ok := services.Storage().Get("discover-list")
-	fmt.Printf("获取discover-list结果: %v, ok: %v\n", discoverList, ok)
-
-	if !ok {
-		fmt.Println("从Storage获取discover-list失败")
-		return []DiscoverDevice{}
-	}
-
-	// 直接尝试将 discoverList 转换为 []DiscoverDevice
 	var deviceList []DiscoverDevice
-
-	// 方法1：使用 json.Marshal 和 json.Unmarshal 进行类型转换
-	jsonData, err := json.Marshal(discoverList)
-	if err != nil {
-		fmt.Printf("Marshal失败: %v\n", err)
-		return []DiscoverDevice{}
+	if discoverList, ok := services.Storage().Get("discover-list"); ok {
+		jsonData, _ := json.Marshal(discoverList)
+		json.Unmarshal(jsonData, &deviceList)
 	}
 
-	err = json.Unmarshal(jsonData, &deviceList)
-	if err != nil {
-		fmt.Printf("Unmarshal失败: %v\n", err)
-		return []DiscoverDevice{}
-	}
-
-	// 检查设备可访问性
+	// 只返回能 ping 通的设备，并从存储中删除不可访问的设备
 	var accessibleDevices []DiscoverDevice
+	var needUpdate bool
+
 	for _, dev := range deviceList {
 		if ping(dev.Address) {
 			accessibleDevices = append(accessibleDevices, dev)
+		} else {
+			needUpdate = true // 标记需要更新存储
 		}
 	}
 
-	services.Storage().Set("discover-list", accessibleDevices)
+	// 如果有不可访问的设备被过滤掉，更新存储
+	if needUpdate {
+		services.Storage().Set("discover-list", accessibleDevices)
+	}
 
-	fmt.Printf("最终返回的设备列表: %+v\n", accessibleDevices)
 	return accessibleDevices
 }

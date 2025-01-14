@@ -14,6 +14,7 @@ import (
 	"transok/backend/domain/resp"
 	"transok/backend/middleware"
 	"transok/backend/services"
+	"transok/backend/utils/common"
 
 	"io/fs"
 
@@ -157,7 +158,7 @@ func (c *ginService) SetupRoutes() {
 
 	c.server.Use(middleware.Cors())
 	c.server.Use(middleware.Recover)
-	c.server.Use(middleware.LogHandler(c.storage.GetBasePath()))
+	c.server.Use(middleware.LogHandler(common.GetBasePath()))
 
 	api := c.server.Group("/api")
 	{

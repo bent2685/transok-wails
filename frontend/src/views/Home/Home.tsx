@@ -23,10 +23,10 @@ const Home: React.FC = () => {
   const event$ /* 事件总栈 */ = useEventEmitter<UploaderEvent>()
 
   const actionList /* 操作列表 */ = [
-    {
-      icon: 'i-tabler:device-desktop-search',
-      onClick: () => navigate('/discover')
-    },
+    // { 暂时移除
+    //   icon: 'i-tabler:device-desktop-search',
+    //   onClick: () => navigate('/discover')
+    // },
     {
       icon: 'i-tabler:settings',
       onClick: () => navigate('/settings')

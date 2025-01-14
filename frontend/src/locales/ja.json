@@ -1,5 +1,8 @@
 {
     "language": "日本語",
+    "common": {
+        "you": "You"
+    },
     "discover": {
         "title": "発見",
         "noDevices": "デバイスが見つかりません",

@@ -22,7 +22,7 @@
 
 # About
 
-**Transok** is a LAN file sharing tool that supports discovering sharing devices in the local network. There are no limits on file quantity and size.
+**Transok** Is a LAN file sharing widget. It does not take up excess storage space, and there is no limit to the number and size of files transferred.
 
 ---
 
@@ -36,7 +36,7 @@
 - [x] Pure text sharing
 - [x] i18n
 - [x] Custom port
-- [x] Discover sharing devices in the local network
+- [ ] Discover sharing devices in the local network
 - [ ] Right-click to add in Finder/File Explorer
 - [ ] Encrypted file sharing
 

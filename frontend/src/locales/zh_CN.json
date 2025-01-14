@@ -1,5 +1,8 @@
 {
     "language": "简体中文",
+    "common": {
+        "you": "你"
+    },
     "discover": {
         "title": "发现设备",
         "noDevices": "未发现设备",

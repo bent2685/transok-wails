@@ -5,6 +5,7 @@ import { GetDiscoverList } from '@wa/handlers/DiscoverHandler'
 import { handlers } from '@wa/models'
 import { cn } from '@/lib/utils'
 import { BrowserOpenURL } from '@runtime/runtime'
+import { GetLocalIp } from '@wa/services/SystemService'
 
 const POLLING_INTERVAL /* 轮询间隔 */ = 1000
 
@@ -13,7 +14,7 @@ const Discover: React.FC = () => {
   const [discoverList, setDiscoverList] = useState<handlers.DiscoverDevice[]>([])
   const [error, setError] = useState<string>('')
   const timerRef = useRef<number>()
-
+  const [ip, setIp] = useState<string>('')
   const deviceIcons /* 设备类型图标 */ = [
     {
       icon: 'i-tabler:brand-apple',
@@ -45,7 +46,12 @@ const Discover: React.FC = () => {
     timerRef.current = window.setTimeout(getDiscoverList, POLLING_INTERVAL)
   }
 
+  const setSelfIp = async () => {
+    const localIp = await GetLocalIp()
+    setIp(localIp)
+  }
   useEffect(() => {
+    setSelfIp()
     getDiscoverList()
 
     // 清理函数
@@ -86,7 +92,10 @@ const Discover: React.FC = () => {
                     deviceIcons.find(icon => icon.type === device.platform)?.icon || 'i-tabler:device-desktop'
                   )}></div>
                 <div className="flex flex-col line-height-1em">
-                  <span className="truncate font-bold text-(3.5 text) break-all">{device.uname}</span>
+                  <p className="truncate font-bold text-(3.5 text) break-all">
+                    {ip === device.ip ? <span className="text-pri mr-1 font-900">[{t('common.you')}]</span> : ''}
+                    <span>{device.uname}</span>
+                  </p>
                   <span className="text-(3 text2) break-all">{device.address}</span>
                 </div>
               </div>
