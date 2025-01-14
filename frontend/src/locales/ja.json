@@ -53,6 +53,15 @@
         },
         "confirm": "確認",
         "cancel": "キャンセル",
-        "placeholder": "入力してください..."
+        "verify": "検証",
+        "verifying": "検証中",
+        "placeholder": "入力してください...",
+        "captcha": {
+            "title": "認証コード",
+            "description": "{{length}}桁のコードを入力してください",
+            "incomplete": "コードを完全に入力してください",
+            "verifyFailed": "認証に失敗しました。もう一度お試しください",
+            "reset": "リセット"
+        }
     }
 }

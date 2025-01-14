@@ -51,8 +51,17 @@
             "title": "Copy Link",
             "confirm": "Copy"
         },
+        "verify": "Verify",
+        "verifying": "Verifying",
         "confirm": "Confirm",
         "cancel": "Cancel",
-        "placeholder": "Please input..."
+        "placeholder": "Please input...",
+        "captcha": {
+            "title": "Verification Code",
+            "description": "Please enter {{length}}-digit code",
+            "incomplete": "Please enter the complete code",
+            "verifyFailed": "Verification failed, please try again",
+            "reset": "Reset"
+        }
     }
 }

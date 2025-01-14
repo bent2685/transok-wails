@@ -1,15 +1,16 @@
 {
+  "captcha": "12122",
   "discover-list": [
     {
+      "address": "192.168.50.74:9482",
       "ip": "192.168.50.74",
-      "port": "9482",
-      "uname": "transok",
       "platform": "darwin",
-      "address": "192.168.50.74:9482"
+      "port": "9482",
+      "uname": "transok"
     }
   ],
-  "is-share": false,
-  "language": "en",
+  "is-share": true,
+  "language": "zh_CN",
   "port": "9482",
   "share-list": [
     {
@@ -18,6 +19,13 @@
       "Size": 18281984,
       "Text": "",
       "Type": "exe"
+    },
+    {
+      "Name": "Untitled",
+      "Path": "text-2",
+      "Size": 0,
+      "Text": "",
+      "Type": "pure-text"
     }
   ],
   "uname": "transok"

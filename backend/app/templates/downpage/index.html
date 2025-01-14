@@ -116,7 +116,11 @@
     const downloadFile = async (url) => {
         try {
             // 发起下载请求并创建 blob URL
-            const response = await fetch(`${baseUrl}/download/index?filePath=${encodeURIComponent(url)}`)
+            const response = await fetch(`${baseUrl}/download/index?filePath=${encodeURIComponent(url)}`, {
+                headers: {
+                    'Captcha-Key': localStorage.getItem('captcha')
+                }
+            })
             const blob = await response.blob()
             const downloadUrl = window.URL.createObjectURL(blob)
 
@@ -231,16 +235,28 @@
             const res = await fetch(`${baseUrl}/share/list`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    captcha: ''
-                })
+                    'Content-Type': 'application/json',
+                    'Captcha-Key': localStorage.getItem('captcha')
+                }
             })
             const data = await res.json()
             if (!data?.success) {
+                if (data.code === 40003) {
+                    localStorage.setItem('captcha', '')
+                    // 移除url中的captcha
+                    const url = new URL(window.location.href)
+                    url.searchParams.delete('captcha')
+                    window.history.replaceState({}, '', url.toString())
+                    window.location.reload()
+                    return
+                }
                 throw new Error('Failed to obtain download list')
             }
+            // 把captcha放到url
+            const url = new URL(window.location.href)
+            url.searchParams.set('captcha', localStorage.getItem('captcha'))
+            window.history.replaceState({}, '', url.toString())
+
             renderList(data.data)
         } catch (error) {
             alert(error.message)
@@ -251,9 +267,34 @@
         }
     }
 
+
+    /* 判断是否需要验证码 */
+    const getShouldCaptcha = async () => {
+        const res = await fetch(`${baseUrl}/api/should-captcha`)
+        const data = await res.json()
+        return data.data
+    }
+
+
     // 页面加载完成后初始化
     window.onload = () => {
+        localStorage.setItem('captcha', '')
         setTimeout(async () => {
+            const shouldCaptcha = await getShouldCaptcha()
+            console.log(shouldCaptcha);
+
+            if (shouldCaptcha) {
+                // 从url获取captcha
+                const url = new URL(window.location.href)
+                const searchParams = url.searchParams
+                const captchaInUrl = searchParams.get('captcha')
+
+                const captcha = captchaInUrl || window.prompt('Please enter the captcha')
+                if (captcha) {
+                    localStorage.setItem('captcha', captcha)
+                }
+            }
+
             await getDownloadList()
             // 使用 requestAnimationFrame 确保平滑过渡
             requestAnimationFrame(() => {

@@ -9,8 +9,6 @@ import (
 	"sync"
 	"time"
 	"transok/backend/apis"
-	"transok/backend/consts"
-	"transok/backend/domain/dto"
 	"transok/backend/domain/resp"
 	"transok/backend/middleware"
 	"transok/backend/services"
@@ -82,24 +80,24 @@ func (c *ginService) Start(port string) {
 
 	c.SetupRoutes()
 	/* 开始发送轮询mdns消息 */
-	services.GetDiscoverService().StopPeriodicBroadcast()
+	// services.GetDiscoverService().StopPeriodicBroadcast()
 
 	// 添加：重新订阅处理器
 	// mdns.GetDispatcher().Subscribe(mdns_handlers.NewDiscoverHandler())
 
-	uname, ok := services.Storage().Get("uname")
-	if !ok {
-		uname = "transok"
-	}
-	services.GetDiscoverService().StartPeriodicBroadcast(portNum, consts.DiscoverPayload{
-		Type: "DISCOVER",
-		Payload: map[string]string{
-			"IP":       services.System().GetLocalIp(),
-			"Port":     fmt.Sprintf("%d", portNum),
-			"Uname":    uname.(string),
-			"Platform": services.System().GetPlatform(),
-		},
-	}, 3*time.Second)
+	// uname, ok := services.Storage().Get("uname")
+	// if !ok {
+	// 	uname = "transok"
+	// }
+	// services.GetDiscoverService().StartPeriodicBroadcast(portNum, consts.DiscoverPayload{
+	// 	Type: "DISCOVER",
+	// 	Payload: map[string]string{
+	// 		"IP":       services.System().GetLocalIp(),
+	// 		"Port":     fmt.Sprintf("%d", portNum),
+	// 		"Uname":    uname.(string),
+	// 		"Platform": services.System().GetPlatform(),
+	// 	},
+	// }, 3*time.Second)
 
 	c.httpServer = &http.Server{
 		Addr:    port,
@@ -121,7 +119,7 @@ func Storage() {
 
 func (c *ginService) Stop() {
 	// 先停止 MDNS 广播
-	services.GetDiscoverService().StopPeriodicBroadcast()
+	// services.GetDiscoverService().StopPeriodicBroadcast()
 
 	if c.cancel != nil {
 		c.cancel()
@@ -165,13 +163,16 @@ func (c *ginService) SetupRoutes() {
 		api.GET("/ping", func(ctx *gin.Context) {
 			resp.Success().WithData("pong").Out()
 		})
+		con := apis.ShareApi{}
+		api.GET("/should-captcha", con.ShouldCaptcha)
 
 	}
 
 	share := c.server.Group("/share")
+	share.Use(middleware.CaptchaHandler())
 	{
 		con := apis.ShareApi{}
-		share.POST("/list", middleware.Valid(dto.ShareListDto{}), con.ShareList)
+		share.POST("/list", con.ShareList)
 	}
 
 	download := c.server.Group("/download")
@@ -185,7 +186,7 @@ func (c *ginService) SetupRoutes() {
 		}
 		download.StaticFS("/page", http.FS(templatesFS))
 
-		download.GET("/index", con.DownloadFile)
+		download.GET("/index", middleware.CaptchaHandler(), con.DownloadFile)
 	}
 
 	discover := c.server.Group("/discover")

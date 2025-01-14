@@ -9,7 +9,8 @@ import { useConfirm } from '@/provider/confirm.provider'
 import { GetShareList } from '@wa/services/fileService'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-
+import DialogCaptcha, { DialogCaptchaRef } from '@/components/Captcha/DialogCaptcha'
+import { GetCaptcha, SetCaptcha } from '@wa/services/ShareService'
 const Home: React.FC = () => {
   const { t } = useTranslation()
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
@@ -17,8 +18,10 @@ const Home: React.FC = () => {
   const [isShare, setIsShare] = useState<boolean | null>(null)
   const [port, setPort] = useState<string>('9482')
   const navigate = useNavigate()
+  const captchaRef = useRef<DialogCaptchaRef>(null)
   const { confirm } = useConfirm()
 
+  const [captcha, setCaptcha] /* 分享密钥 */ = useState<string>('')
   const uploaderRef /* 上传器 */ = useRef<UploaderRef>(null)
   const event$ /* 事件总栈 */ = useEventEmitter<UploaderEvent>()
 
@@ -27,6 +30,18 @@ const Home: React.FC = () => {
     //   icon: 'i-tabler:device-desktop-search',
     //   onClick: () => navigate('/discover')
     // },
+    {
+      icon: 'i-tabler:lock',
+      onClick: () =>
+        captchaRef.current?.show({
+          callback: async (code, done) => {
+            SetCaptcha(code)
+            setCaptcha(code)
+            done()
+          },
+          initialValue: captcha
+        })
+    },
     {
       icon: 'i-tabler:settings',
       onClick: () => navigate('/settings')
@@ -79,6 +94,14 @@ const Home: React.FC = () => {
   }
 
   /**
+   * 同步分享密钥
+   */
+  const syncCaptcha = async () => {
+    const captcha = await GetCaptcha()
+    setCaptcha(captcha)
+  }
+
+  /**
    * 事件订阅
    */
   event$.useSubscription(async payload => {
@@ -112,10 +135,10 @@ const Home: React.FC = () => {
     }, 1000)
 
     if (isShare) {
-      console.log('启动')
       Start(`:${port}`)
-    } else {
-      console.log('关闭')
+    }
+
+    if (!isShare) {
       Stop()
     }
 
@@ -142,6 +165,7 @@ const Home: React.FC = () => {
       setPort(port)
     })
     syncIsShare()
+    syncCaptcha()
   }, [])
   return (
     <>
@@ -181,6 +205,8 @@ const Home: React.FC = () => {
           </div>
         )}
       </div>
+
+      <DialogCaptcha ref={captchaRef} maxLength={5} confirmText={t('dialog.confirm')} />
     </>
   )
 }

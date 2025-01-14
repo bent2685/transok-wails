@@ -53,6 +53,15 @@
         },
         "confirm": "确认",
         "cancel": "取消",
-        "placeholder": "请输入..."
+        "verify": "验证",
+        "verifying": "验证中",
+        "placeholder": "请输入...",
+        "captcha": {
+            "title": "验证码",
+            "description": "请输入{{length}}位验证码",
+            "incomplete": "请输入完整的验证码",
+            "verifyFailed": "验证失败，请重试",
+            "reset": "重置"
+        }
     }
 }

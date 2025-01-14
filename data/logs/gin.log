@@ -1025,3 +1025,38 @@
 [API-LOG]2025/01/14 15:49:11  <IP: ==> 192.168.50.74> [GET] URL: /discover/ping => [code:200 | BusinessCode:20000 => "success"] lasted:4.974µs
 [API-LOG]2025/01/14 15:49:12  <IP: ==> 192.168.50.74> [GET] URL: /discover/ping => [code:200 | BusinessCode:20000 => "success"] lasted:12.671µs
 [API-LOG]2025/01/14 15:49:13  <IP: ==> 192.168.50.74> [GET] URL: /discover/ping => [code:200 | BusinessCode:20000 => "success"] lasted:8.677µs
+[API-LOG]2025/01/14 16:45:16  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:5.51µs
+[API-LOG]2025/01/14 16:45:25  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:6.429µs
+[API-LOG]2025/01/14 16:45:27  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:9.326µs
+[API-LOG]2025/01/14 16:50:11  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:4.441µs
+[API-LOG]2025/01/14 16:50:22  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:7.973µs
+[API-LOG]2025/01/14 16:50:28  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:4.914µs
+[API-LOG]2025/01/14 16:50:37  <IP: ==> 127.0.0.1> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:5.295µs
+[API-LOG]2025/01/14 16:50:57  <IP: ==> 192.168.50.74> [GET] URL: /download/page/ => [code:200 | BusinessCode:40003 => "验证码密钥不能为空"] lasted:6.024µs
+[API-LOG]2025/01/14 16:50:58  <IP: ==> 192.168.50.74> [GET] URL: /download/page/ => [code:200 | BusinessCode:40003 => "验证码密钥不能为空"] lasted:9.174µs
+[API-LOG]2025/01/14 16:53:04  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is required"] lasted:6.116µs
+[API-LOG]2025/01/14 16:53:11  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is required"] lasted:13.72µs
+[API-LOG]2025/01/14 16:53:34  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is required"] lasted:7.584µs
+[API-LOG]2025/01/14 16:54:36  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is required"] lasted:6.234µs
+[API-LOG]2025/01/14 16:56:09  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:7.804µs
+[API-LOG]2025/01/14 17:02:08  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:29.294µs
+[API-LOG]2025/01/14 17:02:10  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is incorrect"] lasted:6.483µs
+[API-LOG]2025/01/14 17:02:12  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:11.765µs
+[API-LOG]2025/01/14 17:02:18  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is incorrect"] lasted:8.428µs
+[API-LOG]2025/01/14 17:02:19  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:15.288µs
+[API-LOG]2025/01/14 17:02:36  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:241.45µs
+[API-LOG]2025/01/14 17:02:55  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:8.917µs
+[API-LOG]2025/01/14 17:02:58  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is incorrect"] lasted:7.074µs
+[API-LOG]2025/01/14 17:02:59  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:15.658µs
+[API-LOG]2025/01/14 17:03:04  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:114.158µs
+[API-LOG]2025/01/14 17:03:07  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:12.255µs
+[API-LOG]2025/01/14 17:05:53  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:14.609µs
+[API-LOG]2025/01/14 17:05:55  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:187.78µs
+[API-LOG]2025/01/14 17:05:59  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:15.961µs
+[API-LOG]2025/01/14 17:05:59  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:120.182µs
+[API-LOG]2025/01/14 17:06:05  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:7.717µs
+[API-LOG]2025/01/14 17:06:08  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:40003 => "Captcha is incorrect"] lasted:6.676µs
+[API-LOG]2025/01/14 17:06:09  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:15.57µs
+[API-LOG]2025/01/14 17:06:11  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:119.809µs
+[API-LOG]2025/01/14 17:06:15  <IP: ==> 192.168.50.74> [GET] URL: /api/should-captcha => [code:200 | BusinessCode:20000 => "success"] lasted:15.821µs
+[API-LOG]2025/01/14 17:06:15  <IP: ==> 192.168.50.74> [POST] URL: /share/list => [code:200 | BusinessCode:20000 => "success"] lasted:81.062µs

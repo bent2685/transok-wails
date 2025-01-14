@@ -30,6 +30,7 @@ func main() {
 	sysSvc := services.System()
 	fileSvc := services.File()
 	discoverSvc := services.GetDiscoverService()
+	shareSvc := services.Share()
 	storageSvc := services.Storage()
 	ginSvc := app.Gin()
 	logger.InitLogger()
@@ -60,7 +61,7 @@ func main() {
 			DisableWebViewDrop: true,
 		},
 		Debug: options.Debug{
-			OpenInspectorOnStartup: false,
+			OpenInspectorOnStartup: true,
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -72,6 +73,7 @@ func main() {
 			fileSvc.Start(ctx)
 			storageSvc.Init(ctx)
 			discoverSvc.Start()
+			shareSvc.Start(ctx)
 			/* 订阅mdns消息 */
 			mdns.GetDispatcher().Subscribe(mdns_handlers.GetDiscoverHandler())
 			mdns.GetDispatcher().Subscribe(mdns_handlers.NewPingHandler())
@@ -81,6 +83,7 @@ func main() {
 			fileSvc,
 			storageSvc,
 			ginSvc,
+			shareSvc,
 			discoverSvc,
 			mdns_handlers.GetDiscoverHandler(),
 		},
