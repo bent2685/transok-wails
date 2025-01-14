@@ -1,4 +1,3 @@
-
 <div align="center">
   <img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/logo.png" alt="logo" width="100" height="100" />
 </div>
@@ -22,7 +21,7 @@
 
 # About
 
-**Transok** Is a LAN file sharing widget. It does not take up excess storage space, and there is no limit to the number and size of files transferred.
+**Transok** is a LAN file sharing widget. It does not take up excess storage space, and there is no limit to the number and size of files transferred. You can also set a password when sharing files to prevent illegal file downloading.
 
 ---
 
@@ -36,9 +35,9 @@
 - [x] Pure text sharing
 - [x] i18n
 - [x] Custom port
-- [ ] Discover sharing devices in the local network
+- [x] Encrypted file sharing
+- [ ] Discover sharing devices in the local network[redo]
 - [ ] Right-click to add in Finder/File Explorer
-- [ ] Encrypted file sharing
 
 ---
 

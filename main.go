@@ -61,7 +61,7 @@ func main() {
 			DisableWebViewDrop: true,
 		},
 		Debug: options.Debug{
-			OpenInspectorOnStartup: true,
+			OpenInspectorOnStartup: false,
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
