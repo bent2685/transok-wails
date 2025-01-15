@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 	"transok/backend/consts"
@@ -62,77 +61,58 @@ func (c *SystemService) GetEnv() string {
 
 // 获取本机局域网ip
 func (c *SystemService) GetLocalIp() string {
+	// 获取所有网络接口
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		return ""
+		return "127.0.0.1"
 	}
-
-	var wlanIP string
-	var ethernetIP string
 
 	// 遍历所有网络接口
 	for _, iface := range interfaces {
-		// 检查接口是否启用且不是回环接口
-		if iface.Flags&net.FlagUp != 0 && iface.Flags&net.FlagLoopback == 0 {
-			name := iface.Name
-			// 跳过虚拟接口
-			if strings.Contains(strings.ToLower(name), "virtual") ||
-				strings.Contains(strings.ToLower(name), "vethernet") ||
-				strings.Contains(strings.ToLower(name), "vmware") ||
-				strings.Contains(strings.ToLower(name), "vbox") {
+		// 跳过禁用的接口和回环接口
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+
+		// 获取接口的地址
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+
+		// 遍历地址
+		for _, addr := range addrs {
+			// 尝试转换为 IP 网络接口
+			ipNet, ok := addr.(*net.IPNet)
+			if !ok {
 				continue
 			}
 
-			isWlan := false
-			isEthernet := false
-
-			switch runtime.GOOS {
-			case "windows":
-				// Windows 下通过描述来判断接口类型
-				description := name
-				isWlan = strings.Contains(strings.ToLower(description), "wireless") ||
-					strings.Contains(strings.ToLower(description), "wi-fi") ||
-					strings.Contains(strings.ToLower(description), "wlan")
-				isEthernet = strings.Contains(strings.ToLower(description), "ethernet") ||
-					strings.Contains(strings.ToLower(description), "gigabit")
-			case "darwin":
-				// macOS 下 en0 通常是内置网卡（Wi-Fi），en1/en2 等可能是以太网
-				isWlan = name == "en0"
-				isEthernet = strings.HasPrefix(name, "en") && name != "en0"
-			case "linux":
-				isWlan = strings.HasPrefix(name, "wlan") || strings.HasPrefix(name, "wifi")
-				isEthernet = strings.HasPrefix(name, "eth") || strings.HasPrefix(name, "enp") || strings.HasPrefix(name, "eno")
-			}
-
-			addrs, err := iface.Addrs()
-			if err != nil {
+			// 获取 IPv4 地址
+			ip4 := ipNet.IP.To4()
+			if ip4 == nil {
 				continue
 			}
 
-			for _, addr := range addrs {
-				if ipnet, ok := addr.(*net.IPNet); ok {
-					if ip4 := ipnet.IP.To4(); ip4 != nil && isPrivateIP(ip4) {
-						if isWlan {
-							wlanIP = ip4.String()
-						} else if isEthernet {
-							ethernetIP = ip4.String()
-						}
-					}
-				}
+			// 排除特殊地址
+			if ip4[0] == 169 && ip4[1] == 254 { // 排除链路本地地址
+				continue
+			}
+
+			// 返回第一个有效的非内网 IPv4 地址
+			if !ip4.IsLoopback() && !ip4.IsPrivate() {
+				return ip4.String()
+			}
+
+			// 如果没有公网地址，也接受私有地址
+			if !ip4.IsLoopback() {
+				return ip4.String()
 			}
 		}
 	}
 
-	if wlanIP != "" {
-		return wlanIP
-	}
-	return ethernetIP
-}
-
-func isPrivateIP(ip net.IP) bool {
-	return ip[0] == 192 && ip[1] == 168 || // 192.168.0.0/16
-		ip[0] == 10 || // 10.0.0.0/8
-		(ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31) // 172.16.0.0/12
+	// 如果没有找到合适的地址，返回本地回环地址
+	return "127.0.0.1"
 }
 
 func (c *SystemService) GetAppInfo() map[string]string {
