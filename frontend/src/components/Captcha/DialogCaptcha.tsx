@@ -86,9 +86,9 @@ const DialogCaptcha = forwardRef<DialogCaptchaRef, IDialogCaptchaProps>(
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="bg-bg shadow-2xl w-80 rd-3">
           <DialogHeader className="">
-            <div className="flex justify-start">
+            {/* <div className="flex justify-start">
               <div className="text-(3 white) inline-block bg-pri rd-full font-900 px-2 py-1 line-height-1em">BETA</div>
-            </div>
+            </div> */}
             <DialogTitle>{title || t('dialog.captcha.title')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4">
