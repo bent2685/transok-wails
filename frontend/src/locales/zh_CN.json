@@ -1,12 +1,17 @@
 {
     "language": "简体中文",
     "common": {
-        "you": "你"
+        "you": "你",
+        "seeAll": "查看全部"
     },
     "discover": {
         "title": "发现设备",
         "noDevices": "未发现设备",
         "fetchError": "获取设备列表失败"
+    },
+    "allurl": {
+        "title": "所有分享链接",
+        "empty": "未发现分享链接"
     },
     "settings": {
         "title": {
@@ -48,8 +53,10 @@
     },
     "dialog": {
         "copyLink": {
+            "desc": "点击地址复制",
             "title": "复制链接",
-            "confirm": "复制"
+            "confirm": "复制",
+            "success": "复制成功"
         },
         "confirm": "确认",
         "cancel": "取消",

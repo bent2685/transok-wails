@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next'
 
 interface ConfirmContextType {
   confirm: (options: ConfirmOptions) => Promise<boolean | string>
+  slotConfirm: (options: SlotConfirmOptions) => Promise<boolean | PromiseLike<boolean>>
+  commonFooter: (props: CommonFooterProps) => ReactNode
 }
 
 interface ConfirmOptions {
@@ -23,6 +25,27 @@ interface ConfirmOptions {
   cancelText?: string
   isPrompt?: boolean
   defaultValue?: string
+}
+
+interface SlotConfirmOptions {
+  title: string
+  description?: string
+  children: ReactNode | ((props: { onConfirm: () => void; onCancel: () => void }) => ReactNode)
+  renderFooter?: (props: {
+    onConfirm: () => void
+    onCancel: () => void
+    confirmText?: string
+    cancelText?: string
+  }) => ReactNode
+  confirmText?: string
+  cancelText?: string
+}
+
+interface CommonFooterProps {
+  onConfirm: () => void
+  onCancel: () => void
+  confirmText?: string
+  cancelText?: string
 }
 
 const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined)
@@ -42,6 +65,7 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
     resolve: (value: boolean | string) => void
     reject: () => void
   } | null>(null)
+  const [slotState, setSlotState] = useState<SlotConfirmOptions | null>(null)
   const { t } = useTranslation()
 
   const confirm = useCallback((options: ConfirmOptions) => {
@@ -66,8 +90,45 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }
 
+  const slotConfirm = useCallback((options: SlotConfirmOptions) => {
+    return new Promise<boolean | PromiseLike<boolean>>((resolve, reject) => {
+      setSlotState(options)
+      setResolveReject({ resolve: resolve as never, reject })
+    })
+  }, [])
+
+  const execSubmit = () => {
+    if (resolveReject) {
+      resolveReject.resolve(true)
+      setSlotState(null)
+    }
+  }
+
+  const execClose = () => {
+    if (resolveReject) {
+      resolveReject.resolve(false)
+      setSlotState(null)
+    }
+  }
+
+  const commonFooter = useCallback(
+    (props: CommonFooterProps) => {
+      return (
+        <div className="flex justify-center">
+          <Button variant="outline" size="sm" onClick={props.onCancel} className="mr-2">
+            {props.cancelText || t('dialog.cancel')}
+          </Button>
+          <Button size="sm" onClick={props.onConfirm}>
+            {props.confirmText || t('dialog.confirm')}
+          </Button>
+        </div>
+      )
+    },
+    [t]
+  )
+
   return (
-    <ConfirmContext.Provider value={{ confirm }}>
+    <ConfirmContext.Provider value={{ confirm, slotConfirm, commonFooter }}>
       {children}
       <Dialog open={!!confirmState} onOpenChange={() => setConfirmState(null)}>
         {confirmState && (
@@ -95,6 +156,31 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
                   {confirmState.confirmText || t('dialog.confirm')}
                 </Button>
               </div>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
+
+      <Dialog open={!!slotState} onOpenChange={() => setSlotState(null)}>
+        {slotState && (
+          <DialogContent className="bg-bg shadow-2xl w-80 rd-3">
+            <DialogHeader>
+              <DialogTitle>{slotState.title}</DialogTitle>
+              {slotState.description && <DialogDescription>{slotState.description}</DialogDescription>}
+            </DialogHeader>
+            <div className="py-2">
+              {typeof slotState.children === 'function'
+                ? slotState.children({ onConfirm: execSubmit, onCancel: execClose })
+                : slotState.children}
+            </div>
+            <DialogFooter>
+              {slotState.renderFooter &&
+                slotState.renderFooter({
+                  onConfirm: execSubmit,
+                  onCancel: execClose,
+                  confirmText: slotState.confirmText,
+                  cancelText: slotState.cancelText
+                })}
             </DialogFooter>
           </DialogContent>
         )}

@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import DialogCaptcha, { DialogCaptchaRef } from '@/components/Captcha/DialogCaptcha'
 import { GetCaptcha, SetCaptcha } from '@wa/services/ShareService'
+import { copyText, getLocalIpsDepth } from '@/utils/common.util'
+import { toast } from 'sonner'
 const Home: React.FC = () => {
   const { t } = useTranslation()
   const [appInfo, setAppInfo] = useState<Record<string, string>>({})
@@ -19,7 +21,7 @@ const Home: React.FC = () => {
   const [port, setPort] = useState<string>('9482')
   const navigate = useNavigate()
   const captchaRef = useRef<DialogCaptchaRef>(null)
-  const { confirm } = useConfirm()
+  const { confirm, slotConfirm, commonFooter } = useConfirm()
 
   const [captcha, setCaptcha] /* 分享密钥 */ = useState<string>('')
   const uploaderRef /* 上传器 */ = useRef<UploaderRef>(null)
@@ -107,15 +109,40 @@ const Home: React.FC = () => {
   event$.useSubscription(async payload => {
     const { type, data } = payload
     if (type === 'copy-link') {
-      const ip = await GetLocalIp()
-      const url = `http://${ip}:${port}/download/page`
-      const ok = await confirm({
+      const ips = await getLocalIpsDepth(2)
+      const urlList = ips.map(ip => `http://${ip}:${port}/download/page`)
+
+      const ok = await slotConfirm({
         title: t('dialog.copyLink.title'),
-        description: url,
-        confirmText: t('dialog.copyLink.confirm')
+        description: t('dialog.copyLink.desc'),
+        children: ({ onConfirm, onCancel }) => (
+          <div className="text-4">
+            {urlList.map((url, index) => (
+              <div
+                key={index}
+                className="text-3 my-2 flex items-center cursor-pointer group justify-center"
+                onClick={async () => {
+                  await copyText(url)
+                  onConfirm()
+                }}>
+                <div className="inline text-text2 group-hover:text-text duration-300">{url}</div>
+                <div className="i-tabler:copy inline-block group-hover:text-pri ml-1 duration-300"></div>
+              </div>
+            ))}
+          </div>
+        ),
+        renderFooter: ({ onCancel }) => (
+          <div
+            className="flex-center text-3.5 mt-3 cursor-pointer hover:(text-pri) duration-300"
+            onClick={() => {
+              onCancel()
+              navigate('/allurl')
+            }}>
+            <span>{t('common.seeAll')}</span>
+            <div className="i-tabler:chevron-right"></div>
+          </div>
+        )
       })
-      if (!ok) return
-      window.navigator.clipboard.writeText(url)
     }
   })
 
