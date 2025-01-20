@@ -1,12 +1,17 @@
 {
     "language": "English",
     "common": {
-        "you": "You"
+        "you": "You",
+        "seeAll": "View all"
     },
     "discover": {
         "title": "Discover",
         "noDevices": "No devices found",
         "fetchError": "Failed to fetch device list"
+    },
+    "allurl": {
+        "title": "All Share Links",
+        "empty": "No share links found"
     },
     "settings": {
         "title": {
@@ -49,7 +54,9 @@
     "dialog": {
         "copyLink": {
             "title": "Copy Link",
-            "confirm": "Copy"
+            "confirm": "Copy",
+            "desc": "Click address to copy",
+            "success": "Copy success"
         },
         "verify": "Verify",
         "verifying": "Verifying",

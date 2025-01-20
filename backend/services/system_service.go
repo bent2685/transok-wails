@@ -59,8 +59,14 @@ func (c *SystemService) GetEnv() string {
 	return c.env
 }
 
-// 获取本机局域网ip
-func (c *SystemService) GetLocalIp() string {
+// 获取本机局域网ip，可以排除指定的IP地址
+func (c *SystemService) GetLocalIp(excludeIps []string) string {
+	// 将 excludeIps 转换为 map，便于快速查找
+	excludeMap := make(map[string]bool)
+	for _, ip := range excludeIps {
+		excludeMap[ip] = true
+	}
+
 	// 获取所有网络接口
 	interfaces, err := net.Interfaces()
 	if err != nil {
@@ -99,14 +105,20 @@ func (c *SystemService) GetLocalIp() string {
 				continue
 			}
 
+			// 在返回IP之前检查是否在排除列表中
+			ipStr := ip4.String()
+			if excludeMap[ipStr] {
+				continue
+			}
+
 			// 返回第一个有效的非内网 IPv4 地址
 			if !ip4.IsLoopback() && !ip4.IsPrivate() {
-				return ip4.String()
+				return ipStr
 			}
 
 			// 如果没有公网地址，也接受私有地址
 			if !ip4.IsLoopback() {
-				return ip4.String()
+				return ipStr
 			}
 		}
 	}
