@@ -47,7 +47,7 @@ const Discover: React.FC = () => {
   }
 
   const setSelfIp = async () => {
-    const localIp = await GetLocalIp()
+    const localIp = await GetLocalIp([])
     setIp(localIp)
   }
   useEffect(() => {

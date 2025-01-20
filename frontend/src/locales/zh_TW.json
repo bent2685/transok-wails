@@ -1,12 +1,17 @@
 {
     "language": "繁體中文",
     "common": {
-        "you": "你"
+        "you": "你",
+        "seeAll": "查看全部"
     },
     "discover": {
         "title": "發現",
         "noDevices": "未發現設備",
         "fetchError": "獲取設備列表失敗"
+    },
+    "allurl": {
+        "title": "所有分享連結",
+        "empty": "未發現分享連結"
     },
     "settings": {
         "title": {
@@ -49,7 +54,9 @@
     "dialog": {
         "copyLink": {
             "title": "複製鏈接",
-            "confirm": "複製"
+            "confirm": "複製",
+            "desc": "點擊地址複製",
+            "success": "複製成功"
         },
         "confirm": "確認",
         "cancel": "取消",

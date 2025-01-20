@@ -1,13 +1,18 @@
 {
     "language": "日本語",
     "common": {
-        "you": "You"
+        "you": "You",
+        "seeAll": "すべて見る"
     },
     "discover": {
         "title": "発見",
         "noDevices": "デバイスが見つかりません",
         "fetchError": "デバイスリストの取得に失敗しました"
     },
+    "allurl": {
+        "title": "すべての共有リンク",
+        "empty": "共有リンクが見つかりません"
+    },  
     "settings": {
         "title": {
             "settings": "設定",
@@ -49,7 +54,9 @@
     "dialog": {
         "copyLink": {
             "title": "リンクをコピー",
-            "confirm": "コピー"
+            "confirm": "コピー",
+            "desc": "アドレスをクリックしてコピー",
+            "success": "コピー成功"
         },
         "confirm": "確認",
         "cancel": "キャンセル",
