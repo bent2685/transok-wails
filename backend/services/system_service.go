@@ -59,7 +59,7 @@ func (c *SystemService) GetEnv() string {
 	return c.env
 }
 
-// 获取本机局域网ip，可以排除指定的IP地址
+// 获取本机局域网ip，可以排除指定的IP地址，排除广播和网络地址
 func (c *SystemService) GetLocalIp(excludeIps []string) string {
 	// 将 excludeIps 转换为 map，便于快速查找
 	excludeMap := make(map[string]bool)
