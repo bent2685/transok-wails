@@ -59,7 +59,7 @@ func (c *SystemService) GetEnv() string {
 	return c.env
 }
 
-// 获取本机局域网ip，可以排除指定的IP地址
+// 获取本机局域网ip，可以排除指定的IP地址，排除广播和网络地址
 func (c *SystemService) GetLocalIp(excludeIps []string) string {
 	// 将 excludeIps 转换为 map，便于快速查找
 	excludeMap := make(map[string]bool)
@@ -73,6 +73,9 @@ func (c *SystemService) GetLocalIp(excludeIps []string) string {
 		return "127.0.0.1"
 	}
 
+	// 用于存储找到的IP地址
+	var classA, classB, classC, publicIP string
+
 	// 遍历所有网络接口
 	for _, iface := range interfaces {
 		// 跳过禁用的接口和回环接口
@@ -80,21 +83,17 @@ func (c *SystemService) GetLocalIp(excludeIps []string) string {
 			continue
 		}
 
-		// 获取接口的地址
 		addrs, err := iface.Addrs()
 		if err != nil {
 			continue
 		}
 
-		// 遍历地址
 		for _, addr := range addrs {
-			// 尝试转换为 IP 网络接口
 			ipNet, ok := addr.(*net.IPNet)
 			if !ok {
 				continue
 			}
 
-			// 获取 IPv4 地址
 			ip4 := ipNet.IP.To4()
 			if ip4 == nil {
 				continue
@@ -105,25 +104,45 @@ func (c *SystemService) GetLocalIp(excludeIps []string) string {
 				continue
 			}
 
-			// 在返回IP之前检查是否在排除列表中
 			ipStr := ip4.String()
 			if excludeMap[ipStr] {
 				continue
 			}
 
-			// 返回第一个有效的非内网 IPv4 地址
-			if !ip4.IsLoopback() && !ip4.IsPrivate() {
-				return ipStr
+			// 排除网络地址和广播地址
+			if ip4[3] == 0 || ip4[3] == 255 {
+				continue
 			}
 
-			// 如果没有公网地址，也接受私有地址
+			// 根据IP地址范围分类存储
 			if !ip4.IsLoopback() {
-				return ipStr
+				if ip4[0] == 192 && ip4[1] == 168 {
+					classC = ipStr
+				} else if ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31 {
+					classB = ipStr
+				} else if ip4[0] == 10 {
+					classA = ipStr
+				} else if !ip4.IsPrivate() {
+					publicIP = ipStr
+				}
 			}
 		}
 	}
 
-	// 如果没有找到合适的地址，返回本地回环地址
+	// 按优先级返回IP地址
+	if classC != "" {
+		return classC
+	}
+	if classB != "" {
+		return classB
+	}
+	if classA != "" {
+		return classA
+	}
+	if publicIP != "" {
+		return publicIP
+	}
+
 	return "127.0.0.1"
 }
 
