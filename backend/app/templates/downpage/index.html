@@ -74,11 +74,14 @@
 <script src="file-util.js"></script>
 
 <!-- 引入 UnoCSS 运行时 -->
-<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script> -->
+<script src="./js/unocss.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/attributify.global.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/attributify.global.js"></script> -->
+<script src="./js/unocss-attr.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/preset-icons.global.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/preset-icons.global.js"></script> -->
+<script src="./js/unocss-icon.js"></script>
 
 <!-- UnoCSS 配置 -->
 <script>
@@ -94,7 +97,8 @@
     }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/core.global.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/core.global.js"></script> -->
+<script src="./js/unocss-core.js"></script>
 
 <script>
 
@@ -192,6 +196,7 @@
             const { Type, Name, Path, Size, Text } = item
             const fileTypeItem = FILE_TYPE_LIST.find(type => type.type === Type)
             const fileTypeIcon = fileTypeItem?.icon
+            const fileTypePath = fileTypeItem?.path || './icons/type/other.svg'
             const listItem = document.createElement('div')
             // 构建列表项HTML
             listItem.innerHTML = `
@@ -199,7 +204,10 @@
                     ${['bg-gray-100'].map(cls => `hover:${cls}`).join(' ')}
                 ">
                     <div class="flex items-center flex-1">
-                        <div class="${fileTypeIcon || 'i-tabler:file'} text-5"></div>
+                        <div class="w-6 h-6">
+                          <img src="${fileTypePath}" class="h-full w-full"/>    
+                        </div>
+
                         <div class="flex flex-1 flex-col line-height-1em ml-2">
                             <span class="text-3.5 font-bold break-all">${Name || 'Untitled'}</span>    
                             <span class="text-gray-400 text-3 break-all">${Type == 'pure-text' ? (Text || 'No content') : calcFileSize(Size)}</span>
@@ -212,7 +220,9 @@
                             ${['bg-pri/30'].map(cls => `hover:${cls}`).join(' ')}
                             ${['scale-95'].map(cls => `active:${cls}`).join(' ')}
                         ">
-                          <div class="${Type === 'pure-text' ? 'i-tabler:copy' : 'i-tabler:download'} text-3"></div>
+                            <div class="w-4 h-4">
+                                <img src="${Type === 'pure-text' ? './icons/ico-copy.svg' : './icons/ico-download.svg'}" class="h-full w-full"/>    
+                            </div>
                         </div>
                     </div>
                 </div>
