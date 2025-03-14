@@ -11,6 +11,7 @@
 ![go][go-badge]
 ![ts][ts-badge]
 ![license][license-badge]
+![download](https://img.shields.io/github/downloads/bent2685/transok-wails/total)
 
 </div>
 
