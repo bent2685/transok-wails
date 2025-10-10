@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -16,14 +17,34 @@ import (
 
 type DownloadApi struct{}
 
+// DownloadFile handles large file downloads efficiently with range support.
 func (d *DownloadApi) DownloadFile(c *gin.Context) {
-	filePath := c.Query("filePath")
-
-	if filePath == "" {
+	filePathRaw := c.Query("filePath")
+	if filePathRaw == "" {
 		resp.DataFormatErr().WithMsg("filePath is required").Out()
 		return
 	}
 
+	filePath, err := url.QueryUnescape(filePathRaw)
+	if err != nil {
+		resp.DataFormatErr().WithMsg("Invalid filePath").Out()
+		return
+	}
+
+	captchaKey := c.Query("captcha-key")
+	if captchaKey == "" {
+		captchaKey = c.GetHeader("Captcha-Key")
+	}
+	if captchaKey == "" {
+		resp.DataFormatErr().WithMsg("Captcha key required").Out()
+		return
+	}
+	captchaInStore := services.Share().GetCaptcha()
+	if captchaKey != captchaInStore {
+		resp.Forbidden().WithMsg("Captcha is incorrect").Out()
+		return
+	}
+	// 验证 share-list 是否存在
 	storage := services.Storage()
 	if storage == nil {
 		resp.ServerErr().WithMsg("storage is nil").Out()
@@ -38,9 +59,10 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 
 	var result []vo.ShareItem
 	if jsonData, err := json.Marshal(shareList); err == nil {
-		json.Unmarshal(jsonData, &result)
+		_ = json.Unmarshal(jsonData, &result)
 	}
 
+	// 验证文件是否在共享列表中
 	exist := false
 	for _, item := range result {
 		if item.Path == filePath {
@@ -48,12 +70,12 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 			break
 		}
 	}
-
 	if !exist {
 		resp.NotExistErr().WithMsg("File not in share list").Out()
 		return
 	}
 
+	// 打开文件
 	file, err := os.Open(filePath)
 	if err != nil {
 		resp.ServerErr().WithMsg("Failed to open file").Out()
@@ -66,78 +88,98 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 		resp.ServerErr().WithMsg("Failed to get file info").Out()
 		return
 	}
-
-	fileName := filepath.Base(filePath)
 	fileSize := fileInfo.Size()
+	fileName := filepath.Base(filePath)
 
-	// 设置支持断点续传的响应头
-	c.Header("Accept-Ranges", "bytes")
-	c.Header("Content-Disposition", "attachment; filename="+fileName)
+	// 中文文件名 & 下载兼容
+	encodedName := url.PathEscape(fileName)
+	contentDisposition := fmt.Sprintf("attachment; filename*=UTF-8''%s", encodedName)
+
+	c.Header("Content-Disposition", contentDisposition)
 	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Accept-Ranges", "bytes")
+	c.Header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
 
-	// 获取Range请求头
+	// 检查是否为 Range 请求（断点续传）
 	rangeHeader := c.GetHeader("Range")
 	if rangeHeader == "" {
-		// 如果没有Range头，返回整个文件
 		c.Header("Content-Length", strconv.FormatInt(fileSize, 10))
-		c.File(filePath)
+		c.Status(200)
+		httpServeFile(c, file)
 		return
 	}
 
-	// 解析Range头
+	// 解析 Range
 	var start, end int64
 	if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-%d", &start, &end); err != nil {
 		if _, err := fmt.Sscanf(rangeHeader, "bytes=%d-", &start); err != nil {
-			resp.DataFormatErr().WithMsg("Invalid range header").Out()
+			resp.DataFormatErr().WithMsg("Invalid Range header").Out()
 			return
 		}
 		end = fileSize - 1
 	}
-
-	// 验证范围的有效性
-	if start >= fileSize {
-		resp.DataFormatErr().WithMsg("Range start exceeds file size").Out()
-		return
-	}
 	if end >= fileSize {
 		end = fileSize - 1
 	}
+	if start > end || start >= fileSize {
+		resp.DataFormatErr().WithMsg("Invalid byte range").Out()
+		return
+	}
 
-	// 设置分块下载的响应头
 	c.Header("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, fileSize))
 	c.Header("Content-Length", strconv.FormatInt(end-start+1, 10))
-	c.Status(206) // Partial Content
+	c.Status(206)
 
-	// 移动文件指针到指定位置
+	// 移动指针
 	_, err = file.Seek(start, io.SeekStart)
 	if err != nil {
 		resp.ServerErr().WithMsg("Failed to seek file").Out()
 		return
 	}
 
-	// 使用缓冲区分块传输
-	const bufferSize = 4 * 1024 // 4KB chunks
+	// 分块传输
+	const bufferSize = 4 * 1024 // 4KB
 	buffer := make([]byte, bufferSize)
+	reader := io.LimitReader(file, end-start+1)
 
-	// 创建限制读取器，确保只读取请求的范围
-	limitReader := io.LimitReader(file, end-start+1)
-
-	// 分块传输文件
 	for {
-		n, err := limitReader.Read(buffer)
+		n, err := reader.Read(buffer)
+		if n > 0 {
+			if _, wErr := c.Writer.Write(buffer[:n]); wErr != nil {
+				return // 连接断开
+			}
+			c.Writer.Flush()
+		}
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			resp.ServerErr().WithMsg("Failed to read file").Out()
+			resp.ServerErr().WithMsg("Read error").Out()
 			return
 		}
+	}
+}
+
+// 封装文件流输出
+func httpServeFile(c *gin.Context, file *os.File) {
+	const bufferSize = 64 * 1024 // 64KB
+	buf := make([]byte, bufferSize)
+	for {
+		n, err := file.Read(buf)
 		if n > 0 {
-			if _, err := c.Writer.Write(buffer[:n]); err != nil {
-				resp.ServerErr().WithMsg("Failed to write response").Out()
+			if _, wErr := c.Writer.Write(buf[:n]); wErr != nil {
 				return
 			}
 			c.Writer.Flush()
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			resp.ServerErr().WithMsg("File read error").Out()
+			return
 		}
 	}
 }

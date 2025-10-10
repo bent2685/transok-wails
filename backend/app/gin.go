@@ -175,18 +175,21 @@ func (c *ginService) SetupRoutes() {
 		share.POST("/list", con.ShareList)
 	}
 
-	download := c.server.Group("/download")
+	// ✅ 静态页面
+	pageGroup := c.server.Group("/download/page")
 	{
-		con := apis.DownloadApi{}
-
-		// 修改静态文件服务配置，指向 downpage 子目录
 		templatesFS, err := fs.Sub(downpageFS, "templates/downpage")
 		if err != nil {
 			log.Printf("Failed to sub downpage directory: %v\n", err)
 		}
-		download.StaticFS("/page", http.FS(templatesFS))
+		pageGroup.StaticFS("/", http.FS(templatesFS))
+	}
 
-		download.GET("/index", middleware.CaptchaHandler(), con.DownloadFile)
+	// ✅ 文件下载（独立路由）
+	downloadApi := apis.DownloadApi{}
+	downloadGroup := c.server.Group("/download")
+	{
+		downloadGroup.GET("/index", downloadApi.DownloadFile)
 	}
 
 	discover := c.server.Group("/discover")
