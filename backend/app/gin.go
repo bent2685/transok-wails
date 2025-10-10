@@ -186,7 +186,7 @@ func (c *ginService) SetupRoutes() {
 		}
 		download.StaticFS("/page", http.FS(templatesFS))
 
-		download.GET("/index", middleware.CaptchaHandler(), con.DownloadFile)
+		download.GET("/index", con.DownloadFile)
 	}
 
 	discover := c.server.Group("/discover")

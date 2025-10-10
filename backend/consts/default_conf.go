@@ -18,7 +18,7 @@ const (
 var APP_INFO = map[string]string{
 	"name":    "Transok",
 	"env":     "prod",
-	"version": "0.4.6",
+	"version": "0.4.7",
 	"desc":    "Transok is an efficient LAN file sharing tool",
 	"author":  "bent2685",
 	"email":   "bent2685@outlook.com",
