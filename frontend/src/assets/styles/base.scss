@@ -1,34 +1,34 @@
+// ClickHouse 风格：电光黄是品牌电压，单色 + 黄的组合在明暗两套都保留。
 html.dark {
-  // --primary-color: 19.32 100% 53.73%;
-  --primary-color: 0 52% 50.98%;
-  --text: 0 0% 100%;
-  --text-2: 0 0% 66.27%;
-  --bg: 0 0% 14.9%;
-  --bg-2: 220 20.55% 14.31%;
-  --nav-menu: 300 4% 19%;
-  --border-color: 0 0% 40%;
-  --bg-2-fuzzy: 225 8% 16% 0.53;
-  --warning: 0 75% 35%;
-  --bg-0: 280 7% 7%;
-  --app-border-color: 0 0% 32%;
-  --list-active: 290 7% 18%;
+  --primary-color: 62 100% 71%;     // #faff69 electric yellow
+  --text: 0 0% 100%;                // #ffffff on-dark
+  --text-2: 0 0% 80%;               // #cccccc body
+  --bg: 0 0% 10%;                   // #1a1a1a surface-card
+  --bg-2: 0 0% 14%;                 // #242424 surface-elevated
+  --nav-menu: 0 0% 7%;              // #121212 surface-soft
+  --border-color: 0 0% 16%;         // #2a2a2a hairline
+  --bg-2-fuzzy: 0 0% 14% 0.53;
+  --warning: 0 84% 60%;             // #ef4444 accent-rose
+  --bg-0: 0 0% 4%;                  // #0a0a0a canvas
+  --app-border-color: 0 0% 23%;     // #3a3a3a hairline-strong
+  --list-active: 0 0% 14%;
 }
 
+// 浅色：从深色镜像映射 —— 单色阶按 L 翻转；黄色加深为芥末黄以在白底上保持可读。
 html {
-  // --primary-color: 19.32 100% 53.73%;
-  --primary-color: 0 81.57% 57.45%;
-  --text: 0 0% 0%;
-  --text-2: 0 0% 66.27%;
-  --bg: 0 0% 96.86%;
-  --bg-2: 128.57 24.14% 94.31%;
-  --nav-menu: 150 10% 96%;
-  --border-color: 0 0% 83%;
-  --bg-2-fuzzy: 240 8% 97% 0.67;
+  --primary-color: 56 90% 38%;      // 深芥末黄，白底可辨识
+  --text: 0 0% 4%;                  // canvas 黑作为正文色
+  --text-2: 0 0% 40%;               // muted 灰
+  --bg: 0 0% 100%;                  // 纯白卡片底
+  --bg-2: 0 0% 96%;                 // 略深抬高层
+  --nav-menu: 0 0% 98%;             // 顶栏 / 菜单
+  --border-color: 0 0% 88%;         // hairline 浅灰
+  --bg-2-fuzzy: 0 0% 96% 0.67;
   --warning: 0 84% 55%;
   --nav-h: 52px;
-  --app-border-color: 0 0% 72% 0.25;
-  --bg-0: 0 0% 95%;
-  --list-active: 0 25% 94%;
+  --bg-0: 0 0% 100%;                // canvas 反相为白
+  --app-border-color: 0 0% 80%;     // hairline-strong 反相
+  --list-active: 56 80% 88%;        // 选中态用极淡芥末呼应品牌
 }
 
 
