@@ -216,25 +216,25 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       )
 
       return (
-        <>
-          <div className="flex items-center border-2 border-solid border-border rounded-lg p-2">
-            <div className="flex items-center gap-2 truncate flex-1">
+        <div className="group flex items-center bg-bg border border-solid border-border rd-3 px-3 py-2.5 duration-200 hover:(border-pri/40 bg-bg/60)">
+          <div className="flex items-center gap-3 truncate flex-1">
+            <div className="w-9 h-9 rd-2 bg-bg2 flex-center shrink-0 group-hover:(bg-pri/15) duration-200">
               <div
                 className={cn(
-                  'text-text min-w-4 min-h-4',
+                  'text-text text-4.5',
                   FileTypeList.find(item => item.type === file.Type)?.icon || 'i-tabler:file'
                 )}></div>
-              {file.Type === 'pure-text' ? renderPureText() : renderCommon()}
             </div>
-            <div className="flex items-center pl-2">
-              <div
-                className="cursor-pointer rd-full duration-300 bg-border/60 w-6 h-6 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)"
-                onClick={() => removeFile(file.Path)}>
-                <div className="i-tabler:trash text-text text-3"></div>
-              </div>
+            {file.Type === 'pure-text' ? renderPureText() : renderCommon()}
+          </div>
+          <div className="flex items-center pl-2">
+            <div
+              className="cursor-pointer rd-full duration-200 w-7 h-7 flex-center text-text2 hover:(bg-pri/20 text-pri) active:(scale-92)"
+              onClick={() => removeFile(file.Path)}>
+              <div className="i-tabler:trash text-3.5"></div>
             </div>
           </div>
-        </>
+        </div>
       )
     }
 
@@ -244,57 +244,73 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           onDragOver={() => setIsDragging(true)}
           onMouseLeave={() => setIsDragging(false)}
           className={cn(
-            'relative flex flex-col items-center justify-center w-full min-h-42',
-            'border-2 border-solid rounded-lg cursor-pointer bg-bg2',
-            'transition-colors duration-200',
-            isDragging ? 'border-primary bg-primary/5' : 'border-border',
+            'group relative flex flex-col items-center justify-center w-full min-h-44',
+            'border border-dashed rd-3 cursor-pointer bg-bg2/60 backdrop-blur-sm',
+            'transition-all duration-200',
+            isDragging ? 'border-pri bg-pri/8 scale-[1.005]' : 'border-border hover:(border-pri/50 bg-bg2)',
             className
           )}
           style={{ '--wails-drop-target': 'drop' } as React.CSSProperties}>
-          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-            <div className="i-tabler:file-upload text-(pri 10)"></div>
-            <p className="m-2 text-(3.5 text2) text-center">
+          <div className="flex flex-col items-center justify-center pt-6 pb-5 px-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-pri/30 blur-xl rd-full"></div>
+              <div className="relative w-12 h-12 rd-3 bg-pri flex-center">
+                <div className="i-tabler:upload text-black text-6"></div>
+              </div>
+            </div>
+            <p className="mt-4 text-(3.5 text2) text-center max-w-72 line-height-1.5">
               {t('home.upload.title')}
               {multiple ? t('home.upload.multiple') : t('home.upload.single')}
             </p>
-            <div className="flex flex-col gap-2">
-              <Button size="sm" variant="destructive" onClick={handleClick}>
-                {t('home.upload.button')}
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              onClick={handleClick}
+              className="mt-3 bg-pri text-black font-700 px-5 h-8.5 rd-2 hover:(bg-pri brightness-95) active:(scale-95)">
+              <div className="i-tabler:plus mr-1 text-3.5"></div>
+              {t('home.upload.button')}
+            </Button>
           </div>
         </div>
-        <p className="text-(3 text2) mt-2">{t('home.upload.noLimit')}</p>
+        <p className="text-(2.8 text2) mt-2 tracking-wide flex items-center gap-1.5">
+          <span className="w-1 h-1 rd-full bg-pri"></span>
+          {t('home.upload.noLimit')}
+        </p>
 
-        <div className="h-4"></div>
-        <div className="flex">
-          <h2 className="text-lg font-bold">
+        <div className="h-5"></div>
+        <div className="flex items-center flex-wrap gap-y-2 gap-x-3">
+          <h2 className="text-(4 text) font-800 tracking-[-0.3px] shrink-0">
             {t('home.upload.fileList')}
-            {!!selectedFiles?.length && `(${selectedFiles?.length})`}
+            {!!selectedFiles?.length && (
+              <span className="ml-1.5 text-pri font-900">({selectedFiles?.length})</span>
+            )}
           </h2>
-          <div className="flex-1"></div>
-          <div className="flex items-center">
-            <div></div>
+          <div className="flex items-center gap-1.5 flex-wrap ml-auto">
             {actionList?.map((item, index) => (
               <div
                 key={index}
                 className={cn(
-                  'not-last:mr-2 cursor-pointer rd-full duration-300 bg-border/60 h-6 px-1.5 flex items-center justify-center hover:(bg-pri/30) active:(scale-95)',
+                  'cursor-pointer rd-2 duration-200 h-7 px-2.5 flex items-center justify-center shrink-0',
+                  'bg-bg2 border border-solid border-border text-text',
+                  'hover:(bg-pri/15 border-pri/40 text-pri) active:(scale-95)',
                   !item.display && 'hidden'
                 )}
                 onClick={item.onClick}>
-                {item?.text && <span className="text-3 mr-1">{item.text}</span>}
-                <div className={`${item.icon} text-3`}></div>
+                {item?.text && (
+                  <span className="text-2.8 font-600 mr-1 tracking-[0.3px] uppercase whitespace-nowrap">
+                    {item.text}
+                  </span>
+                )}
+                <div className={`${item.icon} text-3.2`}></div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 overflow-auto mt-2 hide-scrollbar">
+        <div className="flex flex-col flex-1 overflow-auto mt-3 hide-scrollbar">
           {!selectedFiles?.length && (
-            <div className="flex-center px-2 py-6 flex-col">
-              <div className="i-tabler:playlist-x text-12 text-text2"></div>
-              <p className="text-4 text-text2">{t('home.upload.noFiles')}</p>
+            <div className="flex-center px-2 py-10 flex-col gap-2 opacity-60">
+              <div className="i-tabler:files-off text-10 text-text2"></div>
+              <p className="text-(3.2 text2) tracking-wide">{t('home.upload.noFiles')}</p>
             </div>
           )}
 
