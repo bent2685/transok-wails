@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Github, FileText, Search, X, DownloadCloud, Inbox } from 'lucide-react';
+import { Database, Github, Search, X, DownloadCloud, Inbox } from 'lucide-react';
 import { FileItem } from './components/FileItem';
 import { Header } from './components/Header';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Loading } from './components/Loading';
 import { ErrorMessage } from './components/ErrorMessage';
 import { CaptchaModal } from './components/CaptchaModal';
+import { DetailDialog } from './components/DetailDialog';
 import { useToast } from './components/Toast';
 import { useCopy } from './hooks/useCopy';
 import { ApiService } from './services/api';
@@ -21,6 +22,7 @@ function App() {
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
 
   const { showToast, ToastContainer } = useToast();
   const { copyToClipboard } = useCopy();
@@ -112,9 +114,45 @@ function App() {
     return () => clearTimeout(t);
   }, []);
 
+  // URL hash <-> selected item sync. Format: #item=<encoded path>
+  useEffect(() => {
+    const readHash = () => {
+      const m = window.location.hash.match(/item=([^&]+)/);
+      setSelectedPath(m ? decodeURIComponent(m[1]) : null);
+    };
+    readHash();
+    window.addEventListener('hashchange', readHash);
+    return () => window.removeEventListener('hashchange', readHash);
+  }, []);
+
+  const openItem = (file: FileItemType) => {
+    if (!file.Path) return;
+    window.location.hash = `item=${encodeURIComponent(file.Path)}`;
+  };
+
+  const closeDetail = () => {
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    setSelectedPath(null);
+  };
+
+  const buildInlineUrl = (file: FileItemType) => {
+    const captcha = localStorage.getItem('captcha');
+    const base = import.meta.env.VITE_API_BASE_URL ?? '';
+    let url = `${base}/download/index?inline=1&filePath=${encodeURIComponent(file.Path)}`;
+    if (captcha) url += `&captcha-key=${encodeURIComponent(captcha)}`;
+    return url;
+  };
+
   const total = shareData?.shareList.length ?? 0;
   const textCount = shareData?.shareList.filter((f) => f.Type === 'pure-text').length ?? 0;
   const fileCount = total - textCount;
+
+  const selectedFile = useMemo(() => {
+    if (!selectedPath || !shareData) return null;
+    return shareData.shareList.find((f) => f.Path === selectedPath) ?? null;
+  }, [selectedPath, shareData]);
 
   const visibleList = useMemo(() => {
     if (!shareData) return [];
@@ -297,6 +335,7 @@ function App() {
                           index={index}
                           onDownload={handleDownload}
                           onCopy={handleCopy}
+                          onOpen={openItem}
                         />
                       ))}
                     </ul>
@@ -307,6 +346,14 @@ function App() {
           </div>
         </div>
       </main>
+
+      <DetailDialog
+        file={selectedFile}
+        onClose={closeDetail}
+        onDownload={handleDownload}
+        onCopy={handleCopy}
+        buildInlineUrl={buildInlineUrl}
+      />
     </div>
   );
 }

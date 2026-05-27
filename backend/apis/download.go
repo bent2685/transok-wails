@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"transok/backend/domain/resp"
 	"transok/backend/domain/vo"
 	"transok/backend/services"
@@ -93,12 +95,20 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 	fileSize := fileInfo.Size()
 	fileName := filepath.Base(filePath)
 
-	// Chinese filename & download compatibility
-	encodedName := url.PathEscape(fileName)
-	contentDisposition := fmt.Sprintf("attachment; filename*=UTF-8''%s", encodedName)
+	// inline=1 → preview (image/text) in the browser; otherwise attachment download
+	inline := c.Query("inline") == "1"
 
-	c.Header("Content-Disposition", contentDisposition)
-	c.Header("Content-Type", "application/octet-stream")
+	encodedName := url.PathEscape(fileName)
+	disposition := "attachment"
+	contentType := "application/octet-stream"
+	if inline {
+		disposition = "inline"
+		if ct := mime.TypeByExtension(strings.ToLower(filepath.Ext(fileName))); ct != "" {
+			contentType = ct
+		}
+	}
+	c.Header("Content-Disposition", fmt.Sprintf("%s; filename*=UTF-8''%s", disposition, encodedName))
+	c.Header("Content-Type", contentType)
 	c.Header("Accept-Ranges", "bytes")
 	c.Header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
 	c.Header("Pragma", "no-cache")

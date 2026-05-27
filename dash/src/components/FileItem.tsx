@@ -1,4 +1,4 @@
-import { Download, Copy, Check } from 'lucide-react';
+import { Download, Copy, Check, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileItem as FileItemType } from '../types';
@@ -9,15 +9,16 @@ interface FileItemProps {
   index: number;
   onDownload: (file: FileItemType) => void;
   onCopy: (text: string) => void;
+  onOpen: (file: FileItemType) => void;
 }
 
-export const FileItem = ({ file, index, onDownload, onCopy }: FileItemProps) => {
+export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [justDone, setJustDone] = useState(false);
   const isPureText = file.Type === 'pure-text';
 
-  const handleAction = async (e?: React.MouseEvent) => {
-    e?.stopPropagation();
+  const handleAction = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isLoading) return;
     setIsLoading(true);
     try {
@@ -45,7 +46,7 @@ export const FileItem = ({ file, index, onDownload, onCopy }: FileItemProps) => 
         delay: Math.min(index * 0.025, 0.25),
         ease: [0.16, 1, 0.3, 1],
       }}
-      onClick={handleAction}
+      onClick={() => onOpen(file)}
       className="surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-all hover:border-hairline-strong group"
     >
       <div className="flex items-center gap-3 sm:gap-3.5">
@@ -60,16 +61,13 @@ export const FileItem = ({ file, index, onDownload, onCopy }: FileItemProps) => 
 
         {/* Title + meta */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-ink text-[14px] sm:text-[15px] truncate">
-              {file.Name || (isPureText ? 'Untitled snippet' : 'Untitled')}
-            </h3>
-            {isPureText && <span className="badge-olive flex-shrink-0">TXT</span>}
-          </div>
+          <h3 className="font-semibold text-ink text-[14px] sm:text-[15px] truncate">
+            {file.Name || (isPureText ? 'Untitled snippet' : 'Untitled')}
+          </h3>
 
-          {/* Text preview — inline, single line */}
+          {/* Text preview — up to 2 lines, newlines preserved */}
           {isPureText && file.Text && (
-            <p className="mt-0.5 font-mono text-[12px] text-muted truncate selectable">
+            <p className="mt-0.5 font-mono text-[12px] text-muted line-clamp-2">
               {file.Text}
             </p>
           )}
@@ -109,6 +107,8 @@ export const FileItem = ({ file, index, onDownload, onCopy }: FileItemProps) => 
             <Download size={15} strokeWidth={2.5} />
           )}
         </motion.button>
+
+        <ChevronRight size={16} className="flex-shrink-0 text-muted-soft group-hover:text-muted transition-colors" />
       </div>
     </motion.li>
   );
