@@ -31,18 +31,20 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	captchaKey := c.Query("captcha-key")
-	if captchaKey == "" {
-		captchaKey = c.GetHeader("Captcha-Key")
-	}
-	if captchaKey == "" {
-		resp.DataFormatErr().WithMsg("Captcha key required").Out()
-		return
-	}
 	captchaInStore := services.Share().GetCaptcha()
-	if captchaKey != captchaInStore {
-		resp.Forbidden().WithMsg("Captcha is incorrect").Out()
-		return
+	if captchaInStore != "" {
+		captchaKey := c.Query("captcha-key")
+		if captchaKey == "" {
+			captchaKey = c.GetHeader("Captcha-Key")
+		}
+		if captchaKey == "" {
+			resp.DataFormatErr().WithMsg("Captcha key required").Out()
+			return
+		}
+		if captchaKey != captchaInStore {
+			resp.Forbidden().WithMsg("Captcha is incorrect").Out()
+			return
+		}
 	}
 	// Verify if share-list exists
 	storage := services.Storage()
