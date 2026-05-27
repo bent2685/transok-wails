@@ -1,0 +1,152 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  read-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
+
+  macos:
+    name: macOS ${{ matrix.arch }}
+    needs: read-version
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, amd64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build dash assets
+        run: bash scripts/build-dash.sh
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm install
+
+      - name: Wails build (darwin/${{ matrix.arch }})
+        run: wails build -platform darwin/${{ matrix.arch }} -clean
+
+      - name: Build DMG + zip .app
+        run: bash scripts/build-dmg.sh ${{ matrix.arch }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: transok-darwin-${{ matrix.arch }}
+          path: build/bin/dist/*
+
+  windows:
+    name: Windows amd64
+    needs: read-version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build dash assets
+        shell: bash
+        run: bash scripts/build-dash.sh
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm install
+
+      - name: Wails build (windows/amd64)
+        run: wails build -platform windows/amd64 -clean
+
+      - name: Rename raw .exe
+        shell: pwsh
+        run: |
+          $ver = "${{ needs.read-version.outputs.version }}"
+          New-Item -ItemType Directory -Force -Path build/bin/dist | Out-Null
+          Copy-Item build/bin/transok.exe "build/bin/dist/transok-$ver-windows-amd64.exe"
+
+      - name: Build MSI (WiX v3)
+        shell: pwsh
+        run: |
+          $ver = "${{ needs.read-version.outputs.version }}"
+          $wix = "${env:WIX}bin"
+          if (-not (Test-Path "$wix\candle.exe")) {
+            # Fallback: WiX v3 is preinstalled on windows-latest; locate it.
+            $wix = (Get-ChildItem "C:\Program Files (x86)" -Filter "WiX Toolset*" -Directory | Select-Object -First 1).FullName + "\bin"
+          }
+          Write-Host "Using WiX at: $wix"
+          & "$wix\candle.exe" -nologo `
+            -dAppVersion="$ver" `
+            -dAppExe="$PWD\build\bin\transok.exe" `
+            -out "build\windows\installer\transok.wixobj" `
+            "build\windows\installer\transok.wxs"
+          & "$wix\light.exe" -nologo `
+            -out "build\bin\dist\transok-$ver-windows-amd64.msi" `
+            "build\windows\installer\transok.wixobj"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: transok-windows-amd64
+          path: build/bin/dist/*
+
+  release:
+    name: Attach to GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [macos, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Show files
+        run: ls -lh dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
