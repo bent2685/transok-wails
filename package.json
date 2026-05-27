@@ -1,4 +1,19 @@
 {
+  "name": "transok-wails-monorepo",
+  "private": true,
+  "scripts": {
+    "dash:install": "pnpm -F transok-download install",
+    "dash:dev": "pnpm -F transok-download dev",
+    "dash:build": "pnpm -F transok-download build",
+    "build:dash": "bash scripts/build-dash.sh",
+    "version:set": "node scripts/set-version.mjs",
+    "version:check": "node scripts/set-version.mjs --check",
+    "frontend:install": "cd frontend && npm install",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "wails:dev": "wails dev",
+    "wails:build": "wails build"
+  },
   "devDependencies": {
     "esbuild": "0.28.0"
   },
