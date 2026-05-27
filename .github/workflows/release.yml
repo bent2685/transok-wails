@@ -117,7 +117,7 @@ jobs:
             $wix = (Get-ChildItem "C:\Program Files (x86)" -Filter "WiX Toolset*" -Directory | Select-Object -First 1).FullName + "\bin"
           }
           Write-Host "Using WiX at: $wix"
-          & "$wix\candle.exe" -nologo `
+          & "$wix\candle.exe" -nologo -arch x64 `
             -dAppVersion="$ver" `
             -dAppExe="$PWD\build\bin\transok.exe" `
             -out "build\windows\installer\transok.wixobj" `

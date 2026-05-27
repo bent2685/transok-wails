@@ -6,7 +6,7 @@
            Version="$(var.AppVersion)"
            Manufacturer="transok"
            UpgradeCode="9F4A3E1C-2B5D-4F88-AB12-3C4D5E6F7A8B">
-    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Platform="x64" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of Transok is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
