@@ -117,31 +117,33 @@ const Home: React.FC = () => {
         title: t('dialog.copyLink.title'),
         description: t('dialog.copyLink.desc'),
         children: ({ onConfirm, onCancel }) => (
-          <div className="text-4">
+          <div className="flex flex-col gap-1.5">
             {urlList.map((url, index) => (
               <div
                 key={index}
-                className="text-3 my-2 flex items-center cursor-pointer group justify-center"
+                className="group flex items-center gap-2 px-3 py-2 rd-2 cursor-pointer border border-solid border-border bg-bg2/40 duration-200 hover:(bg-pri/10 border-pri/40) active:(scale-[0.99])"
                 onClick={async () => {
                   await copyText(url)
                   onConfirm()
                 }}>
-                <div className="inline text-text2 group-hover:text-text duration-300">{url}</div>
-                <div className="i-tabler:copy inline-block group-hover:text-pri ml-1 duration-300"></div>
+                <span className="i-tabler:link text-(3.5 text2) group-hover:text-pri duration-200 shrink-0"></span>
+                <span className="flex-1 truncate font-mono text-(3 text) tracking-[0.2px]">{url}</span>
+                <span className="i-tabler:copy text-(3.5 text2) group-hover:text-pri duration-200 shrink-0"></span>
               </div>
             ))}
           </div>
         ),
         renderFooter: ({ onCancel }) => (
-          <div
-            className="flex-center text-3.5 mt-3 cursor-pointer hover:(text-pri) duration-300"
+          <button
+            type="button"
+            className="group inline-flex items-center gap-1 text-(3 text2) cursor-pointer bg-transparent border-none hover:text-pri duration-200 ml-auto"
             onClick={() => {
               onCancel()
               navigate('/allurl')
             }}>
-            <span>{t('common.seeAll')}</span>
-            <div className="i-tabler:chevron-right"></div>
-          </div>
+            <span className="tracking-[0.3px]">{t('common.seeAll')}</span>
+            <span className="i-tabler:chevron-right duration-200 group-hover:translate-x-0.5"></span>
+          </button>
         )
       })
     }
@@ -225,7 +227,7 @@ const Home: React.FC = () => {
             <motion.button
               type="button"
               onClick={toggleShare}
-              className="pointer-events-auto relative w-14 h-14 rd-full bg-pri flex-center cursor-pointer border-none outline-none text-black"
+              className="pointer-events-auto relative w-14 h-14 rd-full bg-pri flex-center cursor-pointer border-none outline-none text-white"
               initial={false}
               animate={{
                 boxShadow: isShare
@@ -269,13 +271,13 @@ const Home: React.FC = () => {
                   animate={{ opacity: 1, rotate: 0, scale: 1 }}
                   exit={{ opacity: 0, rotate: 90, scale: 0.6 }}
                   transition={{ type: 'spring', stiffness: 320, damping: 20 }}
-                  className="relative flex-center text-black">
+                  className="relative flex-center text-white">
                   <div
                     className={cn(
-                      '!text-black text-6',
+                      '!text-white text-6',
                       isShare ? 'i-tabler:player-stop' : 'i-tabler:broadcast'
                     )}
-                    style={{ color: '#0a0a0a' }}></div>
+                    style={{ color: '#ffffff' }}></div>
                 </motion.span>
               </AnimatePresence>
             </motion.button>

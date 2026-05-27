@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react'
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -114,14 +115,14 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
   const commonFooter = useCallback(
     (props: CommonFooterProps) => {
       return (
-        <div className="flex justify-center">
-          <Button variant="outline" size="sm" onClick={props.onCancel} className="mr-2">
+        <>
+          <Button variant="outline" size="sm" onClick={props.onCancel}>
             {props.cancelText || t('dialog.cancel')}
           </Button>
           <Button size="sm" onClick={props.onConfirm}>
             {props.confirmText || t('dialog.confirm')}
           </Button>
-        </div>
+        </>
       )
     },
     [t]
@@ -132,30 +133,28 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
       {children}
       <Dialog open={!!confirmState} onOpenChange={() => setConfirmState(null)}>
         {confirmState && (
-          <DialogContent className="bg-bg shadow-2xl w-80 rd-3">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>{confirmState.title}</DialogTitle>
               <DialogDescription>{confirmState.description}</DialogDescription>
             </DialogHeader>
-            {confirmState.isPrompt && (
-              <div className="py-2">
+            <DialogBody>
+              {confirmState.isPrompt && (
                 <Textarea
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                   placeholder={t('dialog.placeholder')}
-                  className="resize-none hide-scrollbar"
+                  className="resize-none hide-scrollbar bg-bg2 border-border text-text focus-visible:(ring-pri/40 border-pri/40) min-h-32"
                 />
-              </div>
-            )}
-            <DialogFooter className="">
-              <div className="flex justify-center">
-                <Button variant="outline" size="sm" onClick={handleCancel} className="mr-2">
-                  {confirmState.cancelText || t('dialog.cancel')}
-                </Button>
-                <Button size="sm" onClick={handleConfirm}>
-                  {confirmState.confirmText || t('dialog.confirm')}
-                </Button>
-              </div>
+              )}
+            </DialogBody>
+            <DialogFooter className="justify-between">
+              <Button variant="outline" size="sm" onClick={handleCancel}>
+                {confirmState.cancelText || t('dialog.cancel')}
+              </Button>
+              <Button size="sm" onClick={handleConfirm}>
+                {confirmState.confirmText || t('dialog.confirm')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         )}
@@ -163,25 +162,26 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       <Dialog open={!!slotState} onOpenChange={() => setSlotState(null)}>
         {slotState && (
-          <DialogContent className="bg-bg shadow-2xl w-80 rd-3">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>{slotState.title}</DialogTitle>
               {slotState.description && <DialogDescription>{slotState.description}</DialogDescription>}
             </DialogHeader>
-            <div className="py-2">
+            <DialogBody>
               {typeof slotState.children === 'function'
                 ? slotState.children({ onConfirm: execSubmit, onCancel: execClose })
                 : slotState.children}
-            </div>
-            <DialogFooter>
-              {slotState.renderFooter &&
-                slotState.renderFooter({
+            </DialogBody>
+            {slotState.renderFooter && (
+              <DialogFooter>
+                {slotState.renderFooter({
                   onConfirm: execSubmit,
                   onCancel: execClose,
                   confirmText: slotState.confirmText,
                   cancelText: slotState.cancelText
                 })}
-            </DialogFooter>
+              </DialogFooter>
+            )}
           </DialogContent>
         )}
       </Dialog>

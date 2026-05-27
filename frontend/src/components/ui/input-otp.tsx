@@ -16,7 +16,7 @@ const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, React.Compo
 InputOTP.displayName = 'InputOTP'
 
 const InputOTPGroup = React.forwardRef<React.ElementRef<'div'>, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => <div ref={ref} className={cn('flex items-center', className)} {...props} />
+  ({ className, ...props }, ref) => <div ref={ref} className={cn('flex items-center gap-2', className)} {...props} />
 )
 InputOTPGroup.displayName = 'InputOTPGroup'
 
@@ -26,20 +26,31 @@ const InputOTPSlot = React.forwardRef<
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
+  const filled = !!char
 
   return (
     <div
       ref={ref}
       className={cn(
-        'relative flex h-9 w-9 items-center justify-center border-y border-r border-l-0 border-solid border-input text-sm shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md',
-        isActive && 'z-10 ring-1 ring-ring',
+        'relative flex h-12 w-10 items-center justify-center rd-2 border border-solid duration-200 ease-out',
+        'text-(4.5 text) font-700 tracking-[1px]',
+        'bg-bg2/60',
+        filled && !isActive && 'border-pri/40 bg-pri/8',
+        !filled && !isActive && 'border-border',
+        isActive && 'z-10 border-pri scale-[1.06] shadow-[0_0_0_3px_hsl(var(--primary-color)/0.18)]',
         className
       )}
       {...props}>
-      {char}
+      <span
+        className={cn(
+          'inline-block duration-200 ease-out',
+          filled ? 'opacity-100 scale-100 text-pri' : 'opacity-0 scale-50'
+        )}>
+        {char}
+      </span>
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
+          <div className="h-5 w-[2px] rd-full animate-caret-blink bg-pri duration-1000" />
         </div>
       )}
     </div>
