@@ -2,12 +2,6 @@
   <img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/banner.png" alt="banner" />
 </div>
 
-<div align="center">
-  <img src="https://github.com/bent2685/transok-wails/blob/main/readme_assets/logo.png" alt="logo" width="100" height="100" />
-</div>
-
-<h1 align="center">Transok</h1>
-
 <h4 align="center"><strong>English</strong> | <a href="https://github.com/bent2685/transok-wails/blob/main/README_zh.md">
 简体中文</a></h4>
 
