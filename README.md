@@ -69,12 +69,6 @@ Thanks to the following contributors for making this project better:
 
 ---
 
-### Download page project link
-
-[transok-dash](https://github.com/bent2685/transok-dash)
-
----
-
 # License
 
 [MIT](/LICENSE)
