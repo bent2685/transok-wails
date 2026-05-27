@@ -1,7 +1,7 @@
 import { ApiResponse, ShareData } from "../types";
 
-// Use proxy in development, use configured URL in production
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
+// Empty baseUrl means same-origin: dev/preview use vite proxy, prod is embedded in Go.
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export class ApiService {
   private static getCaptcha(): string | null {

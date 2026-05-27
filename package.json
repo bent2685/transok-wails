@@ -5,6 +5,7 @@
     "dash:install": "pnpm -F transok-download install",
     "dash:dev": "pnpm -F transok-download dev",
     "dash:build": "pnpm -F transok-download build",
+    "dash:preview": "pnpm -F transok-download build && pnpm -F transok-download preview",
     "build:dash": "bash scripts/build-dash.sh",
     "version:set": "node scripts/set-version.mjs",
     "version:check": "node scripts/set-version.mjs --check",
