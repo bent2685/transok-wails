@@ -1,4 +1,5 @@
 import { ApiResponse, ShareData } from "../types";
+import { DownloadManager } from "./downloadManager";
 
 // Empty baseUrl means same-origin: dev/preview use vite proxy, prod is embedded in Go.
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -76,35 +77,17 @@ export class ApiService {
     return data.data;
   }
 
-  static async downloadFile(filePath: string): Promise<void> {
+  /**
+   * 发起下载：交给 DownloadManager 处理。
+   *  · 安全上下文（HTTPS / localhost）走 SW + 分片并发 + 应用级进度
+   *  · 非安全上下文降级为浏览器原生 <a> 下载
+   */
+  static async downloadFile(filePath: string, filename?: string): Promise<void> {
     try {
-      // 构造完整 URL
-      const captcha = this.getCaptcha();
-      const url = `${baseUrl}/download/index?filePath=${encodeURIComponent(
-        filePath
-      )}`;
-
-      // 使用 <a> 直接发起请求（浏览器会立即触发下载提示）
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filePath.split("/").pop() || "download";
-      a.rel = "noopener"; // 防止安全警告
-      a.target = "_blank"; // 避免阻塞主线程
-
-      // 附带 captcha 信息（改用 query 参数方式，因为 <a> 无法带 header）
-      if (captcha) {
-        a.href +=
-          (url.includes("?") ? "&" : "?") +
-          "captcha-key=" +
-          encodeURIComponent(captcha);
-      }
-
-      // 模拟点击
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      await DownloadManager.enqueue(filePath, filename);
     } catch (error) {
       console.error("Download failed:", error);
+      throw error;
     }
   }
   static initializeCaptcha(): void {

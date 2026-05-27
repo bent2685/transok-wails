@@ -8,6 +8,7 @@ import { Loading } from './components/Loading';
 import { ErrorMessage } from './components/ErrorMessage';
 import { CaptchaModal } from './components/CaptchaModal';
 import { DetailDialog } from './components/DetailDialog';
+import { DownloadCenter } from './components/DownloadCenter';
 import { useToast } from './components/Toast';
 import { useCopy } from './hooks/useCopy';
 import { ApiService } from './services/api';
@@ -56,8 +57,8 @@ function App() {
 
   const handleDownload = async (file: FileItemType) => {
     try {
-      await ApiService.downloadFile(file.Path);
-      showToast('Download started', 'success');
+      await ApiService.downloadFile(file.Path, file.Name);
+      showToast('Added to downloads', 'success');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Download failed', 'error');
     }
@@ -75,10 +76,10 @@ function App() {
       showToast('No files to download', 'error');
       return;
     }
-    showToast(`Starting ${files.length} downloads`, 'success');
+    showToast(`Added ${files.length} files to downloads`, 'success');
     for (const f of files) {
       try {
-        await ApiService.downloadFile(f.Path);
+        await ApiService.downloadFile(f.Path, f.Name);
       } catch {
         // single failure should not abort batch
       }
@@ -354,6 +355,8 @@ function App() {
         onCopy={handleCopy}
         buildInlineUrl={buildInlineUrl}
       />
+
+      <DownloadCenter />
     </div>
   );
 }
