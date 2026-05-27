@@ -31,24 +31,25 @@
 - [x] File upload functionality
 - [x] Enable sharing feature
 - [x] File deletion and clearing
-- [x] File download page
+- [x] File download page (download web app: `dash`)
 - [x] Dark mode
 - [x] Pure text sharing
-- [x] i18n
+- [x] Per-file additional note (attach a remark to any shared file, visible on the download page)
+- [x] Detail dialog on download page with multi-line text & image preview
+- [x] Resilient large-file downloads (Service Worker + HEAD/ETag + 256KB streaming)
+- [x] Stable per-item ID — detail/download links keep working after the share list is reordered
+- [x] i18n (en / zh-CN / zh-TW / ja)
 - [x] Custom port
-- [x] Encrypted file sharing
-- [x] Discover sharing devices in the local network[redo]
+- [x] Encrypted file sharing (captcha-gated download)
+- [x] Discover sharing devices in the local network (zeroconf)
 - [ ] Right-click to add in Finder/File Explorer
 
 ---
 
 # Preview
 
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview3.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview4.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview5.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.jpg)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.jpg)
 
 ---
 

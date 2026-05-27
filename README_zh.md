@@ -30,24 +30,25 @@
 - [x] 文件上传功能
 - [x] 开启分享功能
 - [x] 文件删除和清空
-- [x] 文件下载页
+- [x] 文件下载页（下载端 Web 应用：`dash`）
 - [x] 深色模式
 - [x] 纯文字分享
-- [x] i18n
+- [x] 文件附加文本（为任意分享文件附加一段说明，下载页可见）
+- [x] 下载页详情弹窗，支持多行文本与图片预览
+- [x] 大文件可靠下载（Service Worker + HEAD/ETag + 256KB 流式 buffer）
+- [x] 分享项稳定 Id —— 列表顺序变化后详情/下载链接仍然可用
+- [x] i18n（en / zh-CN / zh-TW / ja）
 - [x] 自定义端口
-- [x] 文件加密分享
-- [ ] 查找局域网内正在共享的设备[重做]
+- [x] 文件加密分享（验证码下载校验）
+- [x] 查找局域网内正在共享的设备（zeroconf）
 - [ ] 在 Finder/资源管理器中右键添加
 
 ---
 
 # Preview
 
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview3.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview4.png)
-![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview5.png)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview1.jpg)
+![preview](https://github.com/bent2685/transok-wails/blob/main/readme_assets/preview2.jpg)
 
 ---
 
