@@ -180,13 +180,13 @@ const Settings: React.FC = () => {
           <h3 className="text-4 font-900">{item.label}</h3>
         </div>
         <div className="flex-1"></div>
-        <div className="text-4">{item.node}</div>
+        <div className="text-4 select-text">{item.node}</div>
       </div>
     )
   }
   return (
     <>
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden select-none">
         <header className="flex items-center">
           <div className="flex-1 flex items-center">
             <BackBtn />

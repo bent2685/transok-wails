@@ -216,7 +216,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       )
 
       return (
-        <div className="group flex items-center bg-bg border border-solid border-border rd-3 px-3 py-2.5 duration-200 hover:(border-pri/40 bg-bg/60)">
+        <div className="group flex items-center bg-bg border border-solid border-border rd-3 px-3 py-2.5 duration-200 hover:(border-pri/40 bg-bg/60) select-text">
           <div className="flex items-center gap-3 truncate flex-1">
             <div className="w-9 h-9 rd-2 bg-bg2 flex-center shrink-0 group-hover:(bg-pri/15) duration-200">
               <div

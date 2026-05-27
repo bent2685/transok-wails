@@ -199,7 +199,7 @@ const Home: React.FC = () => {
   }, [])
   return (
     <>
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden select-none">
         <header className="flex items-center pb-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-end">
