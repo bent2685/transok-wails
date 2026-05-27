@@ -29,14 +29,14 @@
         "footer": "If you like this app, please give my repository a star"
     },
     "home": {
-        "title": "Fast · Efficient · Unlimited LAN File Sharing",
+        "title": "LAN File Sharing",
         "upload": {
             "title": "Click or drag file to upload",
             "button": "Upload File",
             "multiple": "one or more files",
             "single": "file",
             "noLimit": "No format limit No size limit",
-            "fileList": "File List",
+            "fileList": "Files",
             "noFiles": "Please upload files first",
             "actions": {
                 "pureText": "Pure Text",

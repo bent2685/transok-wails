@@ -29,14 +29,14 @@
         "footer": "如果喜欢本应用请给我的仓库点个star"
     },
     "home": {
-        "title": "高效·快速·无限制 局域网文件分享",
+        "title": "局域网文件分享",
         "upload": {
             "title": "点击或拖拽文件上传",
             "button": "上传文件",
             "multiple": "一个或多个文件",
             "single": "文件",
             "noLimit": "无文件格式限制 无大小限制",
-            "fileList": "文件列表",
+            "fileList": "文件",
             "noFiles": "请先上传文件",
             "actions": {
                 "pureText": "纯文本",
