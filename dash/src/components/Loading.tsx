@@ -2,31 +2,29 @@ import { motion } from 'framer-motion';
 
 export const Loading = () => {
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center space-y-4"
-    >
-      <div className="relative">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-gray-200 dark:border-gray-700 rounded-full"
+    <div className="flex flex-col items-center justify-center gap-6">
+      <div className="relative w-14 h-14">
+        <motion.span
+          className="absolute inset-0 rounded-full border-2 border-hairline"
+          aria-hidden
         />
-        <motion.div 
+        <motion.span
+          className="absolute inset-0 rounded-full border-2 border-transparent"
+          style={{ borderTopColor: '#7C7E2C', borderRightColor: '#7C7E2C' }}
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="absolute top-0 left-0 w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full"
+          transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.span
+          className="absolute inset-3 rounded-full"
+          style={{ background: '#7C7E2C' }}
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
-      <motion.p 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="text-base text-gray-600 dark:text-gray-300 font-medium"
-      >
-        Loading files...
-      </motion.p>
-    </motion.div>
+      <div className="text-center space-y-1.5">
+        <p className="caption-up text-olive">Streaming</p>
+        <p className="text-body text-sm">Fetching share manifest…</p>
+      </div>
+    </div>
   );
 };

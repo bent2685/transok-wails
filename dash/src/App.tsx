@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Database, Github, FileText, Search, X, DownloadCloud, Inbox } from 'lucide-react';
 import { FileItem } from './components/FileItem';
 import { Header } from './components/Header';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -11,12 +12,16 @@ import { useCopy } from './hooks/useCopy';
 import { ApiService } from './services/api';
 import { FileItem as FileItemType, ShareData } from './types';
 
+type Filter = 'all' | 'file' | 'text';
+
 function App() {
   const [shareData, setShareData] = useState<ShareData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
-  
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
+
   const { showToast, ToastContainer } = useToast();
   const { copyToClipboard } = useCopy();
 
@@ -25,20 +30,15 @@ function App() {
       setIsLoading(true);
       setError(null);
 
-      // 检查是否需要验证码
       const shouldCaptcha = await ApiService.shouldCaptcha();
-      
       if (shouldCaptcha) {
-        // 从 URL 获取验证码或提示用户输入
         const url = new URL(window.location.href);
         const captchaInUrl = url.searchParams.get('captcha');
-        
         if (!captchaInUrl) {
           setShowCaptchaModal(true);
           return;
-        } else {
-          ApiService.initializeCaptcha();
         }
+        ApiService.initializeCaptcha();
       }
 
       const data = await ApiService.getShareList();
@@ -57,17 +57,29 @@ function App() {
       await ApiService.downloadFile(file.Path);
       showToast('Download started', 'success');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Download failed';
-      showToast(message, 'error');
+      showToast(err instanceof Error ? err.message : 'Download failed', 'error');
     }
   };
 
   const handleCopy = async (text: string) => {
-    const success = await copyToClipboard(text);
-    if (success) {
-      showToast('Copied to clipboard', 'success');
-    } else {
-      showToast('Copy failed, please copy manually', 'error');
+    const ok = await copyToClipboard(text);
+    showToast(ok ? 'Copied to clipboard' : 'Copy failed', ok ? 'success' : 'error');
+  };
+
+  const handleDownloadAll = async () => {
+    if (!shareData) return;
+    const files = shareData.shareList.filter((f) => f.Type !== 'pure-text');
+    if (files.length === 0) {
+      showToast('No files to download', 'error');
+      return;
+    }
+    showToast(`Starting ${files.length} downloads`, 'success');
+    for (const f of files) {
+      try {
+        await ApiService.downloadFile(f.Path);
+      } catch {
+        // single failure should not abort batch
+      }
     }
   };
 
@@ -77,7 +89,6 @@ function App() {
       setShowCaptchaModal(false);
       setIsLoading(true);
       setError(null);
-      
       const data = await ApiService.getShareList();
       setShareData(data);
       showToast('Verification successful', 'success');
@@ -96,136 +107,275 @@ function App() {
   };
 
   useEffect(() => {
-    // 初始化验证码
     ApiService.initializeCaptcha();
-    
-    // 延迟加载以显示平滑的进入动画
-    const timer = setTimeout(() => {
-      loadData();
-    }, 300);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(loadData, 250);
+    return () => clearTimeout(t);
   }, []);
 
+  const total = shareData?.shareList.length ?? 0;
+  const textCount = shareData?.shareList.filter((f) => f.Type === 'pure-text').length ?? 0;
+  const fileCount = total - textCount;
+
+  const visibleList = useMemo(() => {
+    if (!shareData) return [];
+    const q = query.trim().toLowerCase();
+    return shareData.shareList.filter((f) => {
+      if (filter === 'file' && f.Type === 'pure-text') return false;
+      if (filter === 'text' && f.Type !== 'pure-text') return false;
+      if (!q) return true;
+      return (
+        (f.Name || '').toLowerCase().includes(q) ||
+        (f.Text || '').toLowerCase().includes(q) ||
+        (f.Type || '').toLowerCase().includes(q)
+      );
+    });
+  }, [shareData, query, filter]);
+
   return (
-    <div className="h-screen flex flex-col transition-colors duration-500">
-      <ThemeToggle />
+    <div className="h-screen flex flex-col overflow-hidden">
       <ToastContainer />
-      <CaptchaModal 
+      <CaptchaModal
         isOpen={showCaptchaModal}
         onSubmit={handleCaptchaSubmit}
         onClose={handleCaptchaClose}
       />
-      
-      {/* Header - Fixed */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="flex-shrink-0 border-b border-gray-200/60 dark:border-gray-700/60 clean-card rounded-none"
-      >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
-          <div className="pr-11 xs:pr-14 sm:pr-16 lg:pr-8">
-            <Header 
-              title="Transok"
-              totalFiles={shareData?.shareList.length || 0}
-            />
+
+      {/* Top nav — 56px, tight */}
+      <header className="flex-shrink-0 border-b border-hairline bg-canvas/95 backdrop-blur-sm">
+        <div className="max-w-[1080px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35 }}
+            className="flex items-center gap-2"
+          >
+            <div className="w-6 h-6 rounded-sm flex items-center justify-center" style={{ background: '#7C7E2C' }}>
+              <Database size={12} className="text-white" strokeWidth={2.6} />
+            </div>
+            <span className="font-bold text-ink text-[14px] tracking-tight">transok</span>
+            <span className="hidden sm:inline-flex caption-up text-muted ml-1.5">share</span>
+          </motion.div>
+
+          <div className="flex items-center gap-1.5">
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noreferrer"
+              className="w-9 h-9 inline-flex items-center justify-center rounded-md text-muted hover:text-ink hover:bg-surface-elevated transition-colors"
+              aria-label="GitHub"
+            >
+              <Github size={15} strokeWidth={2.2} />
+            </a>
+            <ThemeToggleCompact />
           </div>
         </div>
-      </motion.div>
-      
-      {/* Main Content - Scrollable */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatePresence mode="wait">
-            {isLoading && (
-              <motion.div 
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-full flex items-center justify-center"
-              >
-                <Loading />
-              </motion.div>
-            )}
-            
-            {error && !isLoading && (
-              <motion.div 
-                key="error"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="h-full flex items-center justify-center"
-              >
-                <ErrorMessage 
-                  message={error}
-                  onRetry={loadData}
-                />
-              </motion.div>
-            )}
-            
-            {shareData && !isLoading && !error && (
-              <motion.div 
-                key="content"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="h-full flex flex-col py-3 sm:py-4 lg:py-6"
-              >
-                {shareData.shareList.length > 0 ? (
-                  <div className="flex-1 overflow-y-auto scrollbar-clean">
-                    <div className="space-y-2 sm:space-y-2 pr-1 sm:pr-2">
-                      {shareData.shareList.map((file, index) => (
-                        <motion.div 
-                          key={`${file.Name}-${index}`}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ 
-                            delay: index * 0.05,
-                            duration: 0.4,
-                            ease: "easeOut"
-                          }}
-                        >
-                          <FileItem 
-                            file={file}
-                            onDownload={handleDownload}
-                            onCopy={handleCopy}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex-1 flex items-center justify-center"
+      </header>
+
+      {/* Main scroll area */}
+      <main className="flex-1 overflow-y-auto scroll-clean">
+        <div className="max-w-[1080px] mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-12">
+          {/* Compact hero — title + total stat inline */}
+          <Header title="Transok" totalFiles={total} />
+
+          {/* Toolbar — search + filter + bulk action; sticky inside the scroll */}
+          {!isLoading && !error && shareData && total > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08, duration: 0.35 }}
+              className="mt-6 sm:mt-7 sticky top-0 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-canvas/95 backdrop-blur-sm border-b border-hairline"
+            >
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Search */}
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search
+                    size={14}
+                    strokeWidth={2.2}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search name, text, or extension…"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="text-input !h-10 !pl-9 !pr-9 text-sm"
+                  />
+                  {query && (
+                    <button
+                      onClick={() => setQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded text-muted hover:text-ink hover:bg-surface-elevated"
+                      aria-label="Clear search"
+                    >
+                      <X size={12} strokeWidth={2.4} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter chips */}
+                <div className="flex items-center gap-1 p-1 rounded-md bg-surface-elevated border border-hairline">
+                  <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
+                    All
+                  </FilterChip>
+                  <FilterChip
+                    active={filter === 'file'}
+                    onClick={() => setFilter('file')}
+                    count={fileCount}
+                    disabled={fileCount === 0}
                   >
-                    <div className="text-center">
-                      <motion.div 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
-                        className="w-16 h-16 mx-auto mb-4 rounded-2xl clean-card flex items-center justify-center"
-                      >
-                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </motion.div>
-                      <p className="text-gray-600 dark:text-gray-300 font-medium">No files available</p>
-                      <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Files will appear here when shared</p>
-                    </div>
-                  </motion.div>
+                    Files
+                  </FilterChip>
+                  <FilterChip
+                    active={filter === 'text'}
+                    onClick={() => setFilter('text')}
+                    count={textCount}
+                    disabled={textCount === 0}
+                  >
+                    Text
+                  </FilterChip>
+                </div>
+
+                {/* Bulk download */}
+                {fileCount > 0 && (
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={handleDownloadAll}
+                    className="btn-primary !h-10 !px-3.5 text-[13px]"
+                    aria-label="Download all files"
+                  >
+                    <DownloadCloud size={14} strokeWidth={2.5} />
+                    <span className="hidden sm:inline">Download all</span>
+                  </motion.button>
                 )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Content */}
+          <div className="mt-5 sm:mt-6">
+            <AnimatePresence mode="wait">
+              {isLoading && (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="min-h-[300px] flex items-center justify-center"
+                >
+                  <Loading />
+                </motion.div>
+              )}
+
+              {error && !isLoading && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ErrorMessage message={error} onRetry={loadData} />
+                </motion.div>
+              )}
+
+              {shareData && !isLoading && !error && (
+                <motion.div
+                  key="content"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {total === 0 ? (
+                    <EmptyState />
+                  ) : visibleList.length === 0 ? (
+                    <NoMatchState onClear={() => { setQuery(''); setFilter('all'); }} />
+                  ) : (
+                    <ul className="space-y-2.5 sm:space-y-3">
+                      {visibleList.map((file, index) => (
+                        <FileItem
+                          key={`${file.Name}-${index}`}
+                          file={file}
+                          index={index}
+                          onDownload={handleDownload}
+                          onCopy={handleCopy}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
+
+const FilterChip = ({
+  active,
+  onClick,
+  count,
+  disabled,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  count: number;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded text-[12px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+      active
+        ? 'bg-canvas text-ink shadow-sm'
+        : 'text-muted hover:text-ink'
+    }`}
+  >
+    <span>{children}</span>
+    <span className={`tabular-nums text-[11px] ${active ? 'text-olive' : 'text-muted-soft'}`}>
+      {count}
+    </span>
+  </button>
+);
+
+const EmptyState = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="surface-card rounded-lg py-14 sm:py-16 flex flex-col items-center justify-center text-center px-6"
+  >
+    <div className="w-12 h-12 rounded-md bg-surface-elevated border border-hairline flex items-center justify-center mb-4">
+      <Inbox size={20} className="text-muted" strokeWidth={1.8} />
+    </div>
+    <p className="text-base font-semibold text-ink">Nothing shared yet</p>
+    <p className="text-body text-sm mt-1 max-w-sm">
+      Items pushed to this link will appear here automatically.
+    </p>
+  </motion.div>
+);
+
+const NoMatchState = ({ onClear }: { onClear: () => void }) => (
+  <div className="surface-card rounded-lg py-10 flex flex-col items-center justify-center text-center px-6">
+    <div className="w-10 h-10 rounded-md bg-surface-elevated border border-hairline flex items-center justify-center mb-3">
+      <Search size={16} className="text-muted" strokeWidth={2} />
+    </div>
+    <p className="text-sm font-semibold text-ink">No matches</p>
+    <p className="text-body text-xs mt-1">Try a different keyword or clear filters.</p>
+    <button onClick={onClear} className="mt-4 text-[12px] font-semibold text-olive hover:underline">
+      Reset
+    </button>
+  </div>
+);
+
+// inline minimal theme toggle (smaller than 40px btn-icon)
+const ThemeToggleCompact = () => {
+  return (
+    <div className="contents">
+      <ThemeToggle />
+    </div>
+  );
+};
 
 export default App;

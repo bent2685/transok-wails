@@ -1,29 +1,30 @@
-import { Download, Copy } from "lucide-react";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { FileItem as FileItemType } from "../types";
-import { getFileIcon, calcFileSize } from "../utils/fileIcons";
+import { Download, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { FileItem as FileItemType } from '../types';
+import { getFileIcon, calcFileSize } from '../utils/fileIcons';
 
 interface FileItemProps {
   file: FileItemType;
+  index: number;
   onDownload: (file: FileItemType) => void;
   onCopy: (text: string) => void;
 }
 
-export const FileItem = ({ file, onDownload, onCopy }: FileItemProps) => {
+export const FileItem = ({ file, index, onDownload, onCopy }: FileItemProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const isPureText = file.Type === "pure-text";
+  const [justDone, setJustDone] = useState(false);
+  const isPureText = file.Type === 'pure-text';
 
-  const handleAction = async () => {
+  const handleAction = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (isLoading) return;
-
     setIsLoading(true);
     try {
-      if (isPureText) {
-        await onCopy(file.Text || "");
-      } else {
-        await onDownload(file);
-      }
+      if (isPureText) await onCopy(file.Text || '');
+      else await onDownload(file);
+      setJustDone(true);
+      setTimeout(() => setJustDone(false), 1400);
     } finally {
       setIsLoading(false);
     }
@@ -31,83 +32,84 @@ export const FileItem = ({ file, onDownload, onCopy }: FileItemProps) => {
 
   const displaySize = isPureText
     ? file.Text
-      ? `${file.Text.length} characters`
-      : "No content"
+      ? `${file.Text.length} chars`
+      : 'empty'
     : calcFileSize(file.Size);
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.005, y: -1 }}
-      whileTap={{ scale: 0.995 }}
-      className={`clean-card px-4 sm:px-4 lg:px-5 py-3.5 sm:py-3 rounded-lg group cursor-pointer transition-all duration-200 ${
-        isPureText && file.Text ? "pb-4 sm:pb-4" : ""
-      }`}
+    <motion.li
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.32,
+        delay: Math.min(index * 0.025, 0.25),
+        ease: [0.16, 1, 0.3, 1],
+      }}
       onClick={handleAction}
+      className="surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-all hover:border-hairline-strong group"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
-          <motion.div
-            whileHover={{ rotate: 5 }}
-            className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center"
-          >
-            {getFileIcon(file.Type)}
-          </motion.div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <h3 className="text-sm sm:text-base font-medium text-gray-800 dark:text-gray-100 truncate">
-                {file.Name || "Untitled"}
-              </h3>
-              {isPureText && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="hidden sm:inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300 border border-primary-200/50 dark:border-primary-700/50"
-                >
-                  Text
-                </motion.span>
-              )}
-            </div>
+      <div className="flex items-center gap-3 sm:gap-3.5">
+        {/* Icon tile */}
+        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-md border flex items-center justify-center transition-colors ${
+          isPureText
+            ? 'border-olive/30 bg-olive/10'
+            : 'border-hairline bg-surface-elevated'
+        }`}>
+          {getFileIcon(file.Type)}
+        </div>
 
-            {/* 显示文本内容（仅纯文本类型） */}
-            {isPureText && file.Text && (
-              <div className="mt-1.5 sm:mt-2 pr-2">
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3 selectable">
-                  {file.Text}
-                </p>
-              </div>
-            )}
+        {/* Title + meta */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-ink text-[14px] sm:text-[15px] truncate">
+              {file.Name || (isPureText ? 'Untitled snippet' : 'Untitled')}
+            </h3>
+            {isPureText && <span className="badge-olive flex-shrink-0">TXT</span>}
+          </div>
 
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 tabular-nums">
-              {displaySize}
+          {/* Text preview — inline, single line */}
+          {isPureText && file.Text && (
+            <p className="mt-0.5 font-mono text-[12px] text-muted truncate selectable">
+              {file.Text}
             </p>
+          )}
+
+          <div className="mt-0.5 flex items-center gap-2 text-[12px] text-muted tabular-nums">
+            <span>{displaySize}</span>
+            {!isPureText && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-hairline-strong" />
+                <span className="uppercase tracking-wider">.{(file.Type || 'bin').toLowerCase()}</span>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Action button - always visible */}
-        <div className="flex items-center">
-          <motion.button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAction();
-            }}
-            disabled={isLoading}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="clean-button p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label={
-              isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`
-            }
-          >
-            {isLoading ? (
-              <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : isPureText ? (
-              <Copy size={14} className="sm:w-4 sm:h-4" />
-            ) : (
-              <Download size={14} className="sm:w-4 sm:h-4" />
-            )}
-          </motion.button>
-        </div>
+        {/* Primary action */}
+        <motion.button
+          onClick={handleAction}
+          disabled={isLoading}
+          whileTap={{ scale: 0.92 }}
+          className="btn-icon-olive flex-shrink-0 !w-10 !h-10 sm:!w-11 sm:!h-11 relative"
+          aria-label={isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`}
+        >
+          {isLoading ? (
+            <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
+          ) : justDone ? (
+            <motion.span
+              initial={{ scale: 0, rotate: -30 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 18 }}
+            >
+              <Check size={16} strokeWidth={2.8} />
+            </motion.span>
+          ) : isPureText ? (
+            <Copy size={15} strokeWidth={2.5} />
+          ) : (
+            <Download size={15} strokeWidth={2.5} />
+          )}
+        </motion.button>
       </div>
-    </motion.div>
+    </motion.li>
   );
 };

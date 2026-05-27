@@ -1,77 +1,62 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        primary: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#c34141',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
+        canvas: 'hsl(var(--canvas) / <alpha-value>)',
+        'surface-soft': 'hsl(var(--surface-soft) / <alpha-value>)',
+        'surface-card': 'hsl(var(--surface-card) / <alpha-value>)',
+        'surface-elevated': 'hsl(var(--surface-elevated) / <alpha-value>)',
+        hairline: 'hsl(var(--hairline) / <alpha-value>)',
+        'hairline-strong': 'hsl(var(--hairline-strong) / <alpha-value>)',
+        ink: 'hsl(var(--ink) / <alpha-value>)',
+        body: 'hsl(var(--body) / <alpha-value>)',
+        'body-strong': 'hsl(var(--body-strong) / <alpha-value>)',
+        muted: 'hsl(var(--muted) / <alpha-value>)',
+        'muted-soft': 'hsl(var(--muted-soft) / <alpha-value>)',
+        olive: {
+          DEFAULT: '#7C7E2C',
+          active: '#686A24',
+          disabled: '#2f3014',
         },
-        linear: {
-          bg: '#fafafa',
-          'bg-dark': '#0d0e10',
-          text: '#1a1a1a',
-          'text-dark': '#f6f8fa',
-          border: 'rgba(0, 0, 0, 0.08)',
-          'border-dark': 'rgba(255, 255, 255, 0.08)',
-        }
+        emerald: { DEFAULT: '#22c55e' },
+        rose: { DEFAULT: '#ef4444' },
+        info: { DEFAULT: '#3b82f6' },
       },
-      animation: {
-        'fade-in': 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        'scale-in': 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-        'pulse-subtle': 'pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      borderRadius: {
+        xs: '4px',
+        sm: '6px',
+        md: '8px',
+        lg: '12px',
       },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(2px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(4px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        scaleIn: {
-          '0%': { opacity: '0', transform: 'scale(0.98)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-        pulseSubtle: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.8' },
-        }
-      },
-      screens: {
-        'xs': '475px',
-      },
-      spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
+      letterSpacing: {
+        'display-xl': '-0.0347em',
+        'display-lg': '-0.0357em',
+        'display-md': '-0.0375em',
+        'display-sm': '-0.03125em',
+        'title-lg': '-0.0125em',
       },
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],
-      }
+        'display-xl': ['72px', { lineHeight: '1.05', fontWeight: '700' }],
+        'display-lg': ['56px', { lineHeight: '1.1', fontWeight: '700' }],
+        'display-md': ['40px', { lineHeight: '1.15', fontWeight: '700' }],
+        'display-sm': ['32px', { lineHeight: '1.2', fontWeight: '700' }],
+        'title-lg': ['24px', { lineHeight: '1.3', fontWeight: '700' }],
+        'title-md': ['18px', { lineHeight: '1.4', fontWeight: '600' }],
+        'title-sm': ['16px', { lineHeight: '1.4', fontWeight: '600' }],
+        stat: ['56px', { lineHeight: '1.0', fontWeight: '700' }],
+        'caption-up': ['12px', { lineHeight: '1.4', fontWeight: '600', letterSpacing: '0.125em' }],
+      },
+      spacing: {
+        section: '96px',
+      },
     },
   },
   plugins: [],
-}
+};

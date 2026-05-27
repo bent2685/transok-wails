@@ -1,4 +1,4 @@
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw, AlertOctagon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ErrorMessageProps {
@@ -8,39 +8,40 @@ interface ErrorMessageProps {
 
 export const ErrorMessage = ({ message, onRetry }: ErrorMessageProps) => {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 px-4"
+      transition={{ duration: 0.4 }}
+      className="surface-card rounded-lg p-8 sm:p-10 max-w-xl mx-auto"
     >
-      <motion.div 
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-        className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl clean-card flex items-center justify-center"
-      >
-        <AlertCircle size={20} className="sm:w-6 sm:h-6 text-red-500 dark:text-red-400" />
-      </motion.div>
-      <div className="space-y-2">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Something went wrong
-        </h3>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-sm sm:max-w-md">
-          {message}
-        </p>
-      </div>
-      {onRetry && (
-        <motion.button
-          onClick={onRetry}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="inline-flex items-center space-x-2 px-3 sm:px-4 py-2 text-sm sm:text-base font-medium
-                     clean-button rounded-lg text-gray-700 dark:text-gray-200"
+      <div className="flex items-start gap-4">
+        <div
+          className="flex-shrink-0 w-11 h-11 rounded-md flex items-center justify-center"
+          style={{ background: 'rgba(239, 68, 68, 0.12)' }}
         >
-          <RefreshCw size={14} className="sm:w-4 sm:h-4" />
-          <span>Try again</span>
-        </motion.button>
-      )}
+          <AlertOctagon size={20} className="text-rose" strokeWidth={2.2} />
+        </div>
+        <div className="flex-1 space-y-3">
+          <span className="caption-up text-rose">Error · 500</span>
+          <h3 className="text-title-lg text-ink" style={{ letterSpacing: '-0.0125em' }}>
+            Couldn’t load this share
+          </h3>
+          <p className="text-body text-sm leading-relaxed">{message}</p>
+          {onRetry && (
+            <div className="pt-2">
+              <motion.button
+                whileHover={{ y: -1 }}
+                whileTap={{ y: 0 }}
+                onClick={onRetry}
+                className="btn-primary"
+              >
+                <RefreshCw size={14} strokeWidth={2.5} />
+                <span>Retry</span>
+              </motion.button>
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 };

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const getFileIcon = (type: string) => {
-  const iconProps = { size: 20, className: "text-gray-500 dark:text-gray-400" };
+  const iconProps = { size: 18, strokeWidth: 2, className: "text-olive" };
   
   switch (type.toLowerCase()) {
     // 图片类型
