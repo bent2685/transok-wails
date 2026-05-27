@@ -1,6 +1,6 @@
-// ClickHouse 风格：电光黄是品牌电压，单色 + 黄的组合在明暗两套都保留。
+// 品牌电压：深橄榄绿黄（olive accent），明暗两套共用同一深色调，呈现工程感而非电光感。
 html.dark {
-  --primary-color: 62 100% 71%;     // #faff69 electric yellow
+  --primary-color: 61 48% 33%;      // #7C7E2C deep olive
   --text: 0 0% 100%;                // #ffffff on-dark
   --text-2: 0 0% 80%;               // #cccccc body
   --bg: 0 0% 10%;                   // #1a1a1a surface-card
@@ -14,9 +14,9 @@ html.dark {
   --list-active: 0 0% 14%;
 }
 
-// 浅色：从深色镜像映射 —— 单色阶按 L 翻转；黄色加深为芥末黄以在白底上保持可读。
+// 浅色：单色阶按 L 翻转；品牌橄榄黄保持同色，对白底亦有足够对比度。
 html {
-  --primary-color: 56 90% 38%;      // 深芥末黄，白底可辨识
+  --primary-color: 61 48% 33%;      // #7C7E2C deep olive
   --text: 0 0% 4%;                  // canvas 黑作为正文色
   --text-2: 0 0% 40%;               // muted 灰
   --bg: 0 0% 100%;                  // 纯白卡片底
@@ -28,7 +28,7 @@ html {
   --nav-h: 52px;
   --bg-0: 0 0% 100%;                // canvas 反相为白
   --app-border-color: 0 0% 80%;     // hairline-strong 反相
-  --list-active: 56 80% 88%;        // 选中态用极淡芥末呼应品牌
+  --list-active: 61 40% 90%;        // 选中态用极淡橄榄呼应品牌
 }
 
 

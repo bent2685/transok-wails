@@ -255,7 +255,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
             <div className="relative">
               <div className="absolute inset-0 bg-pri/30 blur-xl rd-full"></div>
               <div className="relative w-12 h-12 rd-3 bg-pri flex-center">
-                <div className="i-tabler:upload text-black text-6"></div>
+                <div className="i-tabler:upload text-white text-6"></div>
               </div>
             </div>
             <p className="mt-4 text-(3.5 text2) text-center max-w-72 line-height-1.5">
@@ -265,7 +265,7 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
             <Button
               size="sm"
               onClick={handleClick}
-              className="mt-3 bg-pri text-black font-700 px-5 h-8.5 rd-2 hover:(bg-pri brightness-95) active:(scale-95)">
+              className="mt-3 bg-pri text-white font-700 px-5 h-8.5 rd-2 hover:(bg-pri brightness-110) active:(scale-95)">
               <div className="i-tabler:plus mr-1 text-3.5"></div>
               {t('home.upload.button')}
             </Button>
