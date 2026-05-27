@@ -27,13 +27,13 @@
     </Directory>
 
     <DirectoryRef Id="INSTALLFOLDER">
-      <Component Id="MainExe" Guid="C1A2B3D4-5E6F-7081-9203-A4B5C6D7E8F9">
+      <Component Id="MainExe" Guid="C1A2B3D4-5E6F-7081-9203-A4B5C6D7E8F9" Win64="yes">
         <File Id="TransokExe" Source="$(var.AppExe)" KeyPath="yes" Checksum="yes" />
       </Component>
     </DirectoryRef>
 
     <DirectoryRef Id="AppMenuFolder">
-      <Component Id="StartMenuShortcut" Guid="D2B3C4E5-6F70-8192-A3B4-C5D6E7F80910">
+      <Component Id="StartMenuShortcut" Guid="D2B3C4E5-6F70-8192-A3B4-C5D6E7F80910" Win64="yes">
         <Shortcut Id="StartMenuLink"
                   Name="Transok"
                   Target="[INSTALLFOLDER]transok.exe"
@@ -44,7 +44,7 @@
     </DirectoryRef>
 
     <DirectoryRef Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="E3C4D5F6-7081-9203-B4C5-D6E7F8091122">
+      <Component Id="DesktopShortcut" Guid="E3C4D5F6-7081-9203-B4C5-D6E7F8091122" Win64="yes">
         <Shortcut Id="DesktopLink"
                   Name="Transok"
                   Target="[INSTALLFOLDER]transok.exe"
