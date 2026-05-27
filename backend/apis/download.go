@@ -1,15 +1,19 @@
 package apis
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"mime"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 	"transok/backend/domain/resp"
 	"transok/backend/domain/vo"
 	"transok/backend/services"
@@ -19,7 +23,11 @@ import (
 
 type DownloadApi struct{}
 
+// 256KB buffer：在 4KB / 1MB 之间折衷，吞吐与内存占用平衡。
+const downloadBufferSize = 256 * 1024
+
 // DownloadFile handles large file downloads efficiently with range support.
+// 同时支持 HEAD（仅返回元信息）与 GET（含 Range 分片）。
 func (d *DownloadApi) DownloadFile(c *gin.Context) {
 	filePathRaw := c.Query("filePath")
 	if filePathRaw == "" {
@@ -94,6 +102,8 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 	}
 	fileSize := fileInfo.Size()
 	fileName := filepath.Base(filePath)
+	modTime := fileInfo.ModTime()
+	etag := buildETag(filePath, fileSize, modTime)
 
 	// inline=1 → preview (image/text) in the browser; otherwise attachment download
 	inline := c.Query("inline") == "1"
@@ -110,9 +120,20 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 	c.Header("Content-Disposition", fmt.Sprintf("%s; filename*=UTF-8''%s", disposition, encodedName))
 	c.Header("Content-Type", contentType)
 	c.Header("Accept-Ranges", "bytes")
+	c.Header("ETag", etag)
+	c.Header("Last-Modified", modTime.UTC().Format(http.TimeFormat))
+	// 允许 SW / fetch 跨端读到必要响应头
+	c.Header("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges, ETag, Last-Modified")
 	c.Header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
 	c.Header("Pragma", "no-cache")
 	c.Header("Expires", "0")
+
+	// HEAD：只返头不返体，前端预探尺寸用
+	if c.Request.Method == http.MethodHead {
+		c.Header("Content-Length", strconv.FormatInt(fileSize, 10))
+		c.Status(http.StatusOK)
+		return
+	}
 
 	// Check if it's a Range request (breakpoint resume)
 	rangeHeader := c.GetHeader("Range")
@@ -136,7 +157,8 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 		end = fileSize - 1
 	}
 	if start > end || start >= fileSize {
-		resp.DataFormatErr().WithMsg("Invalid byte range").Out()
+		c.Header("Content-Range", fmt.Sprintf("bytes */%d", fileSize))
+		c.Status(http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
 
@@ -151,9 +173,7 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// Chunked transfer
-	const bufferSize = 4 * 1024 // 4KB
-	buffer := make([]byte, bufferSize)
+	buffer := make([]byte, downloadBufferSize)
 	reader := io.LimitReader(file, end-start+1)
 
 	for {
@@ -168,16 +188,14 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 			break
 		}
 		if err != nil {
-			resp.ServerErr().WithMsg("Read error").Out()
 			return
 		}
 	}
 }
 
-// Encapsulate file stream output
+// Encapsulate file stream output（无 Range 时使用）
 func httpServeFile(c *gin.Context, file *os.File) {
-	const bufferSize = 64 * 1024 // 64KB
-	buf := make([]byte, bufferSize)
+	buf := make([]byte, downloadBufferSize)
 	for {
 		n, err := file.Read(buf)
 		if n > 0 {
@@ -190,8 +208,15 @@ func httpServeFile(c *gin.Context, file *os.File) {
 			break
 		}
 		if err != nil {
-			resp.ServerErr().WithMsg("File read error").Out()
 			return
 		}
 	}
+}
+
+// buildETag 用 path+size+mtime 算稳定弱 ETag，便于客户端校验续传一致性。
+func buildETag(path string, size int64, mod time.Time) string {
+	h := sha1.New()
+	io.WriteString(h, path)
+	fmt.Fprintf(h, ":%d:%d", size, mod.UnixNano())
+	return `W/"` + hex.EncodeToString(h.Sum(nil))[:16] + `"`
 }

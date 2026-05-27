@@ -194,6 +194,7 @@ func (c *ginService) SetupRoutes() {
 		download.StaticFS("/page", http.FS(templatesFS))
 
 		download.GET("/index", con.DownloadFile)
+		download.HEAD("/index", con.DownloadFile)
 	}
 
 	discover := c.server.Group("/discover")
