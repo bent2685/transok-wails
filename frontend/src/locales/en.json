@@ -48,6 +48,11 @@
                 "noContent": "No content",
                 "editText": "Edit pure text",
                 "enterContent": "Please enter content"
+            },
+            "note": {
+                "title": "Additional Note",
+                "add": "Add note",
+                "placeholder": "Enter a note for this file"
             }
         }
     },

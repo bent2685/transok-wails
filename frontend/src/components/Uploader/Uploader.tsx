@@ -8,15 +8,23 @@ import { useConfirm } from '@/provider/confirm.provider'
 import { EventEmitter } from 'ahooks/lib/useEventEmitter'
 import { calcFileSize } from '@/utils/file.util'
 import React from 'react'
-import _ from 'lodash'
 import { useTranslation } from 'react-i18next'
 // 定义文件信息接口
 export interface FileInfo {
+  Id: string // 稳定唯一 id
   Name: string
   Size: number
   Path: string // 文件在设备中的绝对路径
   Type: string // 文件类型/扩展名
   Text?: string // 纯文本
+  Note?: string // 附加文本（仅文件类型使用）
+}
+
+const genId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
 export interface UploaderEvent {
@@ -84,10 +92,12 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
           display: true,
           text: t('home.upload.actions.pureText'),
           onClick: () => {
-            const newTextShare = {
+            const id = genId()
+            const newTextShare: FileInfo = {
+              Id: id,
               Type: 'pure-text',
               Name: 'Untitled',
-              Path: _.uniqueId('text-'),
+              Path: id,
               Size: 0,
               Text: ''
             }
@@ -164,11 +174,36 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
       return () => OnFileDropOff()
     }, [])
 
+    const editNote = async (file: FileInfo) => {
+      const result = await confirm({
+        title: t('home.upload.note.title'),
+        description: t('home.upload.note.placeholder'),
+        isPrompt: true,
+        defaultValue: file.Note || ''
+      })
+      if (result === false) return
+      const note = typeof result === 'string' ? result : ''
+      const newFiles = selectedFiles.map(f => (f.Id === file.Id ? { ...f, Note: note } : f))
+      setSelectedFiles(newFiles)
+      onFileSelect?.(newFiles)
+    }
+
     const renderListItem = (file: FileInfo) => {
       const renderCommon = () => (
-        <div className="flex flex-col line-height-1em">
+        <div className="flex flex-col line-height-1em min-w-0 flex-1">
           <span className="truncate font-bold text-(3.5 text) break-all">{file.Name}</span>
-          <span className="text-(3 text2) break-all">{calcFileSize(file.Size)}</span>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-(3 text2) break-all shrink-0">{calcFileSize(file.Size)}</span>
+            <span
+              className="text-(2.8 pri) cursor-pointer hover:underline truncate inline-flex items-center gap-0.5"
+              onClick={e => {
+                e.stopPropagation()
+                editNote(file)
+              }}>
+              <span className="i-tabler:message-plus text-3 shrink-0"></span>
+              <span className="truncate">{file.Note ? file.Note : t('home.upload.note.add')}</span>
+            </span>
+          </div>
         </div>
       )
 

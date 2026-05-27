@@ -1,9 +1,11 @@
 export interface FileItem {
+  Id?: string;
   Type: string;
   Name: string;
   Path: string;
   Size: number;
   Text?: string;
+  Note?: string;
 }
 
 export interface ShareData {

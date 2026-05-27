@@ -48,6 +48,11 @@
                 "noContent": "无内容",
                 "editText": "编辑纯文本",
                 "enterContent": "请输入内容"
+            },
+            "note": {
+                "title": "附加文本",
+                "add": "附加文本",
+                "placeholder": "为该文件附加一段说明"
             }
         }
     },

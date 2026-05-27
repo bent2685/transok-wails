@@ -48,6 +48,11 @@
                 "noContent": "無內容",
                 "editText": "編輯純文本",
                 "enterContent": "請輸入內容"
+            },
+            "note": {
+                "title": "附加文字",
+                "add": "附加文字",
+                "placeholder": "為該檔案附加一段說明"
             }
         }
     },

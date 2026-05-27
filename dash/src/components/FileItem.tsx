@@ -72,6 +72,12 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
             </p>
           )}
 
+          {!isPureText && file.Note && (
+            <p className="mt-0.5 text-[12px] text-muted line-clamp-1 italic">
+              {file.Note}
+            </p>
+          )}
+
           <div className="mt-0.5 flex items-center gap-2 text-[12px] text-muted tabular-nums">
             <span>{displaySize}</span>
             {!isPureText && (

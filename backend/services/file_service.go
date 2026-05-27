@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -16,11 +17,13 @@ type fileService struct {
 }
 
 type FileInfo struct {
+	Id   string
 	Path string
 	Name string
 	Size int64
 	Type string
 	Text string
+	Note string
 }
 
 var file *fileService
@@ -63,6 +66,7 @@ func (c *fileService) GetFile(path string) *FileInfo {
 
 	// Return file object
 	return &FileInfo{
+		Id:   uuid.New().String(),
 		Path: path,
 		Name: fileInfo.Name(),
 		Size: fileInfo.Size(),
@@ -89,8 +93,12 @@ func (c *fileService) GetShareList() []FileInfo {
 
 	validFiles := make([]FileInfo, 0)
 	for _, file := range result {
+		if file.Id == "" {
+			file.Id = uuid.New().String()
+		}
 		if file.Type == "pure-text" {
 			validFiles = append(validFiles, file)
+			continue
 		}
 
 		if _, err := os.Stat(file.Path); err == nil {

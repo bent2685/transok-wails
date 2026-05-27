@@ -127,8 +127,9 @@ function App() {
   }, []);
 
   const openItem = (file: FileItemType) => {
-    if (!file.Path) return;
-    window.location.hash = `item=${encodeURIComponent(file.Path)}`;
+    const key = file.Id || file.Path;
+    if (!key) return;
+    window.location.hash = `item=${encodeURIComponent(key)}`;
   };
 
   const closeDetail = () => {
@@ -152,7 +153,11 @@ function App() {
 
   const selectedFile = useMemo(() => {
     if (!selectedPath || !shareData) return null;
-    return shareData.shareList.find((f) => f.Path === selectedPath) ?? null;
+    return (
+      shareData.shareList.find((f) => f.Id === selectedPath) ??
+      shareData.shareList.find((f) => f.Path === selectedPath) ??
+      null
+    );
   }, [selectedPath, shareData]);
 
   const visibleList = useMemo(() => {

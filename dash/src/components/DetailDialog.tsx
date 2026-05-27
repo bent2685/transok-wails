@@ -97,6 +97,14 @@ export const DetailDialog = ({ file, onClose, onDownload, onCopy, buildInlineUrl
 
             {/* Body */}
             <div className="flex-1 overflow-auto scroll-clean p-4 sm:p-5">
+              {!isPureText && file.Note && (
+                <div className="mb-4 rounded-md border border-hairline bg-surface-soft px-3 py-2.5">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-soft mb-1">Note</div>
+                  <p className="text-[13px] text-body whitespace-pre-wrap break-words selectable">
+                    {file.Note}
+                  </p>
+                </div>
+              )}
               {isPureText ? (
                 <pre className="font-mono text-[13px] leading-relaxed text-body whitespace-pre-wrap break-words selectable">
                   {file.Text || <span className="text-muted-soft">empty</span>}
