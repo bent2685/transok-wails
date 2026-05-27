@@ -135,9 +135,11 @@ jobs:
   release:
     name: Attach to GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [macos, windows]
+    needs: [read-version, macos, windows]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -146,7 +148,22 @@ jobs:
       - name: Show files
         run: ls -lh dist
 
+      - name: Locate release notes
+        id: notes
+        run: |
+          ver="${{ needs.read-version.outputs.version }}"
+          notes="release/${ver}-release.md"
+          if [ ! -f "$notes" ]; then
+            echo "::error file=$notes::release notes not found. Create $notes before tagging v${ver}."
+            exit 1
+          fi
+          echo "path=$notes" >> "$GITHUB_OUTPUT"
+          echo "tag=v${ver}" >> "$GITHUB_OUTPUT"
+
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.notes.outputs.tag }}
+          name: ${{ steps.notes.outputs.tag }}
+          body_path: ${{ steps.notes.outputs.path }}
           files: dist/*
           fail_on_unmatched_files: true
