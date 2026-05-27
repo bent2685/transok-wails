@@ -119,6 +119,7 @@ The criterion for judgment: **If you would want to precisely roll back this spec
 * **Never `git push --force` to main / master.**
 * **Never push when the user hasn't explicitly asked you to.** Local commits are perfectly fine, but pushing introduces side effects.
 * **Never commit `.env` files, secret keys, or binaries larger than 1MB.**
+* **Never append trailers / sign-off footers to commit messages.** This includes `Co-Authored-By:`, `Signed-off-by:`, `Generated-by:`, `Reviewed-by:` and any similar `Key: Value` footer at the end of the message. The commit body ends with the last sentence — nothing after it.
 
 ### Mandatory Checklist When Committing
 
