@@ -121,13 +121,22 @@ const Home: React.FC = () => {
             {urlList.map((url, index) => (
               <div
                 key={index}
-                className="group flex items-center gap-2 px-3 py-2 rd-2 cursor-pointer border border-solid border-border bg-bg2/40 duration-200 hover:(bg-pri/10 border-pri/40) active:(scale-[0.99])"
+                className={cn(
+                  'group flex items-center gap-2.5 px-2.5 py-2.5 rd-2 cursor-pointer border border-solid duration-200 active:scale-[0.99]',
+                  index === 0
+                    ? 'border-pri/45 bg-pri/8 hover:(border-pri/60 bg-pri/12)'
+                    : 'border-border bg-bg2/40 hover:(border-pri/40 bg-pri/8)'
+                )}
                 onClick={async () => {
                   await copyText(url)
                   onConfirm()
                 }}>
-                <span className="i-tabler:link text-(3.5 text2) group-hover:text-pri duration-200 shrink-0"></span>
+                <span className="font-mono text-(3 text2) tabular-nums shrink-0 w-5 text-center group-hover:text-pri duration-200">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="w-px self-stretch bg-border group-hover:bg-pri/40 duration-200 shrink-0"></span>
                 <span className="flex-1 truncate font-mono text-(3 text) tracking-[0.2px]">{url}</span>
+                {index === 0 && <span className="i-tabler:star-filled text-(3 pri) shrink-0"></span>}
                 <span className="i-tabler:copy text-(3.5 text2) group-hover:text-pri duration-200 shrink-0"></span>
               </div>
             ))}
