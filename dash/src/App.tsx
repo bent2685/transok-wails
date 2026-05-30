@@ -608,8 +608,11 @@ const BrowseItem = ({
   onDownload: () => void;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const [thumbFailed, setThumbFailed] = useState(false);
+  const ext = entry.name.includes('.') ? entry.name.split('.').pop()! : '';
+  const showThumb = !entry.isDir && isImage(ext) && !thumbFailed;
+
+  const runDownload = async () => {
     if (isLoading) return;
     setIsLoading(true);
     try {
@@ -625,7 +628,7 @@ const BrowseItem = ({
       onEnter();
       return;
     }
-    handleDownload({ stopPropagation: () => {} } as React.MouseEvent);
+    runDownload();
   };
 
   return (
@@ -634,26 +637,35 @@ const BrowseItem = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: Math.min(index * 0.025, 0.25), ease: [0.16, 1, 0.3, 1] }}
       onClick={handleClick}
-      className="group rounded-lg p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-surface-card flex flex-col items-center text-center relative"
+      className="group rounded-lg p-2 cursor-pointer transition-colors hover:bg-surface-card flex flex-col items-center text-center relative"
     >
-      {/* Large filled icon — no surrounding card */}
-      <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px] flex items-center justify-center">
-        {entry.isDir ? (
-          <Folder size={56} className="text-olive" strokeWidth={1.5} fill="currentColor" fillOpacity={0.2} />
+      {/* Icon / thumbnail */}
+      <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+        {showThumb ? (
+          <img
+            src={ApiService.buildFolderInlineUrl(folderId, entry.relPath)}
+            alt={entry.name}
+            loading="lazy"
+            onError={() => setThumbFailed(true)}
+            className="w-full h-full object-cover rounded-md border border-hairline bg-surface-elevated"
+            style={{ imageOrientation: 'from-image' }}
+          />
+        ) : entry.isDir ? (
+          <Folder size={50} className="text-olive" strokeWidth={1.5} fill="currentColor" fillOpacity={0.2} />
         ) : (
-          <FileDown size={52} className="text-olive" strokeWidth={1.5} fill="currentColor" fillOpacity={0.16} />
+          getFileIcon(ext || 'other', 46)
         )}
 
         {/* Inline status badge while downloading */}
         {!entry.isDir && isLoading && (
-          <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-olive flex items-center justify-center">
+          <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-olive flex items-center justify-center border border-canvas">
             <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
           </span>
         )}
       </div>
 
       {/* Name */}
-      <h3 className="mt-2 w-full font-medium text-ink text-[12px] sm:text-[13px] line-clamp-2 break-words leading-snug">
+      <h3 className="mt-1.5 w-full font-medium text-ink text-[12px] line-clamp-2 break-words leading-snug">
         {entry.name}
       </h3>
 
