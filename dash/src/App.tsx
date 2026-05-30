@@ -539,8 +539,6 @@ function App() {
                           key={`${file.Name}-${index}`}
                           file={file}
                           index={index}
-                          onDownload={handleDownload}
-                          onCopy={handleCopy}
                           onOpen={openItem}
                         />
                       ))}
