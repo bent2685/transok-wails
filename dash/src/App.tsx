@@ -321,10 +321,10 @@ function App() {
               href="https://github.com"
               target="_blank"
               rel="noreferrer"
-              className="w-9 h-9 inline-flex items-center justify-center rounded-md text-muted hover:text-ink hover:bg-surface-elevated transition-colors"
+              className="w-9 h-9 inline-flex items-center justify-center rounded-md text-body hover:text-ink hover:bg-surface-elevated transition-colors"
               aria-label="GitHub"
             >
-              <Github size={15} strokeWidth={2.2} />
+              <Github size={16} strokeWidth={2.2} />
             </a>
             <ThemeToggleCompact />
           </div>
@@ -334,8 +334,8 @@ function App() {
       {/* Main scroll area */}
       <main className="flex-1 overflow-y-auto scroll-clean">
         <div className="max-w-[1080px] mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-12">
-          {/* Compact hero — title + total stat inline */}
-          <Header title="Transok" totalFiles={total} />
+          {/* Compact hero — count reflects current filter / browse view */}
+          <Header title="Transok" totalFiles={browse ? visibleEntries.length : visibleList.length} />
 
           {/* Toolbar — search + filter/breadcrumb + bulk action; sticky inside the scroll */}
           {!isLoading && !error && shareData && (browse || total > 0) && (
@@ -384,7 +384,7 @@ function App() {
                     <motion.button
                       whileTap={{ scale: 0.96 }}
                       onClick={downloadZip}
-                      className="btn-primary !h-10 !w-10 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
+                      className="btn-primary !h-10 !w-10 !px-0 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
                       aria-label="Download folder as zip"
                     >
                       <Archive size={14} strokeWidth={2.5} />
