@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type fileService struct {
@@ -45,7 +47,7 @@ func (c *fileService) Start(ctx context.Context) {
 /* Select multiple files */
 func (c *fileService) SelectFiles() []string {
 	// Open file selection dialog, allowing multiple selection
-	files, err := runtime.OpenMultipleFilesDialog(c.ctx, runtime.OpenDialogOptions{
+	files, err := wailsRuntime.OpenMultipleFilesDialog(c.ctx, wailsRuntime.OpenDialogOptions{
 		Title: "Select File",
 	})
 
@@ -56,6 +58,31 @@ func (c *fileService) SelectFiles() []string {
 	return files
 }
 
+/* Select a single folder（系统对话框无法同时选文件与文件夹，故单独入口） */
+func (c *fileService) SelectFolder() []string {
+	dir, err := wailsRuntime.OpenDirectoryDialog(c.ctx, wailsRuntime.OpenDialogOptions{
+		Title: "Select Folder",
+	})
+	if err != nil || dir == "" {
+		return nil
+	}
+	return []string{dir}
+}
+
+/* 在系统文件管理器中打开目录内部 */
+func (c *fileService) OpenInFileManager(path string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = exec.Command("open", path)
+	case "windows":
+		cmd = exec.Command("explorer", path)
+	default:
+		cmd = exec.Command("xdg-open", path)
+	}
+	return cmd.Start()
+}
+
 /* Get FileInfo object by absolute file path */
 func (c *fileService) GetFile(path string) *FileInfo {
 	// Get file information
@@ -64,13 +91,19 @@ func (c *fileService) GetFile(path string) *FileInfo {
 		return nil
 	}
 
+	// 目录作为共享文件夹项：内容不进快照，浏览时实时读盘
+	fileType := strings.TrimPrefix(strings.ToLower(filepath.Ext(path)), ".")
+	if fileInfo.IsDir() {
+		fileType = "folder"
+	}
+
 	// Return file object
 	return &FileInfo{
 		Id:   uuid.New().String(),
 		Path: path,
 		Name: fileInfo.Name(),
 		Size: fileInfo.Size(),
-		Type: strings.TrimPrefix(strings.ToLower(filepath.Ext(path)), "."),
+		Type: fileType,
 	}
 }
 
