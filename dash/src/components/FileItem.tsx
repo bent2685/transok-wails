@@ -50,7 +50,7 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
         ease: [0.16, 1, 0.3, 1],
       }}
       onClick={() => onOpen(file)}
-      className="surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-all hover:border-hairline-strong group"
+      className="surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors hover:border-hairline-strong group"
     >
       <div className="flex items-center gap-3 sm:gap-3.5">
         {/* Icon tile */}

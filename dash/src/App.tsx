@@ -624,7 +624,7 @@ const BrowseItem = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: Math.min(index * 0.025, 0.25), ease: [0.16, 1, 0.3, 1] }}
       onClick={entry.isDir ? onEnter : undefined}
-      className={`surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 transition-all hover:border-hairline-strong group ${
+      className={`surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 transition-colors hover:border-hairline-strong group ${
         entry.isDir ? 'cursor-pointer' : ''
       }`}
     >
