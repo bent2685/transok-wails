@@ -23,6 +23,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
   const [query, setQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false); // 桌面端搜索折叠态
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   // 浏览态：进入某个共享文件夹后由 URL hash 驱动（#folder=<id>&sub=<rel>）
@@ -369,82 +370,77 @@ function App() {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Search */}
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search
-                    size={14}
-                    strokeWidth={2.2}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder={browse ? 'Search in this folder…' : 'Search name, text, or extension…'}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="text-input !h-10 !pl-9 !pr-9 text-sm"
-                  />
-                  {query && (
-                    <button
-                      onClick={() => setQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded text-muted hover:text-ink hover:bg-surface-elevated"
-                      aria-label="Clear search"
-                    >
-                      <X size={12} strokeWidth={2.4} />
-                    </button>
-                  )}
-                </div>
-
+              <div className="flex items-center gap-2 sm:gap-3">
                 {browse ? (
-                  /* Browse mode — zip the current directory */
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={downloadZip}
-                    className="btn-primary !h-10 !px-3.5 text-[13px]"
-                    aria-label="Download folder as zip"
-                  >
-                    <Archive size={14} strokeWidth={2.5} />
-                    <span className="hidden sm:inline">Download .zip</span>
-                  </motion.button>
+                  <>
+                    {/* Left spacer keeps zip action right-aligned */}
+                    <div className="flex-1" />
+                    <SearchControl
+                      query={query}
+                      setQuery={setQuery}
+                      open={searchOpen}
+                      setOpen={setSearchOpen}
+                      placeholder="Search in this folder…"
+                    />
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={downloadZip}
+                      className="btn-primary !h-10 !px-3.5 text-[13px] shrink-0"
+                      aria-label="Download folder as zip"
+                    >
+                      <Archive size={14} strokeWidth={2.5} />
+                      <span className="hidden sm:inline">Download .zip</span>
+                    </motion.button>
+                  </>
                 ) : (
                   <>
-                    {/* Filter chips */}
-                    <div className="flex items-center gap-1 p-1 rounded-md bg-surface-elevated border border-hairline">
-                      <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
-                        All
-                      </FilterChip>
-                      <FilterChip
-                        active={filter === 'folder'}
-                        onClick={() => setFilter('folder')}
-                        count={folderCount}
-                        disabled={folderCount === 0}
-                      >
-                        Folders
-                      </FilterChip>
-                      <FilterChip
-                        active={filter === 'file'}
-                        onClick={() => setFilter('file')}
-                        count={fileCount}
-                        disabled={fileCount === 0}
-                      >
-                        Files
-                      </FilterChip>
-                      <FilterChip
-                        active={filter === 'text'}
-                        onClick={() => setFilter('text')}
-                        count={textCount}
-                        disabled={textCount === 0}
-                      >
-                        Text
-                      </FilterChip>
+                    {/* Segmented filter — scrolls horizontally on narrow screens */}
+                    <div className="flex-1 min-w-0 overflow-x-auto scroll-clean -mx-1 px-1">
+                      <div className="inline-flex items-center gap-0.5 p-1 rounded-lg bg-surface-card border border-hairline">
+                        <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
+                          All
+                        </FilterChip>
+                        <FilterChip
+                          active={filter === 'folder'}
+                          onClick={() => setFilter('folder')}
+                          count={folderCount}
+                          disabled={folderCount === 0}
+                        >
+                          Folders
+                        </FilterChip>
+                        <FilterChip
+                          active={filter === 'file'}
+                          onClick={() => setFilter('file')}
+                          count={fileCount}
+                          disabled={fileCount === 0}
+                        >
+                          Files
+                        </FilterChip>
+                        <FilterChip
+                          active={filter === 'text'}
+                          onClick={() => setFilter('text')}
+                          count={textCount}
+                          disabled={textCount === 0}
+                        >
+                          Text
+                        </FilterChip>
+                      </div>
                     </div>
+
+                    <SearchControl
+                      query={query}
+                      setQuery={setQuery}
+                      open={searchOpen}
+                      setOpen={setSearchOpen}
+                      placeholder="Search name, text, or extension…"
+                    />
 
                     {/* Bulk download */}
                     {fileCount > 0 && (
                       <motion.button
                         whileTap={{ scale: 0.96 }}
                         onClick={handleDownloadAll}
-                        className="btn-primary !h-10 !px-3.5 text-[13px]"
+                        className="btn-primary !h-10 !w-10 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
                         aria-label="Download all files"
                       >
                         <DownloadCloud size={14} strokeWidth={2.5} />
@@ -505,7 +501,7 @@ function App() {
                       </p>
                     </div>
                   ) : (
-                    <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-1.5">
+                    <ul className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-1.5">
                       {visibleEntries.map((entry, index) => (
                         <BrowseItem
                           key={entry.relPath}
@@ -534,7 +530,7 @@ function App() {
                   ) : visibleList.length === 0 ? (
                     <NoMatchState onClear={() => { setQuery(''); setFilter('all'); }} />
                   ) : (
-                    <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-1.5">
+                    <ul className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-1.5">
                       {visibleList.map((file, index) => (
                         <FileItem
                           key={`${file.Name}-${index}`}
@@ -581,10 +577,10 @@ const FilterChip = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded text-[12px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+    className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12px] font-semibold whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
       active
-        ? 'bg-canvas text-ink shadow-sm'
-        : 'text-muted hover:text-ink'
+        ? 'bg-olive/15 text-ink'
+        : 'text-muted hover:text-ink hover:bg-surface-elevated'
     }`}
   >
     <span>{children}</span>
@@ -593,6 +589,87 @@ const FilterChip = ({
     </span>
   </button>
 );
+
+// 搜索控件：桌面端折叠为图标、点击向左展开；移动端直接显示输入框
+const SearchControl = ({
+  query,
+  setQuery,
+  open,
+  setOpen,
+  placeholder,
+}: {
+  query: string;
+  setQuery: (v: string) => void;
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  placeholder: string;
+}) => {
+  const expanded = open || !!query;
+  return (
+    <>
+      {/* Mobile: always-visible full input */}
+      <div className="relative flex-1 min-w-0 sm:hidden">
+        <Search size={14} strokeWidth={2.2} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+        <input
+          type="text"
+          inputMode="search"
+          placeholder={placeholder}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="text-input !h-10 !pl-9 !pr-9 text-sm w-full"
+        />
+        {query && (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded text-muted hover:text-ink hover:bg-surface-elevated"
+            aria-label="Clear search"
+          >
+            <X size={12} strokeWidth={2.4} />
+          </button>
+        )}
+      </div>
+
+      {/* Desktop: collapsible icon → input */}
+      <div className="hidden sm:block shrink-0">
+        <motion.div
+          animate={{ width: expanded ? 240 : 40 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="relative h-10 overflow-hidden"
+        >
+          <button
+            onClick={() => setOpen(true)}
+            className={`absolute left-0 top-0 w-10 h-10 inline-flex items-center justify-center rounded-md text-muted transition-colors ${
+              expanded ? 'pointer-events-none' : 'hover:text-ink hover:bg-surface-elevated'
+            }`}
+            aria-label="Search"
+          >
+            <Search size={16} strokeWidth={2.2} className={expanded ? 'text-muted' : ''} />
+          </button>
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={query}
+            autoFocus={open}
+            onChange={(e) => setQuery(e.target.value)}
+            onBlur={() => { if (!query) setOpen(false); }}
+            className={`text-input !h-10 !pl-9 !pr-9 text-sm w-full transition-opacity ${
+              expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          />
+          {expanded && query && (
+            <button
+              onClick={() => { setQuery(''); setOpen(false); }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded text-muted hover:text-ink hover:bg-surface-elevated"
+              aria-label="Clear search"
+            >
+              <X size={12} strokeWidth={2.4} />
+            </button>
+          )}
+        </motion.div>
+      </div>
+    </>
+  );
+};
 
 const BrowseItem = ({
   entry,
