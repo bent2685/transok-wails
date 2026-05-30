@@ -1,5 +1,3 @@
-import { GetLocalIp } from '@wa/services/SystemService'
-
 /* Copy text */
 export const copyText = async (text: string): Promise<boolean> => {
   try {
@@ -24,19 +22,4 @@ export const copyText = async (text: string): Promise<boolean> => {
     console.error('Copy failed:', error)
     return false
   }
-}
-
-/* Recursively get n layers of IPs; stop if 127.0.0.1 */
-export const getLocalIpsDepth = async (depth: number, excludeIps: string[] = []): Promise<string[]> => {
-  // Return current results if depth is not -1 and <= 0
-  if (depth !== -1 && depth <= 0) {
-    return excludeIps
-  }
-
-  const ip = await GetLocalIp(excludeIps)
-  if (ip === '127.0.0.1') {
-    excludeIps.push(ip)
-    return excludeIps
-  }
-  return getLocalIpsDepth(depth === -1 ? -1 : depth - 1, [...excludeIps, ip])
 }

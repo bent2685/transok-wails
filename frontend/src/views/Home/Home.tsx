@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { GetAppInfo, GetLocalIp } from '@wa/services/SystemService'
+import { GetAppInfo, GetLocalIps } from '@wa/services/SystemService'
 import { FileInfo, Uploader, UploaderEvent, UploaderRef } from '@/components/Uploader/Uploader'
 import { Set, Delete, Get, GetKeys } from '@wa/services/StorageService'
 import { Start, Stop } from '@wa/app/ginService'
@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import DialogCaptcha, { DialogCaptchaRef } from '@/components/Captcha/DialogCaptcha'
 import { GetCaptcha, SetCaptcha } from '@wa/services/ShareService'
-import { copyText, getLocalIpsDepth } from '@/utils/common.util'
+import { copyText } from '@/utils/common.util'
 import { toast } from 'sonner'
 const Home: React.FC = () => {
   const { t } = useTranslation()
@@ -110,7 +110,7 @@ const Home: React.FC = () => {
   event$.useSubscription(async payload => {
     const { type, data } = payload
     if (type === 'copy-link') {
-      const ips = await getLocalIpsDepth(2)
+      const ips = (await GetLocalIps()).slice(0, 3)
       const urlList = ips.map(ip => `http://${ip}:${port}/download/page`)
 
       const ok = await slotConfirm({

@@ -1,5 +1,7 @@
 import BackBtn from '@/components/BackBtn/BacKBtn'
-import { copyText, getLocalIpsDepth } from '@/utils/common.util'
+import { cn } from '@/lib/utils'
+import { copyText } from '@/utils/common.util'
+import { GetLocalIps } from '@wa/services/SystemService'
 import { Get } from '@wa/services/StorageService'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,7 +19,7 @@ const ViewAllUrl: React.FC<IViewAllUrl> = props => {
   const [allUrl, setAllUrl] = useState<string[]>([])
   const [port, setPort] = useState('')
   const syncAllUrl = async () => {
-    const ips = await getLocalIpsDepth(-1)
+    const ips = await GetLocalIps()
     const urlList = ips.map(ip => `http://${ip}:${port}/download/page`)
     setAllUrl(urlList)
   }
