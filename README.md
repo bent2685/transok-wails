@@ -35,7 +35,7 @@
 - [x] Folder sharing (add a whole folder; recipients browse subfolders, download files individually or the current directory as a zip)
 - [x] Live folder contents (read on each visit, auto-reflecting changes on disk)
 - [x] Reveal a shared folder in the system file manager (Finder / Explorer / Files)
-- [x] Finder-style download grid (image thumbnails, note badges, collapsible search, category filters)
+- [x] Image thumbnails on the download page
 - [x] Per-file additional note (attach a remark to any shared file, visible on the download page)
 - [x] Detail dialog on download page with multi-line text & image preview
 - [x] Resilient large-file downloads (Service Worker + HEAD/ETag + 256KB streaming)
