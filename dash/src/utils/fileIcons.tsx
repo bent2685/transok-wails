@@ -12,6 +12,10 @@ import {
   Keyboard
 } from 'lucide-react';
 
+const IMAGE_TYPES = new Set(['jpg', 'jpeg', 'png', 'gif', 'svg', 'bmp', 'webp', 'avif', 'ico']);
+
+export const isImage = (type: string): boolean => IMAGE_TYPES.has((type || '').toLowerCase());
+
 export const getFileIcon = (type: string, size: number = 18) => {
   // filled 风格：olive 实心填充 + 细描边，接近 macOS Finder 的实心图标观感
   const iconProps = {

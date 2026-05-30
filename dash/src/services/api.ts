@@ -93,6 +93,22 @@ export class ApiService {
     return data.data;
   }
 
+  /** 散文件的内联预览地址（图片缩略图 / 浏览器内预览） */
+  static buildInlineUrl(filePath: string): string {
+    const captcha = this.getCaptcha();
+    let url = `${baseUrl}/download/index?inline=1&filePath=${encodeURIComponent(filePath)}`;
+    if (captcha) url += `&captcha-key=${encodeURIComponent(captcha)}`;
+    return url;
+  }
+
+  /** 共享文件夹内文件的内联预览地址 */
+  static buildFolderInlineUrl(folderId: string, sub: string): string {
+    const captcha = this.getCaptcha();
+    let url = `${baseUrl}/download/index?inline=1&folderId=${encodeURIComponent(folderId)}&sub=${encodeURIComponent(sub)}`;
+    if (captcha) url += `&captcha-key=${encodeURIComponent(captcha)}`;
+    return url;
+  }
+
   /** 共享文件夹内某层目录的 zip 打包下载地址（原生 <a> 下载，无进度） */
   static buildZipUrl(folderId: string, sub: string): string {
     const params = new URLSearchParams({ folderId, sub });

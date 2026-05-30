@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Github, Search, X, DownloadCloud, Inbox, Folder, FileDown, ChevronRight, Archive, FolderOpen } from 'lucide-react';
+import { Database, Github, Search, X, DownloadCloud, Inbox, Folder, ChevronRight, Archive, FolderOpen } from 'lucide-react';
 import { FileItem } from './components/FileItem';
 import { Header } from './components/Header';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -13,7 +13,7 @@ import { useToast } from './components/Toast';
 import { useCopy } from './hooks/useCopy';
 import { ApiService } from './services/api';
 import { FileItem as FileItemType, ShareData, BrowseData, BrowseEntry } from './types';
-import { calcFileSize } from './utils/fileIcons';
+import { calcFileSize, isImage, getFileIcon } from './utils/fileIcons';
 
 type Filter = 'all' | 'folder' | 'file' | 'text';
 
@@ -505,12 +505,13 @@ function App() {
                       </p>
                     </div>
                   ) : (
-                    <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+                    <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-1.5">
                       {visibleEntries.map((entry, index) => (
                         <BrowseItem
                           key={entry.relPath}
                           entry={entry}
                           index={index}
+                          folderId={browse.folderId}
                           onEnter={() => navigateSub(entry.relPath)}
                           onDownload={() => handleBrowseEntryDownload(entry)}
                         />
@@ -533,7 +534,7 @@ function App() {
                   ) : visibleList.length === 0 ? (
                     <NoMatchState onClear={() => { setQuery(''); setFilter('all'); }} />
                   ) : (
-                    <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+                    <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-1.5">
                       {visibleList.map((file, index) => (
                         <FileItem
                           key={`${file.Name}-${index}`}
@@ -596,11 +597,13 @@ const FilterChip = ({
 const BrowseItem = ({
   entry,
   index,
+  folderId,
   onEnter,
   onDownload,
 }: {
   entry: BrowseEntry;
   index: number;
+  folderId: string;
   onEnter: () => void;
   onDownload: () => void;
 }) => {
