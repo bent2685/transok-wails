@@ -180,6 +180,7 @@ func (c *ginService) SetupRoutes() {
 	{
 		con := apis.ShareApi{}
 		share.POST("/list", con.ShareList)
+		share.GET("/browse", con.Browse)
 	}
 
 	download := c.server.Group("/download")
@@ -195,6 +196,7 @@ func (c *ginService) SetupRoutes() {
 
 		download.GET("/index", con.DownloadFile)
 		download.HEAD("/index", con.DownloadFile)
+		download.GET("/zip", con.DownloadZip)
 	}
 
 	discover := c.server.Group("/discover")
