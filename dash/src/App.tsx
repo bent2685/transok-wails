@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Github, Search, X, DownloadCloud, Inbox, Folder, ChevronRight, Archive, FolderOpen } from 'lucide-react';
+import { Database, Github, Search, X, DownloadCloud, Inbox, Folder, ChevronRight, Archive, FolderOpen, LayoutGrid, File, Type } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { FileItem } from './components/FileItem';
 import { Header } from './components/Header';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -370,11 +371,9 @@ function App() {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 {browse ? (
-                  <>
-                    {/* Left spacer keeps zip action right-aligned */}
-                    <div className="flex-1" />
+                  <div className="flex items-center gap-2 sm:gap-3 sm:ml-auto">
                     <SearchControl
                       query={query}
                       setQuery={setQuery}
@@ -385,68 +384,70 @@ function App() {
                     <motion.button
                       whileTap={{ scale: 0.96 }}
                       onClick={downloadZip}
-                      className="btn-primary !h-10 !px-3.5 text-[13px] shrink-0"
+                      className="btn-primary !h-10 !w-10 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
                       aria-label="Download folder as zip"
                     >
                       <Archive size={14} strokeWidth={2.5} />
                       <span className="hidden sm:inline">Download .zip</span>
                     </motion.button>
-                  </>
+                  </div>
                 ) : (
                   <>
-                    {/* Segmented filter — scrolls horizontally on narrow screens */}
-                    <div className="flex-1 min-w-0 overflow-x-auto scroll-clean -mx-1 px-1">
-                      <div className="inline-flex items-center gap-0.5 p-1 rounded-lg bg-surface-card border border-hairline">
-                        <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
-                          All
-                        </FilterChip>
-                        <FilterChip
-                          active={filter === 'folder'}
-                          onClick={() => setFilter('folder')}
-                          count={folderCount}
-                          disabled={folderCount === 0}
-                        >
-                          Folders
-                        </FilterChip>
-                        <FilterChip
-                          active={filter === 'file'}
-                          onClick={() => setFilter('file')}
-                          count={fileCount}
-                          disabled={fileCount === 0}
-                        >
-                          Files
-                        </FilterChip>
-                        <FilterChip
-                          active={filter === 'text'}
-                          onClick={() => setFilter('text')}
-                          count={textCount}
-                          disabled={textCount === 0}
-                        >
-                          Text
-                        </FilterChip>
-                      </div>
+                    {/* Segmented filter — own row on mobile (icon-only), inline on desktop */}
+                    <div className="inline-flex items-center gap-0.5 p-1 rounded-lg bg-surface-card border border-hairline self-start sm:self-auto">
+                      <FilterChip icon={LayoutGrid} active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
+                        All
+                      </FilterChip>
+                      <FilterChip
+                        icon={Folder}
+                        active={filter === 'folder'}
+                        onClick={() => setFilter('folder')}
+                        count={folderCount}
+                        disabled={folderCount === 0}
+                      >
+                        Folders
+                      </FilterChip>
+                      <FilterChip
+                        icon={File}
+                        active={filter === 'file'}
+                        onClick={() => setFilter('file')}
+                        count={fileCount}
+                        disabled={fileCount === 0}
+                      >
+                        Files
+                      </FilterChip>
+                      <FilterChip
+                        icon={Type}
+                        active={filter === 'text'}
+                        onClick={() => setFilter('text')}
+                        count={textCount}
+                        disabled={textCount === 0}
+                      >
+                        Text
+                      </FilterChip>
                     </div>
 
-                    <SearchControl
-                      query={query}
-                      setQuery={setQuery}
-                      open={searchOpen}
-                      setOpen={setSearchOpen}
-                      placeholder="Search name, text, or extension…"
-                    />
-
-                    {/* Bulk download */}
-                    {fileCount > 0 && (
-                      <motion.button
-                        whileTap={{ scale: 0.96 }}
-                        onClick={handleDownloadAll}
-                        className="btn-primary !h-10 !w-10 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
-                        aria-label="Download all files"
-                      >
-                        <DownloadCloud size={14} strokeWidth={2.5} />
-                        <span className="hidden sm:inline">Download all</span>
-                      </motion.button>
-                    )}
+                    {/* Search + bulk download — right cluster (second row on mobile) */}
+                    <div className="flex items-center gap-2 sm:gap-3 sm:ml-auto">
+                      <SearchControl
+                        query={query}
+                        setQuery={setQuery}
+                        open={searchOpen}
+                        setOpen={setSearchOpen}
+                        placeholder="Search name, text, or extension…"
+                      />
+                      {fileCount > 0 && (
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
+                          onClick={handleDownloadAll}
+                          className="btn-primary !h-10 !w-10 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
+                          aria-label="Download all files"
+                        >
+                          <DownloadCloud size={14} strokeWidth={2.5} />
+                          <span className="hidden sm:inline">Download all</span>
+                        </motion.button>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -566,25 +567,29 @@ const FilterChip = ({
   onClick,
   count,
   disabled,
+  icon: Icon,
   children,
 }: {
   active: boolean;
   onClick: () => void;
   count: number;
   disabled?: boolean;
+  icon: LucideIcon;
   children: React.ReactNode;
 }) => (
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12px] font-semibold whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+    title={typeof children === 'string' ? children : undefined}
+    className={`relative inline-flex items-center justify-center gap-1.5 h-8 w-8 sm:w-auto sm:px-3 rounded-md text-[12px] font-semibold whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
       active
         ? 'bg-olive/15 text-ink'
         : 'text-muted hover:text-ink hover:bg-surface-elevated'
     }`}
   >
-    <span>{children}</span>
-    <span className={`tabular-nums text-[11px] ${active ? 'text-olive' : 'text-muted-soft'}`}>
+    <Icon size={15} strokeWidth={2.2} className={active ? 'text-olive' : ''} />
+    <span className="hidden sm:inline">{children}</span>
+    <span className={`hidden sm:inline tabular-nums text-[11px] ${active ? 'text-olive' : 'text-muted-soft'}`}>
       {count}
     </span>
   </button>
