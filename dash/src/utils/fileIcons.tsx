@@ -12,9 +12,9 @@ import {
   Keyboard
 } from 'lucide-react';
 
-export const getFileIcon = (type: string) => {
-  const iconProps = { size: 18, strokeWidth: 2, className: "text-olive" };
-  
+export const getFileIcon = (type: string, size: number = 18) => {
+  const iconProps = { size, strokeWidth: 2, className: "text-olive" };
+
   switch (type.toLowerCase()) {
     // 图片类型
     case 'jpg':

@@ -87,7 +87,7 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
       }`}>
         {isFolder
           ? <Folder size={30} className="text-olive" strokeWidth={2} />
-          : getFileIcon(file.Type, 'w-7 h-7')}
+          : getFileIcon(file.Type, 28)}
       </div>
 
       {/* Name */}
