@@ -505,7 +505,7 @@ function App() {
                       </p>
                     </div>
                   ) : (
-                    <ul className="space-y-2.5 sm:space-y-3">
+                    <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
                       {visibleEntries.map((entry, index) => (
                         <BrowseItem
                           key={entry.relPath}
@@ -533,7 +533,7 @@ function App() {
                   ) : visibleList.length === 0 ? (
                     <NoMatchState onClear={() => { setQuery(''); setFilter('all'); }} />
                   ) : (
-                    <ul className="space-y-2.5 sm:space-y-3">
+                    <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
                       {visibleList.map((file, index) => (
                         <FileItem
                           key={`${file.Name}-${index}`}
@@ -624,45 +624,46 @@ const BrowseItem = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: Math.min(index * 0.025, 0.25), ease: [0.16, 1, 0.3, 1] }}
       onClick={entry.isDir ? onEnter : undefined}
-      className={`surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 transition-colors hover:border-hairline-strong group ${
+      className={`surface-card rounded-lg p-3.5 sm:p-4 transition-colors hover:border-hairline-strong group flex flex-col items-center text-center relative ${
         entry.isDir ? 'cursor-pointer' : ''
       }`}
     >
-      <div className="flex items-center gap-3 sm:gap-3.5">
-        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-md border flex items-center justify-center ${
-          entry.isDir ? 'border-olive/30 bg-olive/10' : 'border-hairline bg-surface-elevated'
-        }`}>
-          {entry.isDir ? (
-            <Folder size={18} className="text-olive" strokeWidth={2.2} />
+      {/* Download action — top-right corner; folders enter on card click instead */}
+      {!entry.isDir && (
+        <motion.button
+          onClick={handleDownload}
+          disabled={isLoading}
+          whileTap={{ scale: 0.92 }}
+          className="btn-icon-olive absolute top-2 right-2 !w-8 !h-8 z-10"
+          aria-label={`Download ${entry.name}`}
+        >
+          {isLoading ? (
+            <div className="w-3.5 h-3.5 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
           ) : (
-            <FileDown size={17} className="text-muted" strokeWidth={2.2} />
+            <FileDown size={13} strokeWidth={2.5} />
           )}
-        </div>
+        </motion.button>
+      )}
 
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-ink text-[14px] sm:text-[15px] truncate">{entry.name}</h3>
-          <div className="mt-0.5 text-[12px] text-muted tabular-nums">
-            {entry.isDir ? 'Folder' : calcFileSize(entry.size)}
-          </div>
-        </div>
-
+      {/* Large icon tile */}
+      <div className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-lg border flex items-center justify-center ${
+        entry.isDir ? 'border-olive/30 bg-olive/10' : 'border-hairline bg-surface-elevated'
+      }`}>
         {entry.isDir ? (
-          <ChevronRight size={16} className="flex-shrink-0 text-muted-soft group-hover:text-muted transition-colors" />
+          <Folder size={30} className="text-olive" strokeWidth={2} />
         ) : (
-          <motion.button
-            onClick={handleDownload}
-            disabled={isLoading}
-            whileTap={{ scale: 0.92 }}
-            className="btn-icon-olive flex-shrink-0 !w-10 !h-10 sm:!w-11 sm:!h-11"
-            aria-label={`Download ${entry.name}`}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <FileDown size={15} strokeWidth={2.5} />
-            )}
-          </motion.button>
+          <FileDown size={26} className="text-muted" strokeWidth={2} />
         )}
+      </div>
+
+      {/* Name */}
+      <h3 className="mt-3 w-full font-semibold text-ink text-[13px] sm:text-[14px] line-clamp-2 break-words leading-snug">
+        {entry.name}
+      </h3>
+
+      {/* Meta */}
+      <div className="mt-1 text-[11px] text-muted tabular-nums">
+        {entry.isDir ? 'Folder' : calcFileSize(entry.size)}
       </div>
     </motion.li>
   );

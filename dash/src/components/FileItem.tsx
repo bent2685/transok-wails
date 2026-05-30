@@ -1,4 +1,4 @@
-import { Download, Copy, Check, ChevronRight, Folder } from 'lucide-react';
+import { Download, Copy, Check, Folder } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileItem as FileItemType } from '../types';
@@ -50,76 +50,60 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
         ease: [0.16, 1, 0.3, 1],
       }}
       onClick={() => onOpen(file)}
-      className="surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors hover:border-hairline-strong group"
+      className="surface-card rounded-lg p-3.5 sm:p-4 cursor-pointer transition-colors hover:border-hairline-strong group flex flex-col items-center text-center relative"
     >
-      <div className="flex items-center gap-3 sm:gap-3.5">
-        {/* Icon tile */}
-        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-md border flex items-center justify-center transition-colors ${
-          isPureText || isFolder
-            ? 'border-olive/30 bg-olive/10'
-            : 'border-hairline bg-surface-elevated'
-        }`}>
-          {isFolder ? <Folder size={18} className="text-olive" strokeWidth={2.2} /> : getFileIcon(file.Type)}
-        </div>
-
-        {/* Title + meta */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-ink text-[14px] sm:text-[15px] truncate">
-            {file.Name || (isPureText ? 'Untitled snippet' : 'Untitled')}
-          </h3>
-
-          {/* Text preview — up to 2 lines, newlines preserved */}
-          {isPureText && file.Text && (
-            <p className="mt-0.5 font-mono text-[12px] text-muted line-clamp-2">
-              {file.Text}
-            </p>
+      {/* Primary action — top-right corner; folders enter on card click instead */}
+      {!isFolder && (
+        <motion.button
+          onClick={handleAction}
+          disabled={isLoading}
+          whileTap={{ scale: 0.92 }}
+          className="btn-icon-olive absolute top-2 right-2 !w-8 !h-8 z-10"
+          aria-label={isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`}
+        >
+          {isLoading ? (
+            <div className="w-3.5 h-3.5 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
+          ) : justDone ? (
+            <motion.span
+              initial={{ scale: 0, rotate: -30 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 18 }}
+            >
+              <Check size={14} strokeWidth={2.8} />
+            </motion.span>
+          ) : isPureText ? (
+            <Copy size={13} strokeWidth={2.5} />
+          ) : (
+            <Download size={13} strokeWidth={2.5} />
           )}
+        </motion.button>
+      )}
 
-          {!isPureText && file.Note && (
-            <p className="mt-0.5 text-[12px] text-muted line-clamp-1 italic">
-              {file.Note}
-            </p>
-          )}
+      {/* Large icon tile */}
+      <div className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-lg border flex items-center justify-center transition-colors ${
+        isPureText || isFolder
+          ? 'border-olive/30 bg-olive/10'
+          : 'border-hairline bg-surface-elevated'
+      }`}>
+        {isFolder
+          ? <Folder size={30} className="text-olive" strokeWidth={2} />
+          : getFileIcon(file.Type, 'w-7 h-7')}
+      </div>
 
-          <div className="mt-0.5 flex items-center gap-2 text-[12px] text-muted tabular-nums">
-            <span>{displaySize}</span>
-            {!isPureText && !isFolder && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-hairline-strong" />
-                <span className="uppercase tracking-wider">.{(file.Type || 'bin').toLowerCase()}</span>
-              </>
-            )}
-          </div>
-        </div>
+      {/* Name */}
+      <h3 className="mt-3 w-full font-semibold text-ink text-[13px] sm:text-[14px] line-clamp-2 break-words leading-snug">
+        {file.Name || (isPureText ? 'Untitled snippet' : 'Untitled')}
+      </h3>
 
-        {/* Primary action — folders have no inline action, the row click enters */}
-        {!isFolder && (
-          <motion.button
-            onClick={handleAction}
-            disabled={isLoading}
-            whileTap={{ scale: 0.92 }}
-            className="btn-icon-olive flex-shrink-0 !w-10 !h-10 sm:!w-11 sm:!h-11 relative"
-            aria-label={isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
-            ) : justDone ? (
-              <motion.span
-                initial={{ scale: 0, rotate: -30 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-              >
-                <Check size={16} strokeWidth={2.8} />
-              </motion.span>
-            ) : isPureText ? (
-              <Copy size={15} strokeWidth={2.5} />
-            ) : (
-              <Download size={15} strokeWidth={2.5} />
-            )}
-          </motion.button>
+      {/* Meta */}
+      <div className="mt-1 flex items-center justify-center gap-1.5 text-[11px] text-muted tabular-nums">
+        <span className="truncate max-w-full">{displaySize}</span>
+        {!isPureText && !isFolder && (
+          <>
+            <span className="w-1 h-1 rounded-full bg-hairline-strong flex-shrink-0" />
+            <span className="uppercase tracking-wider flex-shrink-0">.{(file.Type || 'bin').toLowerCase()}</span>
+          </>
         )}
-
-        <ChevronRight size={16} className="flex-shrink-0 text-muted-soft group-hover:text-muted transition-colors" />
       </div>
     </motion.li>
   );
