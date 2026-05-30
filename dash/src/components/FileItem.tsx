@@ -1,4 +1,4 @@
-import { Download, Copy, Check, ChevronRight } from 'lucide-react';
+import { Download, Copy, Check, ChevronRight, Folder } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileItem as FileItemType } from '../types';
@@ -16,6 +16,7 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
   const [isLoading, setIsLoading] = useState(false);
   const [justDone, setJustDone] = useState(false);
   const isPureText = file.Type === 'pure-text';
+  const isFolder = file.Type === 'folder';
 
   const handleAction = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -31,7 +32,9 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
     }
   };
 
-  const displaySize = isPureText
+  const displaySize = isFolder
+    ? 'Folder'
+    : isPureText
     ? file.Text
       ? `${file.Text.length} chars`
       : 'empty'
@@ -52,11 +55,11 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
       <div className="flex items-center gap-3 sm:gap-3.5">
         {/* Icon tile */}
         <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-md border flex items-center justify-center transition-colors ${
-          isPureText
+          isPureText || isFolder
             ? 'border-olive/30 bg-olive/10'
             : 'border-hairline bg-surface-elevated'
         }`}>
-          {getFileIcon(file.Type)}
+          {isFolder ? <Folder size={18} className="text-olive" strokeWidth={2.2} /> : getFileIcon(file.Type)}
         </div>
 
         {/* Title + meta */}
@@ -80,7 +83,7 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
 
           <div className="mt-0.5 flex items-center gap-2 text-[12px] text-muted tabular-nums">
             <span>{displaySize}</span>
-            {!isPureText && (
+            {!isPureText && !isFolder && (
               <>
                 <span className="w-1 h-1 rounded-full bg-hairline-strong" />
                 <span className="uppercase tracking-wider">.{(file.Type || 'bin').toLowerCase()}</span>
@@ -89,30 +92,32 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
           </div>
         </div>
 
-        {/* Primary action */}
-        <motion.button
-          onClick={handleAction}
-          disabled={isLoading}
-          whileTap={{ scale: 0.92 }}
-          className="btn-icon-olive flex-shrink-0 !w-10 !h-10 sm:!w-11 sm:!h-11 relative"
-          aria-label={isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`}
-        >
-          {isLoading ? (
-            <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
-          ) : justDone ? (
-            <motion.span
-              initial={{ scale: 0, rotate: -30 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-            >
-              <Check size={16} strokeWidth={2.8} />
-            </motion.span>
-          ) : isPureText ? (
-            <Copy size={15} strokeWidth={2.5} />
-          ) : (
-            <Download size={15} strokeWidth={2.5} />
-          )}
-        </motion.button>
+        {/* Primary action — folders have no inline action, the row click enters */}
+        {!isFolder && (
+          <motion.button
+            onClick={handleAction}
+            disabled={isLoading}
+            whileTap={{ scale: 0.92 }}
+            className="btn-icon-olive flex-shrink-0 !w-10 !h-10 sm:!w-11 sm:!h-11 relative"
+            aria-label={isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`}
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
+            ) : justDone ? (
+              <motion.span
+                initial={{ scale: 0, rotate: -30 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 18 }}
+              >
+                <Check size={16} strokeWidth={2.8} />
+              </motion.span>
+            ) : isPureText ? (
+              <Copy size={15} strokeWidth={2.5} />
+            ) : (
+              <Download size={15} strokeWidth={2.5} />
+            )}
+          </motion.button>
+        )}
 
         <ChevronRight size={16} className="flex-shrink-0 text-muted-soft group-hover:text-muted transition-colors" />
       </div>

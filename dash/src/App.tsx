@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Github, Search, X, DownloadCloud, Inbox } from 'lucide-react';
+import { Database, Github, Search, X, DownloadCloud, Inbox, Folder, FileDown, ChevronRight, Archive, FolderOpen } from 'lucide-react';
 import { FileItem } from './components/FileItem';
 import { Header } from './components/Header';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -12,9 +12,10 @@ import { DownloadCenter } from './components/DownloadCenter';
 import { useToast } from './components/Toast';
 import { useCopy } from './hooks/useCopy';
 import { ApiService } from './services/api';
-import { FileItem as FileItemType, ShareData } from './types';
+import { FileItem as FileItemType, ShareData, BrowseData, BrowseEntry } from './types';
+import { calcFileSize } from './utils/fileIcons';
 
-type Filter = 'all' | 'file' | 'text';
+type Filter = 'all' | 'folder' | 'file' | 'text';
 
 function App() {
   const [shareData, setShareData] = useState<ShareData | null>(null);
@@ -24,6 +25,10 @@ function App() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  // 浏览态：进入某个共享文件夹后由 URL hash 驱动（#folder=<id>&sub=<rel>）
+  const [browse, setBrowse] = useState<{ folderId: string; sub: string } | null>(null);
+  const [browseData, setBrowseData] = useState<BrowseData | null>(null);
+  const [browseLoading, setBrowseLoading] = useState(false);
 
   const { showToast, ToastContainer } = useToast();
   const { copyToClipboard } = useCopy();
@@ -71,7 +76,7 @@ function App() {
 
   const handleDownloadAll = async () => {
     if (!shareData) return;
-    const files = shareData.shareList.filter((f) => f.Type !== 'pure-text');
+    const files = shareData.shareList.filter((f) => f.Type !== 'pure-text' && f.Type !== 'folder');
     if (files.length === 0) {
       showToast('No files to download', 'error');
       return;
@@ -115,21 +120,99 @@ function App() {
     return () => clearTimeout(t);
   }, []);
 
-  // URL hash <-> selected item sync. Format: #item=<encoded path>
+  // URL hash 同步：详情 #item=<path>；浏览 #folder=<id>&sub=<rel>
   useEffect(() => {
     const readHash = () => {
-      const m = window.location.hash.match(/item=([^&]+)/);
-      setSelectedPath(m ? decodeURIComponent(m[1]) : null);
+      const hash = window.location.hash;
+      const item = hash.match(/item=([^&]+)/);
+      setSelectedPath(item ? decodeURIComponent(item[1]) : null);
+
+      const folder = hash.match(/folder=([^&]+)/);
+      if (folder) {
+        const sub = hash.match(/sub=([^&]+)/);
+        setBrowse({
+          folderId: decodeURIComponent(folder[1]),
+          sub: sub ? decodeURIComponent(sub[1]) : '',
+        });
+      } else {
+        setBrowse(null);
+      }
     };
     readHash();
     window.addEventListener('hashchange', readHash);
     return () => window.removeEventListener('hashchange', readHash);
   }, []);
 
+  // 浏览态变化 → 实时拉取目录内容
+  useEffect(() => {
+    if (!browse) {
+      setBrowseData(null);
+      return;
+    }
+    let canceled = false;
+    setBrowseLoading(true);
+    ApiService.browse(browse.folderId, browse.sub)
+      .then((data) => {
+        if (!canceled) setBrowseData(data);
+      })
+      .catch((err) => {
+        if (canceled) return;
+        showToast(err instanceof Error ? err.message : 'Folder not accessible', 'error');
+        // 出错退回分享清单
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        setBrowse(null);
+        setBrowseData(null);
+      })
+      .finally(() => {
+        if (!canceled) setBrowseLoading(false);
+      });
+    return () => {
+      canceled = true;
+    };
+  }, [browse]);
+
   const openItem = (file: FileItemType) => {
+    if (file.Type === 'folder') {
+      if (!file.Id) return;
+      window.location.hash = `folder=${encodeURIComponent(file.Id)}`;
+      return;
+    }
     const key = file.Id || file.Path;
     if (!key) return;
     window.location.hash = `item=${encodeURIComponent(key)}`;
+  };
+
+  // 浏览态内导航：进入子目录 / 跳到面包屑某一级 / 退回分享清单
+  const navigateSub = (sub: string) => {
+    if (!browse) return;
+    const base = `folder=${encodeURIComponent(browse.folderId)}`;
+    window.location.hash = sub ? `${base}&sub=${encodeURIComponent(sub)}` : base;
+  };
+
+  const exitBrowse = () => {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    setBrowse(null);
+    setBrowseData(null);
+  };
+
+  const handleBrowseEntryDownload = (entry: BrowseEntry) => {
+    if (!browse) return;
+    ApiService.downloadFile(entry.relPath, entry.name, {
+      folderId: browse.folderId,
+      sub: entry.relPath,
+    })
+      .then(() => showToast('Added to downloads', 'success'))
+      .catch((err) => showToast(err instanceof Error ? err.message : 'Download failed', 'error'));
+  };
+
+  const downloadZip = () => {
+    if (!browse) return;
+    const url = ApiService.buildZipUrl(browse.folderId, browse.sub);
+    const a = document.createElement('a');
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   const closeDetail = () => {
@@ -149,7 +232,37 @@ function App() {
 
   const total = shareData?.shareList.length ?? 0;
   const textCount = shareData?.shareList.filter((f) => f.Type === 'pure-text').length ?? 0;
-  const fileCount = total - textCount;
+  const folderCount = shareData?.shareList.filter((f) => f.Type === 'folder').length ?? 0;
+  const fileCount = total - textCount - folderCount;
+
+  // 当前共享文件夹的根名（面包屑根），从分享清单按 id 取
+  const browseRootName = useMemo(() => {
+    if (!browse || !shareData) return '';
+    return shareData.shareList.find((f) => f.Id === browse.folderId)?.Name ?? '';
+  }, [browse, shareData]);
+
+  // 面包屑：根 + sub 各段，可点跳任意一级
+  const crumbs = useMemo(() => {
+    if (!browse) return [] as { label: string; sub: string }[];
+    const list = [{ label: browseRootName || 'Folder', sub: '' }];
+    if (browse.sub) {
+      const parts = browse.sub.split('/').filter(Boolean);
+      let acc = '';
+      for (const p of parts) {
+        acc = acc ? `${acc}/${p}` : p;
+        list.push({ label: p, sub: acc });
+      }
+    }
+    return list;
+  }, [browse, browseRootName]);
+
+  // 浏览态搜索：仅本地过滤当前目录条目
+  const visibleEntries = useMemo(() => {
+    if (!browseData) return [] as BrowseEntry[];
+    const q = query.trim().toLowerCase();
+    if (!q) return browseData.entries;
+    return browseData.entries.filter((e) => e.name.toLowerCase().includes(q));
+  }, [browseData, query]);
 
   const selectedFile = useMemo(() => {
     if (!selectedPath || !shareData) return null;
@@ -164,7 +277,8 @@ function App() {
     if (!shareData) return [];
     const q = query.trim().toLowerCase();
     return shareData.shareList.filter((f) => {
-      if (filter === 'file' && f.Type === 'pure-text') return false;
+      if (filter === 'folder' && f.Type !== 'folder') return false;
+      if (filter === 'file' && (f.Type === 'pure-text' || f.Type === 'folder')) return false;
       if (filter === 'text' && f.Type !== 'pure-text') return false;
       if (!q) return true;
       return (
@@ -221,14 +335,40 @@ function App() {
           {/* Compact hero — title + total stat inline */}
           <Header title="Transok" totalFiles={total} />
 
-          {/* Toolbar — search + filter + bulk action; sticky inside the scroll */}
-          {!isLoading && !error && shareData && total > 0 && (
+          {/* Toolbar — search + filter/breadcrumb + bulk action; sticky inside the scroll */}
+          {!isLoading && !error && shareData && (browse || total > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08, duration: 0.35 }}
               className="mt-6 sm:mt-7 sticky top-0 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-canvas/95 backdrop-blur-sm border-b border-hairline"
             >
+              {/* Breadcrumb — only while browsing a shared folder */}
+              {browse && (
+                <div className="flex items-center gap-1 flex-wrap mb-2.5 text-[13px]">
+                  <button
+                    onClick={exitBrowse}
+                    className="inline-flex items-center gap-1 text-muted hover:text-ink transition-colors"
+                  >
+                    <FolderOpen size={14} strokeWidth={2.2} />
+                    <span>Shared</span>
+                  </button>
+                  {crumbs.map((c, i) => (
+                    <span key={c.sub} className="inline-flex items-center gap-1">
+                      <ChevronRight size={13} className="text-muted-soft" />
+                      <button
+                        onClick={() => navigateSub(c.sub)}
+                        className={`transition-colors ${
+                          i === crumbs.length - 1 ? 'text-ink font-semibold' : 'text-muted hover:text-ink'
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Search */}
                 <div className="relative flex-1 min-w-[200px]">
@@ -239,7 +379,7 @@ function App() {
                   />
                   <input
                     type="text"
-                    placeholder="Search name, text, or extension…"
+                    placeholder={browse ? 'Search in this folder…' : 'Search name, text, or extension…'}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="text-input !h-10 !pl-9 !pr-9 text-sm"
@@ -255,40 +395,63 @@ function App() {
                   )}
                 </div>
 
-                {/* Filter chips */}
-                <div className="flex items-center gap-1 p-1 rounded-md bg-surface-elevated border border-hairline">
-                  <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
-                    All
-                  </FilterChip>
-                  <FilterChip
-                    active={filter === 'file'}
-                    onClick={() => setFilter('file')}
-                    count={fileCount}
-                    disabled={fileCount === 0}
-                  >
-                    Files
-                  </FilterChip>
-                  <FilterChip
-                    active={filter === 'text'}
-                    onClick={() => setFilter('text')}
-                    count={textCount}
-                    disabled={textCount === 0}
-                  >
-                    Text
-                  </FilterChip>
-                </div>
-
-                {/* Bulk download */}
-                {fileCount > 0 && (
+                {browse ? (
+                  /* Browse mode — zip the current directory */
                   <motion.button
                     whileTap={{ scale: 0.96 }}
-                    onClick={handleDownloadAll}
+                    onClick={downloadZip}
                     className="btn-primary !h-10 !px-3.5 text-[13px]"
-                    aria-label="Download all files"
+                    aria-label="Download folder as zip"
                   >
-                    <DownloadCloud size={14} strokeWidth={2.5} />
-                    <span className="hidden sm:inline">Download all</span>
+                    <Archive size={14} strokeWidth={2.5} />
+                    <span className="hidden sm:inline">Download .zip</span>
                   </motion.button>
+                ) : (
+                  <>
+                    {/* Filter chips */}
+                    <div className="flex items-center gap-1 p-1 rounded-md bg-surface-elevated border border-hairline">
+                      <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} count={total}>
+                        All
+                      </FilterChip>
+                      <FilterChip
+                        active={filter === 'folder'}
+                        onClick={() => setFilter('folder')}
+                        count={folderCount}
+                        disabled={folderCount === 0}
+                      >
+                        Folders
+                      </FilterChip>
+                      <FilterChip
+                        active={filter === 'file'}
+                        onClick={() => setFilter('file')}
+                        count={fileCount}
+                        disabled={fileCount === 0}
+                      >
+                        Files
+                      </FilterChip>
+                      <FilterChip
+                        active={filter === 'text'}
+                        onClick={() => setFilter('text')}
+                        count={textCount}
+                        disabled={textCount === 0}
+                      >
+                        Text
+                      </FilterChip>
+                    </div>
+
+                    {/* Bulk download */}
+                    {fileCount > 0 && (
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={handleDownloadAll}
+                        className="btn-primary !h-10 !px-3.5 text-[13px]"
+                        aria-label="Download all files"
+                      >
+                        <DownloadCloud size={14} strokeWidth={2.5} />
+                        <span className="hidden sm:inline">Download all</span>
+                      </motion.button>
+                    )}
+                  </>
                 )}
               </div>
             </motion.div>
@@ -320,7 +483,44 @@ function App() {
                 </motion.div>
               )}
 
-              {shareData && !isLoading && !error && (
+              {browse && !isLoading && !error && (
+                <motion.div
+                  key="browse"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {browseLoading ? (
+                    <div className="min-h-[200px] flex items-center justify-center">
+                      <Loading />
+                    </div>
+                  ) : visibleEntries.length === 0 ? (
+                    <div className="surface-card rounded-lg py-12 flex flex-col items-center justify-center text-center px-6">
+                      <div className="w-10 h-10 rounded-md bg-surface-elevated border border-hairline flex items-center justify-center mb-3">
+                        <Folder size={18} className="text-muted" strokeWidth={2} />
+                      </div>
+                      <p className="text-sm font-semibold text-ink">
+                        {query ? 'No matches' : 'Empty folder'}
+                      </p>
+                    </div>
+                  ) : (
+                    <ul className="space-y-2.5 sm:space-y-3">
+                      {visibleEntries.map((entry, index) => (
+                        <BrowseItem
+                          key={entry.relPath}
+                          entry={entry}
+                          index={index}
+                          onEnter={() => navigateSub(entry.relPath)}
+                          onDownload={() => handleBrowseEntryDownload(entry)}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </motion.div>
+              )}
+
+              {shareData && !browse && !isLoading && !error && (
                 <motion.div
                   key="content"
                   initial={{ opacity: 0 }}
@@ -394,6 +594,79 @@ const FilterChip = ({
     </span>
   </button>
 );
+
+const BrowseItem = ({
+  entry,
+  index,
+  onEnter,
+  onDownload,
+}: {
+  entry: BrowseEntry;
+  index: number;
+  onEnter: () => void;
+  onDownload: () => void;
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await onDownload();
+    } finally {
+      setTimeout(() => setIsLoading(false), 600);
+    }
+  };
+
+  return (
+    <motion.li
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, delay: Math.min(index * 0.025, 0.25), ease: [0.16, 1, 0.3, 1] }}
+      onClick={entry.isDir ? onEnter : undefined}
+      className={`surface-card rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 transition-all hover:border-hairline-strong group ${
+        entry.isDir ? 'cursor-pointer' : ''
+      }`}
+    >
+      <div className="flex items-center gap-3 sm:gap-3.5">
+        <div className={`flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-md border flex items-center justify-center ${
+          entry.isDir ? 'border-olive/30 bg-olive/10' : 'border-hairline bg-surface-elevated'
+        }`}>
+          {entry.isDir ? (
+            <Folder size={18} className="text-olive" strokeWidth={2.2} />
+          ) : (
+            <FileDown size={17} className="text-muted" strokeWidth={2.2} />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-ink text-[14px] sm:text-[15px] truncate">{entry.name}</h3>
+          <div className="mt-0.5 text-[12px] text-muted tabular-nums">
+            {entry.isDir ? 'Folder' : calcFileSize(entry.size)}
+          </div>
+        </div>
+
+        {entry.isDir ? (
+          <ChevronRight size={16} className="flex-shrink-0 text-muted-soft group-hover:text-muted transition-colors" />
+        ) : (
+          <motion.button
+            onClick={handleDownload}
+            disabled={isLoading}
+            whileTap={{ scale: 0.92 }}
+            className="btn-icon-olive flex-shrink-0 !w-10 !h-10 sm:!w-11 sm:!h-11"
+            aria-label={`Download ${entry.name}`}
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <FileDown size={15} strokeWidth={2.5} />
+            )}
+          </motion.button>
+        )}
+      </div>
+    </motion.li>
+  );
+};
 
 const EmptyState = () => (
   <motion.div

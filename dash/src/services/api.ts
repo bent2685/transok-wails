@@ -1,4 +1,4 @@
-import { ApiResponse, ShareData } from "../types";
+import { ApiResponse, ShareData, BrowseData } from "../types";
 import { DownloadManager } from "./downloadManager";
 
 // Empty baseUrl means same-origin: dev/preview use vite proxy, prod is embedded in Go.
@@ -77,14 +77,42 @@ export class ApiService {
     return data.data;
   }
 
+  /** 实时浏览共享文件夹内某个目录（sub 为相对根的子路径，空=根） */
+  static async browse(folderId: string, sub: string): Promise<BrowseData> {
+    const params = new URLSearchParams({ folderId, sub });
+    const response = await fetch(`${baseUrl}/share/browse?${params.toString()}`, {
+      headers: { "Captcha-Key": this.getCaptcha() || "" },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    const data: ApiResponse<BrowseData> = await response.json();
+    if (!data.success) {
+      throw new Error(data.message || "Failed to browse folder");
+    }
+    return data.data;
+  }
+
+  /** 共享文件夹内某层目录的 zip 打包下载地址（原生 <a> 下载，无进度） */
+  static buildZipUrl(folderId: string, sub: string): string {
+    const params = new URLSearchParams({ folderId, sub });
+    const captcha = this.getCaptcha();
+    if (captcha) params.set("captcha-key", captcha);
+    return `${baseUrl}/download/zip?${params.toString()}`;
+  }
+
   /**
    * 发起下载：交给 DownloadManager 处理。
    *  · 安全上下文（HTTPS / localhost）走 SW + 分片并发 + 应用级进度
    *  · 非安全上下文降级为浏览器原生 <a> 下载
    */
-  static async downloadFile(filePath: string, filename?: string): Promise<void> {
+  static async downloadFile(
+    filePath: string,
+    filename?: string,
+    folder?: { folderId: string; sub: string }
+  ): Promise<void> {
     try {
-      await DownloadManager.enqueue(filePath, filename);
+      await DownloadManager.enqueue(filePath, filename, folder);
     } catch (error) {
       console.error("Download failed:", error);
       throw error;

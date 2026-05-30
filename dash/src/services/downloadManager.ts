@@ -37,6 +37,7 @@ export interface DownloadSnapshot {
 
 interface InternalTask extends DownloadSnapshot {
   // 仅内部使用
+  folder?: { folderId: string; sub: string }; // 共享文件夹内文件用 folderId+sub 授权
   abortAll: AbortController[];
   writer: WritableStreamDefaultWriter<Uint8Array> | null;
   iframe: HTMLIFrameElement | null;
@@ -156,8 +157,12 @@ class DownloadManagerImpl {
     }));
   }
 
-  /** 入口：发起一个下载任务 */
-  async enqueue(filePath: string, filename?: string): Promise<string> {
+  /** 入口：发起一个下载任务（folder 存在时为共享文件夹内文件） */
+  async enqueue(
+    filePath: string,
+    filename?: string,
+    folder?: { folderId: string; sub: string }
+  ): Promise<string> {
     await this.init();
 
     const id = `dl_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -167,6 +172,7 @@ class DownloadManagerImpl {
       id,
       filename: name,
       filePath,
+      folder,
       size: -1,
       loaded: 0,
       speed: 0,
@@ -280,7 +286,7 @@ class DownloadManagerImpl {
   // Legacy fallback：直接交给浏览器原生下载（无进度，记录为提示项）
   // ---------------------------------------------------------------------------
   private runLegacy(task: InternalTask) {
-    const url = this.buildDownloadUrl(task.filePath);
+    const url = this.buildDownloadUrl(task.filePath, task.folder);
     const a = document.createElement('a');
     a.href = url;
     a.download = task.filename;
@@ -304,7 +310,7 @@ class DownloadManagerImpl {
   // ---------------------------------------------------------------------------
   private async runSw(task: InternalTask) {
     // 1) HEAD 拿尺寸
-    const url = this.buildDownloadUrl(task.filePath);
+    const url = this.buildDownloadUrl(task.filePath, task.folder);
     const headResp = await fetch(url, { method: 'HEAD' });
     if (!headResp.ok) {
       throw new Error(`HEAD failed: HTTP ${headResp.status}`);
@@ -533,9 +539,12 @@ class DownloadManagerImpl {
     task.writer = null;
   }
 
-  private buildDownloadUrl(filePath: string): string {
+  private buildDownloadUrl(filePath: string, folder?: { folderId: string; sub: string }): string {
     const captcha = this.getCaptcha();
-    let url = `${this.baseUrl}/download/index?filePath=${encodeURIComponent(filePath)}`;
+    // folder 内文件：后端按 folderId+sub 授权，不依赖 filePath
+    let url = folder
+      ? `${this.baseUrl}/download/index?folderId=${encodeURIComponent(folder.folderId)}&sub=${encodeURIComponent(folder.sub)}`
+      : `${this.baseUrl}/download/index?filePath=${encodeURIComponent(filePath)}`;
     if (captcha) url += `&captcha-key=${encodeURIComponent(captcha)}`;
     return url;
   }
