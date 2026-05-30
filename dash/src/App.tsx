@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Github, Search, X, DownloadCloud, Inbox, Folder, ChevronRight, Archive, FolderOpen, LayoutGrid, File, Type } from 'lucide-react';
+import { Database, Search, X, DownloadCloud, Inbox, Folder, ChevronRight, Archive, FolderOpen, LayoutGrid, File, Type } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { FileItem } from './components/FileItem';
 import { Header } from './components/Header';
@@ -317,15 +317,6 @@ function App() {
           </motion.div>
 
           <div className="flex items-center gap-1.5">
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noreferrer"
-              className="w-9 h-9 inline-flex items-center justify-center rounded-md text-body hover:text-ink hover:bg-surface-elevated transition-colors"
-              aria-label="GitHub"
-            >
-              <Github size={16} strokeWidth={2.2} />
-            </a>
             <ThemeToggleCompact />
           </div>
         </div>
@@ -440,7 +431,7 @@ function App() {
                         <motion.button
                           whileTap={{ scale: 0.96 }}
                           onClick={handleDownloadAll}
-                          className="btn-primary !h-10 !w-10 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
+                          className="btn-primary !h-10 !w-10 !px-0 sm:!w-auto sm:!px-3.5 text-[13px] shrink-0"
                           aria-label="Download all files"
                         >
                           <DownloadCloud size={14} strokeWidth={2.5} />
