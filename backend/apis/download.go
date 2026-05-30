@@ -1,11 +1,13 @@
 package apis
 
 import (
+	"archive/zip"
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"mime"
 	"net/http"
 	"net/url"
@@ -227,6 +229,88 @@ func httpServeFile(c *gin.Context, file *os.File) {
 			return
 		}
 	}
+}
+
+// DownloadZip 把共享文件夹内某层目录（含子目录）流式打包为 zip 下载。
+// 流式：不预知总大小、不支持 Range/续传。入参 folderId + sub（默认根）。
+func (d *DownloadApi) DownloadZip(c *gin.Context) {
+	folderId := c.Query("folderId")
+	if folderId == "" {
+		resp.DataFormatErr().WithMsg("folderId is required").Out()
+		return
+	}
+
+	// captcha 校验：与 DownloadFile 同标准
+	captchaInStore := services.Share().GetCaptcha()
+	if captchaInStore != "" {
+		captchaKey := c.Query("captcha-key")
+		if captchaKey == "" {
+			captchaKey = c.GetHeader("Captcha-Key")
+		}
+		if captchaKey == "" {
+			resp.DataFormatErr().WithMsg("Captcha key required").Out()
+			return
+		}
+		if captchaKey != captchaInStore {
+			resp.Forbidden().WithMsg("Captcha is incorrect").Out()
+			return
+		}
+	}
+
+	dir, err := services.ResolveSharedPath(folderId, c.Query("sub"))
+	if err != nil {
+		resp.NotExistErr().WithMsg("Folder not accessible").Out()
+		return
+	}
+
+	info, err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		resp.NotExistErr().WithMsg("Not a directory").Out()
+		return
+	}
+
+	zipName := filepath.Base(dir) + ".zip"
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename*=UTF-8''%s", url.PathEscape(zipName)))
+	c.Header("Content-Type", "application/zip")
+	c.Header("Cache-Control", "no-store, no-cache, must-revalidate")
+	c.Status(http.StatusOK)
+
+	zw := zip.NewWriter(c.Writer)
+	defer zw.Close()
+
+	// zip 内路径以打包目录名为顶层，便于解压后归档
+	base := filepath.Base(dir)
+	filepath.WalkDir(dir, func(path string, de fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return nil // 跳过无法访问的项，不中断整包
+		}
+		name := de.Name()
+		if strings.HasPrefix(name, ".") {
+			if de.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if de.IsDir() {
+			return nil // 目录本身不单独写入，靠文件路径隐式建立
+		}
+
+		rel, err := filepath.Rel(dir, path)
+		if err != nil {
+			return nil
+		}
+		w, err := zw.Create(filepath.ToSlash(filepath.Join(base, rel)))
+		if err != nil {
+			return nil
+		}
+		f, err := os.Open(path)
+		if err != nil {
+			return nil
+		}
+		defer f.Close()
+		io.Copy(w, f)
+		return nil
+	})
 }
 
 // buildETag 用 path+size+mtime 算稳定弱 ETag，便于客户端校验续传一致性。
