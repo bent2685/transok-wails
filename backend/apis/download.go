@@ -29,16 +29,23 @@ const downloadBufferSize = 256 * 1024
 // DownloadFile handles large file downloads efficiently with range support.
 // 同时支持 HEAD（仅返回元信息）与 GET（含 Range 分片）。
 func (d *DownloadApi) DownloadFile(c *gin.Context) {
-	filePathRaw := c.Query("filePath")
-	if filePathRaw == "" {
-		resp.DataFormatErr().WithMsg("filePath is required").Out()
-		return
-	}
+	// folderId 存在 → 共享文件夹内的文件，按 folderId+相对路径解析授权
+	folderId := c.Query("folderId")
 
-	filePath, err := url.QueryUnescape(filePathRaw)
-	if err != nil {
-		resp.DataFormatErr().WithMsg("Invalid filePath").Out()
-		return
+	var filePath string
+	if folderId == "" {
+		filePathRaw := c.Query("filePath")
+		if filePathRaw == "" {
+			resp.DataFormatErr().WithMsg("filePath is required").Out()
+			return
+		}
+
+		unescaped, err := url.QueryUnescape(filePathRaw)
+		if err != nil {
+			resp.DataFormatErr().WithMsg("Invalid filePath").Out()
+			return
+		}
+		filePath = unescaped
 	}
 
 	captchaInStore := services.Share().GetCaptcha()
@@ -56,35 +63,44 @@ func (d *DownloadApi) DownloadFile(c *gin.Context) {
 			return
 		}
 	}
-	// Verify if share-list exists
-	storage := services.Storage()
-	if storage == nil {
-		resp.ServerErr().WithMsg("storage is nil").Out()
-		return
-	}
-
-	shareList, isExist := storage.Get("share-list")
-	if !isExist {
-		resp.NotExistErr().WithMsg("share-list is not exist").Out()
-		return
-	}
-
-	var result []vo.ShareItem
-	if jsonData, err := json.Marshal(shareList); err == nil {
-		_ = json.Unmarshal(jsonData, &result)
-	}
-
-	// Verify if the file is in the share list
-	exist := false
-	for _, item := range result {
-		if item.Path == filePath {
-			exist = true
-			break
+	if folderId != "" {
+		// 共享文件夹内文件：folderId+sub 解析为安全绝对路径（含越界校验）
+		resolved, err := services.ResolveSharedPath(folderId, c.Query("sub"))
+		if err != nil {
+			resp.NotExistErr().WithMsg("File not accessible").Out()
+			return
 		}
-	}
-	if !exist {
-		resp.NotExistErr().WithMsg("File not in share list").Out()
-		return
+		filePath = resolved
+	} else {
+		// 散文件：必须精确命中分享清单
+		storage := services.Storage()
+		if storage == nil {
+			resp.ServerErr().WithMsg("storage is nil").Out()
+			return
+		}
+
+		shareList, isExist := storage.Get("share-list")
+		if !isExist {
+			resp.NotExistErr().WithMsg("share-list is not exist").Out()
+			return
+		}
+
+		var result []vo.ShareItem
+		if jsonData, err := json.Marshal(shareList); err == nil {
+			_ = json.Unmarshal(jsonData, &result)
+		}
+
+		exist := false
+		for _, item := range result {
+			if item.Path == filePath {
+				exist = true
+				break
+			}
+		}
+		if !exist {
+			resp.NotExistErr().WithMsg("File not in share list").Out()
+			return
+		}
 	}
 
 	// Open file
