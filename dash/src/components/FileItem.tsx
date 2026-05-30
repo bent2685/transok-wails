@@ -1,4 +1,4 @@
-import { Download, Copy, Check, Folder } from 'lucide-react';
+import { Check, Folder } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileItem as FileItemType } from '../types';
@@ -40,6 +40,15 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
       : 'empty'
     : calcFileSize(file.Size);
 
+  // 整个格子可点：文件夹进入、纯文本复制、文件下载
+  const handleClick = () => {
+    if (isFolder) {
+      onOpen(file);
+      return;
+    }
+    handleAction({ stopPropagation: () => {} } as React.MouseEvent);
+  };
+
   return (
     <motion.li
       initial={{ opacity: 0, y: 8 }}
@@ -49,61 +58,37 @@ export const FileItem = ({ file, index, onDownload, onCopy, onOpen }: FileItemPr
         delay: Math.min(index * 0.025, 0.25),
         ease: [0.16, 1, 0.3, 1],
       }}
-      onClick={() => onOpen(file)}
-      className="surface-card rounded-lg p-3.5 sm:p-4 cursor-pointer transition-colors hover:border-hairline-strong group flex flex-col items-center text-center relative"
+      onClick={handleClick}
+      className="group rounded-lg p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-surface-card flex flex-col items-center text-center relative"
     >
-      {/* Primary action — top-right corner; folders enter on card click instead */}
-      {!isFolder && (
-        <motion.button
-          onClick={handleAction}
-          disabled={isLoading}
-          whileTap={{ scale: 0.92 }}
-          className="btn-icon-olive absolute top-2 right-2 !w-8 !h-8 z-10"
-          aria-label={isPureText ? `Copy ${file.Name}` : `Download ${file.Name}`}
-        >
-          {isLoading ? (
-            <div className="w-3.5 h-3.5 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
-          ) : justDone ? (
-            <motion.span
-              initial={{ scale: 0, rotate: -30 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-            >
-              <Check size={14} strokeWidth={2.8} />
-            </motion.span>
-          ) : isPureText ? (
-            <Copy size={13} strokeWidth={2.5} />
-          ) : (
-            <Download size={13} strokeWidth={2.5} />
-          )}
-        </motion.button>
-      )}
+      {/* Large filled icon — no surrounding card */}
+      <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px] flex items-center justify-center">
+        {isFolder ? (
+          <Folder size={56} className="text-olive" strokeWidth={1.5} fill="currentColor" fillOpacity={0.2} />
+        ) : (
+          getFileIcon(file.Type, 52)
+        )}
 
-      {/* Large icon tile */}
-      <div className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-lg border flex items-center justify-center transition-colors ${
-        isPureText || isFolder
-          ? 'border-olive/30 bg-olive/10'
-          : 'border-hairline bg-surface-elevated'
-      }`}>
-        {isFolder
-          ? <Folder size={30} className="text-olive" strokeWidth={2} />
-          : getFileIcon(file.Type, 28)}
+        {/* Inline status badge on the icon corner while acting */}
+        {!isFolder && (isLoading || justDone) && (
+          <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-olive flex items-center justify-center">
+            {isLoading ? (
+              <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Check size={12} strokeWidth={3} className="text-white" />
+            )}
+          </span>
+        )}
       </div>
 
       {/* Name */}
-      <h3 className="mt-3 w-full font-semibold text-ink text-[13px] sm:text-[14px] line-clamp-2 break-words leading-snug">
+      <h3 className="mt-2 w-full font-medium text-ink text-[12px] sm:text-[13px] line-clamp-2 break-words leading-snug">
         {file.Name || (isPureText ? 'Untitled snippet' : 'Untitled')}
       </h3>
 
       {/* Meta */}
-      <div className="mt-1 flex items-center justify-center gap-1.5 text-[11px] text-muted tabular-nums">
-        <span className="truncate max-w-full">{displaySize}</span>
-        {!isPureText && !isFolder && (
-          <>
-            <span className="w-1 h-1 rounded-full bg-hairline-strong flex-shrink-0" />
-            <span className="uppercase tracking-wider flex-shrink-0">.{(file.Type || 'bin').toLowerCase()}</span>
-          </>
-        )}
+      <div className="mt-0.5 text-[11px] text-muted tabular-nums truncate max-w-full">
+        {displaySize}
       </div>
     </motion.li>
   );

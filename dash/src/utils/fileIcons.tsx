@@ -13,7 +13,14 @@ import {
 } from 'lucide-react';
 
 export const getFileIcon = (type: string, size: number = 18) => {
-  const iconProps = { size, strokeWidth: 2, className: "text-olive" };
+  // filled 风格：olive 实心填充 + 细描边，接近 macOS Finder 的实心图标观感
+  const iconProps = {
+    size,
+    strokeWidth: 1.5,
+    className: "text-olive",
+    fill: "currentColor",
+    fillOpacity: 0.16,
+  };
 
   switch (type.toLowerCase()) {
     // 图片类型
