@@ -1,7 +1,7 @@
 import { useState, useRef, forwardRef, useImperativeHandle, useEffect, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
-import { GetFile, SelectFiles } from '@wa/services/fileService'
+import { GetFile, SelectFiles, SelectFolder, OpenInFileManager } from '@wa/services/fileService'
 import { OnFileDrop, OnFileDropOff } from '@runtime/runtime'
 import { FileTypeList } from './file-type'
 import { useConfirm } from '@/provider/confirm.provider'
@@ -56,14 +56,29 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
     const [isDragging, setIsDragging] = useState(false)
     const [isRunning, setIsRunning] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([])
+    const [showUploadMenu, setShowUploadMenu] = useState(false)
     const { confirm } = useConfirm()
-    const handleClick = async () => {
+
+    // 系统对话框无法同时选文件与文件夹，故点击上传弹小菜单二选一
+    const pickFiles = async () => {
+      setShowUploadMenu(false)
       try {
         const filePaths = await SelectFiles()
         if (!filePaths || filePaths.length === 0) return
         await handleDrop(filePaths)
       } catch (error) {
         console.error('选择文件失败:', error)
+      }
+    }
+
+    const pickFolder = async () => {
+      setShowUploadMenu(false)
+      try {
+        const dirPaths = await SelectFolder()
+        if (!dirPaths || dirPaths.length === 0) return
+        await handleDrop(dirPaths)
+      } catch (error) {
+        console.error('选择文件夹失败:', error)
       }
     }
 
@@ -250,6 +265,23 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
         </div>
       )
 
+      const isFolder = file.Type === 'folder'
+
+      const renderFolder = () => (
+        <div className="flex flex-col line-height-1em min-w-0 flex-1">
+          <span className="truncate font-bold text-(3.5 text) break-all">{file.Name}</span>
+          <span className="text-(3 text2) mt-0.5">{t('home.upload.folder')}</span>
+        </div>
+      )
+
+      const renderContent = () => {
+        if (isFolder) return renderFolder()
+        if (file.Type === 'pure-text') return renderPureText()
+        return renderCommon()
+      }
+
+      const folderIcon = 'i-tabler:folder'
+
       return (
         <div className="group flex items-center bg-bg border border-solid border-border rd-3 px-3 py-2.5 duration-200 hover:(border-pri/40 bg-bg/60) select-text">
           <div className="flex items-center gap-3 truncate flex-1">
@@ -257,12 +289,22 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
               <div
                 className={cn(
                   'text-text text-4.5',
-                  FileTypeList.find(item => item.type === file.Type)?.icon || 'i-tabler:file'
+                  isFolder
+                    ? folderIcon
+                    : FileTypeList.find(item => item.type === file.Type)?.icon || 'i-tabler:file'
                 )}></div>
             </div>
-            {file.Type === 'pure-text' ? renderPureText() : renderCommon()}
+            {renderContent()}
           </div>
-          <div className="flex items-center pl-2">
+          <div className="flex items-center pl-2 gap-1">
+            {isFolder && (
+              <div
+                className="cursor-pointer rd-full duration-200 w-7 h-7 flex-center text-text2 hover:(bg-pri/20 text-pri) active:(scale-92)"
+                title={t('home.upload.openInFinder')}
+                onClick={() => OpenInFileManager(file.Path)}>
+                <div className="i-tabler:external-link text-3.5"></div>
+              </div>
+            )}
             <div
               className="cursor-pointer rd-full duration-200 w-7 h-7 flex-center text-text2 hover:(bg-pri/20 text-pri) active:(scale-92)"
               onClick={() => removeFile(file.Path)}>
@@ -297,13 +339,37 @@ export const Uploader = forwardRef<UploaderRef, UploaderProps>(
               {t('home.upload.title')}
               {multiple ? t('home.upload.multiple') : t('home.upload.single')}
             </p>
-            <Button
-              size="sm"
-              onClick={handleClick}
-              className="mt-3 bg-pri text-white font-700 px-5 h-8.5 rd-2 hover:(bg-pri brightness-110) active:(scale-95)">
-              <div className="i-tabler:plus mr-1 text-3.5"></div>
-              {t('home.upload.button')}
-            </Button>
+            <div className="relative mt-3">
+              <Button
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation()
+                  setShowUploadMenu(v => !v)
+                }}
+                className="bg-pri text-white font-700 px-5 h-8.5 rd-2 hover:(bg-pri brightness-110) active:(scale-95)">
+                <div className="i-tabler:plus mr-1 text-3.5"></div>
+                {t('home.upload.button')}
+              </Button>
+              {showUploadMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowUploadMenu(false)}></div>
+                  <div className="absolute z-20 top-full mt-1.5 left-1/2 -translate-x-1/2 min-w-36 bg-bg border border-solid border-border rd-2 shadow-lg overflow-hidden">
+                    <div
+                      className="flex items-center gap-2 px-3 py-2 text-(3.2 text) cursor-pointer hover:(bg-pri/10 text-pri) duration-150"
+                      onClick={pickFiles}>
+                      <div className="i-tabler:file text-3.8 shrink-0"></div>
+                      {t('home.upload.selectFile')}
+                    </div>
+                    <div
+                      className="flex items-center gap-2 px-3 py-2 text-(3.2 text) cursor-pointer hover:(bg-pri/10 text-pri) duration-150"
+                      onClick={pickFolder}>
+                      <div className="i-tabler:folder text-3.8 shrink-0"></div>
+                      {t('home.upload.selectFolder')}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
         <p className="text-(2.8 text2) mt-2 tracking-wide flex items-center gap-1.5">
