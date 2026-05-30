@@ -33,6 +33,10 @@
         "upload": {
             "title": "點擊或拖拽文件上傳",
             "button": "上傳文件",
+            "selectFile": "選擇文件",
+            "selectFolder": "選擇資料夾",
+            "folder": "資料夾",
+            "openInFinder": "在檔案總管中開啟",
             "multiple": "一個或多個文件",
             "single": "文件",
             "noLimit": "無文件格式限制 無大小限制",

@@ -33,6 +33,10 @@
         "upload": {
             "title": "ファイルをアップロード",
             "button": "ファイルをアップロード",
+            "selectFile": "ファイルを選択",
+            "selectFolder": "フォルダを選択",
+            "folder": "フォルダ",
+            "openInFinder": "ファイルマネージャーで開く",
             "multiple": "一つまたは複数のファイル",
             "single": "ファイル",
             "noLimit": "形式制限なし サイズ制限なし",

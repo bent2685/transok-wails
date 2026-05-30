@@ -33,6 +33,10 @@
         "upload": {
             "title": "Click or drag file to upload",
             "button": "Upload File",
+            "selectFile": "Select Files",
+            "selectFolder": "Select Folder",
+            "folder": "Folder",
+            "openInFinder": "Show in File Manager",
             "multiple": "one or more files",
             "single": "file",
             "noLimit": "No format limit No size limit",
